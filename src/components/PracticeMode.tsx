@@ -33,6 +33,7 @@ export default function PracticeMode() {
   const [guess, setGuess] = useState("");
   const [result, setResult] = useState<"correct" | "incorrect" | null>(null);
   const [score, setScore] = useState({ correct: 0, total: 0 });
+  const [imgError, setImgError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const deckRef = useRef<Country[]>([]);
 
@@ -65,6 +66,7 @@ export default function PracticeMode() {
 
   useEffect(() => {
     inputRef.current?.focus();
+    setImgError(false);
   }, [current]);
 
   const handleSubmit = useCallback(
@@ -132,16 +134,19 @@ export default function PracticeMode() {
 
       {/* Flag */}
       <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-white flex items-center justify-center min-h-40 p-3">
-        {current ? (
+        {!current ? (
+          <div className="w-full aspect-[3/2] bg-gray-100 animate-pulse rounded-xl" />
+        ) : imgError ? (
+          <div className="py-10 text-sm text-gray-400">Flag unavailable</div>
+        ) : (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             key={current.code}
             src={`https://flagcdn.com/w640/${current.code}.png`}
             alt="Country flag"
+            onError={() => setImgError(true)}
             className="max-w-full max-h-72 w-auto h-auto block"
           />
-        ) : (
-          <div className="w-full aspect-[3/2] bg-gray-100 animate-pulse rounded-xl" />
         )}
       </div>
 
@@ -154,6 +159,10 @@ export default function PracticeMode() {
           onChange={(e) => setGuess(e.target.value)}
           disabled={answered || !current}
           placeholder="Type country name…"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
           className="w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 text-base
                      placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500
                      disabled:bg-gray-100 disabled:text-gray-400"

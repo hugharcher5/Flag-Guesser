@@ -47,6 +47,7 @@ export default function SpeedQuizMode() {
   const [correctCount, setCorrectCount] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(QUIZ_DURATION_S);
   const [guess, setGuess] = useState("");
+  const [imgError, setImgError] = useState(false);
   const [finished, setFinished] = useState<FinishedData | null>(null);
   // Records loaded client-side only to avoid hydration mismatch.
   const [records, setRecords] = useState<SpeedQuizRecords>({
@@ -80,6 +81,7 @@ export default function SpeedQuizMode() {
   useEffect(() => {
     if (phase === "running") {
       inputRef.current?.focus();
+      setImgError(false);
     }
   }, [phase, currentCode]);
 
@@ -89,7 +91,10 @@ export default function SpeedQuizMode() {
     hasFinishedRef.current = true;
     phaseRef.current = "finished";
 
-    const elapsedMs = Date.now() - startTimeRef.current;
+    const elapsedMs = Math.min(
+      Date.now() - startTimeRef.current,
+      QUIZ_DURATION_S * 1000
+    );
     const finalCorrect = correctCountRef.current;
 
     const { records: newRecords, isNewBestScore, isNewFastestCompletion } =
@@ -227,6 +232,10 @@ export default function SpeedQuizMode() {
   // ════════════════════════════════════════════════════════════════════════
   // RESULTS SCREEN
   // ════════════════════════════════════════════════════════════════════════
+  // Guard: finished state and phase are set together in finishQuiz, but add
+  // an explicit fallback in case of any React batching edge case.
+  if (phase === "finished" && !finished) return null;
+
   if (phase === "finished" && finished) {
     const pct = Math.round((finished.correctCount / TOTAL) * 100);
     const remaining = TOTAL - finished.correctCount;
@@ -308,16 +317,19 @@ export default function SpeedQuizMode() {
 
       {/* Flag */}
       <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-white flex items-center justify-center min-h-40 p-3">
-        {current ? (
+        {!current ? (
+          <div className="w-full aspect-[3/2] bg-gray-100 animate-pulse rounded-xl" />
+        ) : imgError ? (
+          <div className="py-10 text-sm text-gray-400">Flag unavailable</div>
+        ) : (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             key={current.code}
             src={`https://flagcdn.com/w640/${current.code}.png`}
             alt="Country flag"
+            onError={() => setImgError(true)}
             className="max-w-full max-h-72 w-auto h-auto block"
           />
-        ) : (
-          <div className="w-full aspect-[3/2] bg-gray-100 animate-pulse rounded-xl" />
         )}
       </div>
 
