@@ -10,9 +10,9 @@ export default function Page() {
   const [mode, setMode] = useState<AppMode>("practice");
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-[100dvh] flex flex-col bg-gray-50">
       <NavBar mode={mode} onModeChange={setMode} />
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-10">
+      <main className="flex-1 flex flex-col items-center justify-start sm:justify-center px-4 py-6 sm:py-10">
         {mode === "practice" ? <PracticeMode /> : <SpeedQuizMode />}
       </main>
     </div>

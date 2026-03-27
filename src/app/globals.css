@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Remove tap highlight flash on iOS/Android */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent pull-to-refresh and overscroll bounce interfering with gameplay */
+html,
+body {
+  overscroll-behavior: none;
+}
+
+/* Safe area: push nav down below the notch, and main up above the home indicator */
+nav {
+  padding-top: env(safe-area-inset-top);
+}
+
+main {
+  padding-bottom: env(safe-area-inset-bottom);
+}

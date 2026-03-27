@@ -133,7 +133,7 @@ export default function PracticeMode() {
       </p>
 
       {/* Flag */}
-      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-white flex items-center justify-center min-h-40 p-3">
+      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-white flex items-center justify-center min-h-32 sm:min-h-40 p-3">
         {!current ? (
           <div className="w-full aspect-[3/2] bg-gray-100 animate-pulse rounded-xl" />
         ) : imgError ? (
@@ -145,7 +145,7 @@ export default function PracticeMode() {
             src={`https://flagcdn.com/w640/${current.code}.png`}
             alt="Country flag"
             onError={() => setImgError(true)}
-            className="max-w-full max-h-72 w-auto h-auto block"
+            className="max-w-full max-h-48 sm:max-h-72 w-auto h-auto block"
           />
         )}
       </div>
@@ -163,6 +163,7 @@ export default function PracticeMode() {
           autoCorrect="off"
           autoCapitalize="off"
           spellCheck={false}
+          inputMode="text"
           className="w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 text-base
                      placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500
                      disabled:bg-gray-100 disabled:text-gray-400"
@@ -172,7 +173,7 @@ export default function PracticeMode() {
           disabled={answered || !current || guess.trim() === ""}
           className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
                      hover:bg-blue-700 active:bg-blue-800 transition-colors
-                     disabled:opacity-40 disabled:cursor-not-allowed"
+                     disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation"
         >
           Submit
         </button>
@@ -204,7 +205,7 @@ export default function PracticeMode() {
         <button
           onClick={handleNext}
           className="w-full py-3 rounded-xl bg-gray-800 text-white font-semibold text-base
-                     hover:bg-gray-900 active:bg-black transition-colors"
+                     hover:bg-gray-900 active:bg-black transition-colors touch-manipulation"
         >
           Next Flag →
         </button>

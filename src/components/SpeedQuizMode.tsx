@@ -221,7 +221,7 @@ export default function SpeedQuizMode() {
         <button
           onClick={startQuiz}
           className="w-full py-4 rounded-2xl bg-blue-600 text-white font-bold text-lg
-                     hover:bg-blue-700 active:bg-blue-800 transition-colors"
+                     hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
         >
           Start Quiz
         </button>
@@ -284,7 +284,7 @@ export default function SpeedQuizMode() {
         <button
           onClick={startQuiz}
           className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
-                     hover:bg-blue-700 active:bg-blue-800 transition-colors"
+                     hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
         >
           Play Again
         </button>
@@ -296,7 +296,7 @@ export default function SpeedQuizMode() {
   // RUNNING SCREEN
   // ════════════════════════════════════════════════════════════════════════
   return (
-    <div className="w-full max-w-md flex flex-col items-center gap-5">
+    <div className="w-full max-w-md flex flex-col items-center gap-3 sm:gap-5">
 
       {/* HUD: timer left, score right */}
       <div className="w-full flex items-center justify-between">
@@ -316,7 +316,7 @@ export default function SpeedQuizMode() {
       </div>
 
       {/* Flag */}
-      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-white flex items-center justify-center min-h-40 p-3">
+      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-white flex items-center justify-center min-h-32 sm:min-h-40 p-3">
         {!current ? (
           <div className="w-full aspect-[3/2] bg-gray-100 animate-pulse rounded-xl" />
         ) : imgError ? (
@@ -328,7 +328,7 @@ export default function SpeedQuizMode() {
             src={`https://flagcdn.com/w640/${current.code}.png`}
             alt="Country flag"
             onError={() => setImgError(true)}
-            className="max-w-full max-h-72 w-auto h-auto block"
+            className="max-w-full max-h-48 sm:max-h-72 w-auto h-auto block"
           />
         )}
       </div>
@@ -344,6 +344,7 @@ export default function SpeedQuizMode() {
         autoCorrect="off"
         autoCapitalize="off"
         spellCheck={false}
+        inputMode="text"
         className="w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 text-base
                    placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
@@ -353,14 +354,14 @@ export default function SpeedQuizMode() {
         <button
           onClick={handleSkip}
           className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold text-sm
-                     hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                     hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
         >
           Skip
         </button>
         <button
           onClick={() => finishQuiz(false)}
           className="flex-1 py-3 rounded-xl border border-red-200 text-red-600 font-semibold text-sm
-                     hover:bg-red-50 active:bg-red-100 transition-colors"
+                     hover:bg-red-50 active:bg-red-100 transition-colors touch-manipulation"
         >
           Finish Quiz
         </button>
