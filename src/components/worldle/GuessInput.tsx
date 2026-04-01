@@ -34,6 +34,15 @@ export default function GuessInput({ usedCodes, onGuess, disabled = false }: Pro
     [usedCodes],
   );
 
+  /** Fill the input with the country name and close the dropdown — does NOT submit. */
+  const fillFromSuggestion = useCallback((country: Country) => {
+    setValue(country.name);
+    setSuggestions([]);
+    setActiveIdx(-1);
+    setError('');
+    inputRef.current?.focus();
+  }, []);
+
   const commit = useCallback(
     (country: Country) => {
       if (usedCodes.has(country.code)) {
@@ -60,12 +69,17 @@ export default function GuessInput({ usedCodes, onGuess, disabled = false }: Pro
         setActiveIdx(i => Math.max(i - 1, 0));
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        const picked = activeIdx >= 0 ? suggestions[activeIdx] : null;
-        if (picked) {
-          commit(picked);
-        } else if (suggestions.length === 1) {
-          commit(suggestions[0]);
+        if (suggestions.length > 0) {
+          // Dropdown is open: fill the input, don't submit yet.
+          // The player must press Enter again (with the dropdown closed) to submit.
+          if (activeIdx >= 0) {
+            fillFromSuggestion(suggestions[activeIdx]);
+          } else if (suggestions.length === 1) {
+            fillFromSuggestion(suggestions[0]);
+          }
+          // Multiple suggestions, none highlighted → do nothing; let the player pick.
         } else {
+          // Dropdown is closed: resolve and commit.
           const resolved = resolveCountry(value);
           if (resolved) commit(resolved);
           else if (value.trim()) setError('Country not found — select from the list.');
@@ -74,17 +88,14 @@ export default function GuessInput({ usedCodes, onGuess, disabled = false }: Pro
         clearDropdown();
       }
     },
-    [suggestions, activeIdx, value, commit],
+    [suggestions, activeIdx, value, fillFromSuggestion, commit],
   );
 
   const handleSubmitClick = useCallback(() => {
-    const picked = activeIdx >= 0 ? suggestions[activeIdx] : null;
-    if (picked) { commit(picked); return; }
-    if (suggestions.length === 1) { commit(suggestions[0]); return; }
     const resolved = resolveCountry(value);
     if (resolved) commit(resolved);
     else if (value.trim()) setError('Country not found — select from the list.');
-  }, [activeIdx, suggestions, value, commit]);
+  }, [value, commit]);
 
   return (
     <div className="relative w-full">
@@ -129,8 +140,8 @@ export default function GuessInput({ usedCodes, onGuess, disabled = false }: Pro
             <li key={c.code}>
               <button
                 type="button"
-                // Use onMouseDown so the selection registers before onBlur fires
-                onMouseDown={e => { e.preventDefault(); commit(c); }}
+                // Use onMouseDown so the fill registers before onBlur closes the dropdown
+                onMouseDown={e => { e.preventDefault(); fillFromSuggestion(c); }}
                 className={`w-full text-left px-4 py-2.5 text-sm cursor-pointer touch-manipulation
                   ${i === activeIdx
                     ? 'bg-blue-50 text-blue-700'

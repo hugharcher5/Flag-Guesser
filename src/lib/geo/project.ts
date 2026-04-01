@@ -18,12 +18,68 @@ interface BBox {
   minLat: number; maxLat: number;
 }
 
-/** Flatten all rings from a geometry (outer + inner, for correct evenodd fill). */
-function allRings(geom: CountryGeometry): Coord[][] {
+/** Average [lng, lat] of a ring's vertices. */
+function ringCentroid(ring: Coord[]): Coord {
+  let sumLng = 0, sumLat = 0;
+  for (const [lng, lat] of ring) { sumLng += lng; sumLat += lat; }
+  return [sumLng / ring.length, sumLat / ring.length];
+}
+
+/**
+ * Returns the rings to use for rendering.
+ *
+ * For Polygon geometries this is identical to returning all rings.
+ *
+ * For MultiPolygon geometries (countries that include distant overseas
+ * territories — France, Netherlands, Spain, USA, …) we filter out
+ * sub-polygons whose centroid is more than 72° away from the main territory
+ * (the sub-polygon with the most outer-ring vertices).  This keeps nearby
+ * islands (Alaska ~60°, Hawaii ~62°, Corsica ~9°, Azores ~20°, Svalbard ~14°)
+ * while dropping far-flung territories (French Guiana ~70°, Réunion ~87°,
+ * Martinique ~70°, Dutch Caribbean ~85°).
+ *
+ * The threshold only affects display; borderCalc.ts uses the raw geometry.
+ */
+const DISPLAY_THRESHOLD_DEG = 72;
+
+function displayRings(geom: CountryGeometry): Coord[][] {
   if (geom.type === 'Polygon') {
     return (geom as PolygonGeometry).coordinates as Coord[][];
   }
-  return ((geom as MultiPolygonGeometry).coordinates as Coord[][][]).flat();
+
+  const polys = (geom as MultiPolygonGeometry).coordinates as Coord[][][];
+  if (polys.length === 1) return polys[0] as Coord[][];
+
+  // Find the main sub-polygon: the one with the most outer-ring vertices.
+  let mainIdx = 0;
+  for (let i = 1; i < polys.length; i++) {
+    if (polys[i][0].length > polys[mainIdx][0].length) mainIdx = i;
+  }
+
+  const [mainLng, mainLat] = ringCentroid(polys[mainIdx][0]);
+  const kept: Coord[][] = [];
+
+  for (let i = 0; i < polys.length; i++) {
+    if (i === mainIdx) {
+      // Always keep the main territory (all its rings, including holes).
+      for (const ring of polys[i]) kept.push(ring as Coord[]);
+      continue;
+    }
+
+    const [rawLng, cLat] = ringCentroid(polys[i][0]);
+
+    // Normalise longitude so the difference wraps correctly across ±180°.
+    let dLng = rawLng - mainLng;
+    while (dLng > 180) dLng -= 360;
+    while (dLng < -180) dLng += 360;
+
+    const dist = Math.sqrt(dLng * dLng + (cLat - mainLat) ** 2);
+    if (dist <= DISPLAY_THRESHOLD_DEG) {
+      for (const ring of polys[i]) kept.push(ring as Coord[]);
+    }
+  }
+
+  return kept;
 }
 
 function computeBBox(rings: Coord[][]): BBox {
@@ -69,7 +125,7 @@ export function toSvgPath(
   svgH: number,
   padding = 16,
 ): string {
-  let rings = allRings(geom);
+  let rings = displayRings(geom);
   let box = computeBBox(rings);
 
   // Detect antimeridian crossing: bbox wider than 180°

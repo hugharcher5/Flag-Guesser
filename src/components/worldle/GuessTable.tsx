@@ -46,8 +46,8 @@ export default function GuessTable({ guesses }: Props) {
               </span>
 
               {/* Direction */}
-              <div className="flex items-center gap-1 font-semibold text-xs text-gray-700">
-                <CompassIcon dir={g.compassDir} size={14} />
+              <div className="flex items-center gap-1.5 font-semibold text-xs text-gray-700">
+                <CompassIcon dir={g.compassDir} size={28} />
                 <span>{g.compassDir}</span>
               </div>
             </div>

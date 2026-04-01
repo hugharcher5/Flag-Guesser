@@ -2,7 +2,7 @@
 /**
  * scripts/buildPolygons.mjs
  *
- * Generates public/countryPolygons.json from Natural Earth 50m data
+ * Generates public/countryPolygons.json from Natural Earth 10m data
  * (bundled in the world-atlas npm package).
  *
  * Run once after `npm install`:
@@ -22,7 +22,7 @@ const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Load topology via require (works cross-package-manager: npm, Yarn, pnpm)
-const topology = require('world-atlas/countries-50m.json');
+const topology = require('world-atlas/countries-10m.json');
 
 // ---------------------------------------------------------------------------
 // ISO 3166-1 alpha-2 → numeric mapping for all 196 countries in the app
@@ -56,7 +56,7 @@ const ISO_MAP = {
 };
 
 // ---------------------------------------------------------------------------
-// Centroid fallbacks [lat, lng] for nations too small for 50m resolution.
+// Centroid fallbacks [lat, lng] for nations too small for 10m resolution.
 // These produce a small dot polygon — excluded from the answer pool but still
 // valid as guesses (distance uses the centroid).
 // ---------------------------------------------------------------------------
@@ -65,8 +65,6 @@ const FALLBACKS = {
   mc: [43.7333,   7.4167],  // Monaco        (~2 km²)
   nr: [-0.5228, 166.9316],  // Nauru         (~21 km²)
   tv: [-8.5167, 179.2167],  // Tuvalu        (~26 km²)
-  sm: [43.9424,  12.4578],  // San Marino    (~61 km²) — may or may not appear
-  li: [47.1411,   9.5531],  // Liechtenstein (~160 km²) — may or may not appear
   xk: [42.6026,  20.9030],  // Kosovo        (disputed, id=-99 in Natural Earth)
 };
 

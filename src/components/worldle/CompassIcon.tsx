@@ -12,22 +12,55 @@ interface Props {
 }
 
 /**
- * Small arrow icon that rotates to point in one of the 8 compass directions.
- * The arrow is drawn pointing up (North) and rotated via CSS transform.
+ * Cartoon compass rose that rotates a two-tone needle toward the answer country.
+ *
+ * The face (circle, tick marks, "N" label) is fixed and never rotates.
+ * Only the diamond needle inside the <g transform="rotate(…)"> rotates.
+ * Red half points toward the answer; light-grey half points away.
  */
-export default function CompassIcon({ dir, size = 18, className = '' }: Props) {
+export default function CompassIcon({ dir, size = 32, className = '' }: Props) {
+  const deg = DEG[dir];
+
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      style={{ transform: `rotate(${DEG[dir]}deg)` }}
+      viewBox="0 0 32 32"
       aria-label={dir}
       className={`inline-block shrink-0 ${className}`}
     >
-      {/* Arrow pointing upward (North); rotated by DEG[dir] */}
-      <path d="M12 3 L17 19 L12 15.5 L7 19 Z" />
+      {/* Compass face */}
+      <circle cx="16" cy="16" r="15" fill="#f9fafb" stroke="#d1d5db" strokeWidth="1" />
+
+      {/* Cardinal tick marks — fixed, do not rotate */}
+      <line x1="16" y1="2"  x2="16" y2="5"  stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="16" y1="27" x2="16" y2="30" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="27" y1="16" x2="30" y2="16" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="2"  y1="16" x2="5"  y2="16" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" />
+
+      {/* Rotating diamond needle */}
+      <g transform={`rotate(${deg}, 16, 16)`}>
+        {/* Red top half — points toward the answer country */}
+        <polygon points="16,6 13,16 19,16" fill="#ef4444" />
+        {/* Light-grey bottom half */}
+        <polygon points="16,26 13,16 19,16" fill="#d1d5db" />
+      </g>
+
+      {/* Centre anchor pin — rendered above needle so it always shows */}
+      <circle cx="16" cy="16" r="2.5" fill="#374151" />
+
+      {/* "N" label — fixed, rendered last so it appears above the needle */}
+      <text
+        x="16"
+        y="11.5"
+        textAnchor="middle"
+        fontSize="5"
+        fontFamily="sans-serif"
+        fontWeight="bold"
+        fill="#374151"
+      >
+        N
+      </text>
     </svg>
   );
 }

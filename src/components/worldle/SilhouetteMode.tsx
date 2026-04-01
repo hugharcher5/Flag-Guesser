@@ -97,7 +97,7 @@ export default function SilhouetteMode() {
   if (phase === 'loading') {
     return (
       <div className="w-full max-w-md flex flex-col items-center gap-6">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-800">Silhouette</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Country Silhouette Quiz</h1>
         {loadError ? (
           <p className="text-red-600 text-sm text-center">{loadError}</p>
         ) : (
@@ -114,7 +114,7 @@ export default function SilhouetteMode() {
   if (phase === 'won' || phase === 'lost') {
     return (
       <div className="w-full max-w-md flex flex-col items-center gap-5">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-800">Silhouette</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Country Silhouette Quiz</h1>
 
         {/* Reveal the silhouette in blue */}
         <SilhouetteDisplay
@@ -167,18 +167,37 @@ export default function SilhouetteMode() {
     );
   }
 
+  const guessesLeft = MAX_GUESSES - guesses.length;
+
   // ── Playing ──────────────────────────────────────────────────────────────
   return (
     <div className="w-full max-w-md flex flex-col items-center gap-5">
-      {/* Header row */}
-      <div className="w-full flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-800">Silhouette</h1>
-        <span className="text-sm text-gray-500">
-          {'Guess '}
-          <span className="font-semibold text-gray-800">{guesses.length}</span>
-          {' / '}
-          <span className="font-semibold text-gray-800">{MAX_GUESSES}</span>
-        </span>
+      {/* Header: title + pip indicators */}
+      <div className="w-full flex flex-col gap-1.5">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Country Silhouette Quiz</h1>
+        <div className="flex items-center gap-2">
+          {/* 6 pip circles: green = correct, grey = wrong, white = unused */}
+          <div className="flex gap-1">
+            {Array.from({ length: MAX_GUESSES }).map((_, i) => {
+              const g = guesses[i];
+              return (
+                <span
+                  key={i}
+                  className={`w-3 h-3 rounded-full border ${
+                    !g
+                      ? 'bg-white border-gray-300'
+                      : g.correct
+                      ? 'bg-green-500 border-green-500'
+                      : 'bg-gray-400 border-gray-400'
+                  }`}
+                />
+              );
+            })}
+          </div>
+          <span className="text-sm text-gray-500">
+            {guessesLeft} {guessesLeft === 1 ? 'guess' : 'guesses'} left
+          </span>
+        </div>
       </div>
 
       {/* Country silhouette */}
