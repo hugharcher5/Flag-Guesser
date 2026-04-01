@@ -6,6 +6,7 @@ import type { AppMode } from "@/components/NavBar";
 import PracticeMode from "@/components/PracticeMode";
 import SpeedQuizMode from "@/components/SpeedQuizMode";
 import SilhouetteMode from "@/components/worldle/SilhouetteMode";
+import GlobeMode from "@/components/globe/GlobeMode";
 
 export default function Page() {
   const [mode, setMode] = useState<AppMode>("practice");
@@ -18,8 +19,10 @@ export default function Page() {
           <PracticeMode />
         ) : mode === "speed" ? (
           <SpeedQuizMode />
-        ) : (
+        ) : mode === "silhouette" ? (
           <SilhouetteMode />
+        ) : (
+          <GlobeMode />
         )}
       </main>
     </div>

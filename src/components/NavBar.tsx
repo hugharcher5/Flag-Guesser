@@ -1,6 +1,6 @@
 "use client";
 
-export type AppMode = "practice" | "speed" | "silhouette";
+export type AppMode = "practice" | "speed" | "silhouette" | "globe";
 
 interface NavBarProps {
   mode: AppMode;
@@ -11,6 +11,7 @@ const TABS: { key: AppMode; label: string }[] = [
   { key: "practice", label: "Practice" },
   { key: "speed", label: "Speed Quiz" },
   { key: "silhouette", label: "Shape Guesser" },
+  { key: "globe", label: "Globe Guesser" },
 ];
 
 export default function NavBar({ mode, onModeChange }: NavBarProps) {
