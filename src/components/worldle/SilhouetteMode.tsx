@@ -97,7 +97,7 @@ export default function SilhouetteMode() {
   if (phase === 'loading') {
     return (
       <div className="w-full max-w-md flex flex-col items-center gap-6">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Country Silhouette Quiz</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Country Shape Guesser</h1>
         {loadError ? (
           <p className="text-red-600 text-sm text-center">{loadError}</p>
         ) : (
@@ -114,7 +114,7 @@ export default function SilhouetteMode() {
   if (phase === 'won' || phase === 'lost') {
     return (
       <div className="w-full max-w-md flex flex-col items-center gap-5">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Country Silhouette Quiz</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Country Shape Guesser</h1>
 
         {/* Reveal the silhouette in blue */}
         <SilhouetteDisplay
@@ -174,7 +174,7 @@ export default function SilhouetteMode() {
     <div className="w-full max-w-md flex flex-col items-center gap-5">
       {/* Header: title + pip indicators */}
       <div className="w-full flex flex-col gap-1.5">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Country Silhouette Quiz</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Country Shape Guesser</h1>
         <div className="flex items-center gap-2">
           {/* 6 pip circles: green = correct, grey = wrong, white = unused */}
           <div className="flex gap-1">

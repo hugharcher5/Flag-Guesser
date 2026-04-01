@@ -10,7 +10,7 @@ interface NavBarProps {
 const TABS: { key: AppMode; label: string }[] = [
   { key: "practice", label: "Practice" },
   { key: "speed", label: "Speed Quiz" },
-  { key: "silhouette", label: "Silhouette" },
+  { key: "silhouette", label: "Shape Guesser" },
 ];
 
 export default function NavBar({ mode, onModeChange }: NavBarProps) {
