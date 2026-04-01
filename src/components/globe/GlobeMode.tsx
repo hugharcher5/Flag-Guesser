@@ -10,11 +10,27 @@ import { getCountryColor } from '@/lib/globe/colorScale';
 import GlobeInput from './GlobeInput';
 import GuessList, { type GlobeGuessEntry } from './GuessList';
 import MagnifyOverlay from './MagnifyOverlay';
+import type { GuessedPolygon } from './GlobeDisplay';
 
 // Three.js / react-globe.gl must not run on the server
 const GlobeDisplay = dynamic(() => import('./GlobeDisplay'), { ssr: false });
 
 type Phase = 'loading' | 'playing' | 'won';
+
+/**
+ * Try to fetch the lighter 50m polygon file for the globe (faster load).
+ * Falls back to the full 10m file if 50m is not yet generated.
+ */
+async function getGlobePolygons(): Promise<Map<string, CountryGeometry>> {
+  try {
+    const res = await fetch('/countryPolygons50m.json');
+    if (!res.ok) throw new Error('50m not available');
+    const raw = (await res.json()) as Record<string, CountryGeometry>;
+    return new Map(Object.entries(raw));
+  } catch {
+    return getCountryPolygons();
+  }
+}
 
 export default function GlobeMode() {
   const [phase, setPhase] = useState<Phase>('loading');
@@ -26,9 +42,9 @@ export default function GlobeMode() {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
 
-  // Load polygon data once
+  // Load 50m polygon data once
   useEffect(() => {
-    getCountryPolygons()
+    getGlobePolygons()
       .then(polys => {
         const el = countries.filter(c => {
           const g = polys.get(c.code);
@@ -96,7 +112,17 @@ export default function GlobeMode() {
     [],
   );
 
-  // Derived maps for GlobeDisplay and MagnifyOverlay
+  // Only guessed countries (non-dot) forwarded to GlobeDisplay polygonsData
+  const guessedPolygons = useMemo<GuessedPolygon[]>(() => {
+    if (!polygons) return [];
+    return guesses.flatMap(g => {
+      const geom = polygons.get(g.country.code);
+      if (!geom || geom._dot) return [];
+      return [{ code: g.country.code, geom, color: g.color }];
+    });
+  }, [guesses, polygons]);
+
+  // Maps used by MagnifyOverlay
   const guessColors = useMemo(() => {
     const m = new Map<string, string>();
     for (const g of guesses) m.set(g.country.code, g.color);
@@ -152,8 +178,7 @@ export default function GlobeMode() {
       {polygons && (
         <div className="relative w-full">
           <GlobeDisplay
-            polygons={polygons}
-            guessColors={guessColors}
+            guessedPolygons={guessedPolygons}
             onCountryHover={handleHover}
             height={440}
           />
@@ -168,7 +193,7 @@ export default function GlobeMode() {
         </div>
       )}
 
-      {/* Win overlay */}
+      {/* Win banner */}
       {phase === 'won' && (
         <div className="w-full rounded-xl px-5 py-5 text-center space-y-3 bg-green-50 border border-green-200">
           <p className="text-xl font-bold text-green-800">

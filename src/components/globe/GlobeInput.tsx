@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { searchCountries, resolveCountry } from '@/lib/resolveCountry';
 import type { Country } from '@/data/countries';
 
@@ -22,16 +22,20 @@ export default function GlobeInput({ usedCodes, onGuess, disabled = false }: Pro
     setActiveIdx(-1);
   };
 
-  const handleChange = useCallback(
-    (raw: string) => {
-      setValue(raw);
-      setError('');
-      setActiveIdx(-1);
-      const q = raw.trim();
-      setSuggestions(q ? searchCountries(q, usedCodes) : []);
-    },
-    [usedCodes],
-  );
+  // Debounced autocomplete — runs searchCountries 120 ms after the user stops typing
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setSuggestions(value.trim() ? searchCountries(value.trim(), usedCodes) : []);
+    }, 120);
+    return () => clearTimeout(id);
+  }, [value, usedCodes]);
+
+  const handleChange = useCallback((raw: string) => {
+    setValue(raw);
+    setError('');
+    setActiveIdx(-1);
+    // Suggestions are updated via the debounced useEffect above
+  }, []);
 
   const fillFromSuggestion = useCallback((country: Country) => {
     setValue(country.name);

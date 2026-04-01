@@ -22,20 +22,15 @@ export default function GuessList({ guesses }: Props) {
   const sorted = [...guesses].sort((a, b) => a.distanceKm - b.distanceKm);
 
   return (
-    <div className="w-full flex flex-col gap-1.5">
+    <div className="w-full divide-y divide-gray-100 rounded-xl overflow-hidden border border-gray-200 bg-white">
       {sorted.map((g, rank) => (
         <div
           key={g.country.code}
-          className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm
-            ${g.correct
-              ? 'bg-green-50 border border-green-200'
-              : rank % 2 === 0
-              ? 'bg-white border border-gray-200'
-              : 'bg-gray-50 border border-gray-200'
-            }`}
+          className={`flex items-center gap-2.5 px-3 py-2.5
+            ${g.correct ? 'bg-green-50' : ''}`}
         >
           {/* Rank */}
-          <span className="w-5 text-xs font-mono text-gray-400 shrink-0 text-right">
+          <span className="w-6 text-sm font-bold text-gray-400 shrink-0 text-right">
             {rank + 1}
           </span>
 
@@ -51,22 +46,22 @@ export default function GuessList({ guesses }: Props) {
 
           {/* Country name */}
           <span
-            className={`flex-1 font-semibold truncate
+            className={`flex-1 text-sm font-semibold truncate
               ${g.correct ? 'text-green-800' : 'text-gray-800'}`}
           >
             {g.country.name}
           </span>
 
           {/* Guess number */}
-          <span className="text-xs text-gray-400 shrink-0 whitespace-nowrap">
-            #{g.guessNumber}
+          <span className="font-mono text-xs text-gray-400 font-normal shrink-0 whitespace-nowrap">
+            Guess {g.guessNumber}
           </span>
 
-          {/* Distance */}
+          {/* Distance / tick */}
           {g.correct ? (
             <span className="text-green-700 font-bold text-base shrink-0">✓</span>
           ) : (
-            <span className="font-mono text-xs tabular-nums whitespace-nowrap text-gray-500 shrink-0">
+            <span className="font-mono text-sm text-gray-600 tabular-nums whitespace-nowrap shrink-0">
               {g.distanceKm === 0 ? '< 1' : g.distanceKm.toLocaleString()} km
             </span>
           )}

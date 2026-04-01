@@ -2,13 +2,14 @@
 /**
  * scripts/buildPolygons.mjs
  *
- * Generates public/countryPolygons.json from Natural Earth 10m data
- * (bundled in the world-atlas npm package).
+ * Generates:
+ *   public/countryPolygons.json    — 10m resolution (used by Shape Guesser + distance calc)
+ *   public/countryPolygons50m.json — 50m resolution (used by Globe Guesser, ~1/5 the size)
  *
  * Run once after `npm install`:
  *   node scripts/buildPolygons.mjs
  *
- * The output file is committed to the repo so the app never fetches external data.
+ * Both output files are committed to the repo so the app never fetches external data.
  * Re-run only if you need to update the underlying geographic data.
  */
 
@@ -20,9 +21,6 @@ import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-// Load topology via require (works cross-package-manager: npm, Yarn, pnpm)
-const topology = require('world-atlas/countries-10m.json');
 
 // ---------------------------------------------------------------------------
 // ISO 3166-1 alpha-2 → numeric mapping for all 196 countries in the app
@@ -56,29 +54,48 @@ const ISO_MAP = {
 };
 
 // ---------------------------------------------------------------------------
-// Centroid fallbacks [lat, lng] for nations too small for 10m resolution.
-// These produce a small dot polygon — excluded from the answer pool but still
-// valid as guesses (distance uses the centroid).
+// Centroid fallbacks [lat, lng] — used when a country is absent from the
+// topology. Produces a small dot polygon (_dot: true), excluded from the
+// answer pool but valid as a guess.
 // ---------------------------------------------------------------------------
-const FALLBACKS = {
+
+/** Fallbacks needed for 10m resolution data. */
+const FALLBACKS_10m = {
   va: [41.9022,  12.4539],  // Vatican City  (~0.44 km²)
   mc: [43.7333,   7.4167],  // Monaco        (~2 km²)
   nr: [-0.5228, 166.9316],  // Nauru         (~21 km²)
   tv: [-8.5167, 179.2167],  // Tuvalu        (~26 km²)
-  xk: [42.6026,  20.9030],  // Kosovo        (disputed, id=-99 in Natural Earth)
+  xk: [42.6026,  20.9030],  // Kosovo        (disputed, id=-99)
 };
 
-// Build a small hexagonal polygon to represent a tiny/missing country.
-// Marked with _dot:true so the game excludes it from the answer pool.
-function makeDotPolygon(lat, lng) {
-  const r = 0.3; // ~33 km visual radius — visible in the SVG
-  const ring = [];
-  for (let i = 0; i <= 6; i++) {
-    const a = (i / 6) * 2 * Math.PI;
-    ring.push([round4(lng + r * Math.cos(a)), round4(lat + r * Math.sin(a))]);
-  }
-  return { type: 'Polygon', coordinates: [ring], _dot: true };
-}
+/**
+ * Fallbacks for 50m resolution — a superset of 10m fallbacks.
+ * Includes countries whose area is too small to appear in the 50m topology
+ * (~< 1 000 km²).
+ */
+const FALLBACKS_50m = {
+  ...FALLBACKS_10m,
+  sm: [ 43.9424,  12.4578],  // San Marino      (~61 km²)
+  li: [ 47.1660,   9.5554],  // Liechtenstein   (~160 km²)
+  mh: [  7.1316, 171.1845],  // Marshall Islands (~181 km²)
+  kn: [ 17.3578, -62.7830],  // St. Kitts & Nevis (~261 km²)
+  gd: [ 12.1165, -61.6790],  // Grenada         (~344 km²)
+  mt: [ 35.8997,  14.5147],  // Malta           (~316 km²)
+  vc: [ 13.2528, -61.1971],  // St. Vincent     (~389 km²)
+  bb: [ 13.1939, -59.5432],  // Barbados        (~430 km²)
+  sc: [ -4.6796,  55.4920],  // Seychelles      (~452 km²)
+  pw: [  7.5150, 134.5825],  // Palau           (~459 km²)
+  lc: [ 13.9094, -60.9789],  // St. Lucia       (~616 km²)
+  dm: [ 15.4150, -61.3710],  // Dominica        (~751 km²)
+  to: [-21.1789,-175.1982],  // Tonga           (~747 km²)
+  ag: [ 17.0608, -61.7964],  // Antigua & Barbuda (~440 km²)
+  fm: [  6.8879, 158.2150],  // Micronesia      (~702 km²)
+  st: [  0.1864,   6.6131],  // São Tomé        (~964 km²)
+};
+
+// ---------------------------------------------------------------------------
+// Shared helpers
+// ---------------------------------------------------------------------------
 
 function round4(n) {
   return Math.round(n * 10000) / 10000;
@@ -98,57 +115,79 @@ function roundGeom(geom) {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Convert TopoJSON → GeoJSON and index by numeric ID
-// ---------------------------------------------------------------------------
-const fc = feature(topology, topology.objects.countries);
-
-const byNumeric = new Map();
-for (const f of fc.features) {
-  if (f.id != null && f.geometry) {
-    byNumeric.set(Number(f.id), f.geometry);
+/** Build a small hexagonal polygon to represent a tiny/missing country. */
+function makeDotPolygon(lat, lng) {
+  const r = 0.3; // ~33 km visual radius
+  const ring = [];
+  for (let i = 0; i <= 6; i++) {
+    const a = (i / 6) * 2 * Math.PI;
+    ring.push([round4(lng + r * Math.cos(a)), round4(lat + r * Math.sin(a))]);
   }
+  return { type: 'Polygon', coordinates: [ring], _dot: true };
 }
-console.log(`Topology contains ${byNumeric.size} features.`);
 
 // ---------------------------------------------------------------------------
-// Build output object keyed by alpha-2 code
+// Core build function — works for any resolution topology + fallbacks map
 // ---------------------------------------------------------------------------
-const output = {};
-let fullCount = 0;
-let dotCount = 0;
-const noData = [];
+function buildOutput(topology, fallbacks, label) {
+  const fc = feature(topology, topology.objects.countries);
 
-for (const [alpha2, numericId] of Object.entries(ISO_MAP)) {
-  const geom = byNumeric.get(numericId);
-  if (geom) {
-    output[alpha2] = roundGeom(geom);
-    fullCount++;
-  } else if (FALLBACKS[alpha2]) {
-    const [lat, lng] = FALLBACKS[alpha2];
-    output[alpha2] = makeDotPolygon(lat, lng);
-    dotCount++;
-    console.log(`  Centroid dot: ${alpha2}`);
-  } else {
-    noData.push(`${alpha2}(${numericId})`);
-    console.warn(`  MISSING — no polygon and no fallback: ${alpha2} (numeric ${numericId})`);
+  const byNumeric = new Map();
+  for (const f of fc.features) {
+    if (f.id != null && f.geometry) {
+      byNumeric.set(Number(f.id), f.geometry);
+    }
   }
-}
+  console.log(`[${label}] Topology contains ${byNumeric.size} features.`);
 
-if (noData.length > 0) {
-  console.warn(`\nStill missing: ${noData.join(', ')}`);
-  console.warn('Add an entry to FALLBACKS with a [lat, lng] centroid.');
+  const output = {};
+  let fullCount = 0;
+  let dotCount = 0;
+  const noData = [];
+
+  for (const [alpha2, numericId] of Object.entries(ISO_MAP)) {
+    const geom = byNumeric.get(numericId);
+    if (geom) {
+      output[alpha2] = roundGeom(geom);
+      fullCount++;
+    } else if (fallbacks[alpha2]) {
+      const [lat, lng] = fallbacks[alpha2];
+      output[alpha2] = makeDotPolygon(lat, lng);
+      dotCount++;
+      console.log(`  [${label}] Centroid dot: ${alpha2}`);
+    } else {
+      noData.push(`${alpha2}(${numericId})`);
+      console.warn(`  [${label}] MISSING — no polygon and no fallback: ${alpha2} (numeric ${numericId})`);
+    }
+  }
+
+  if (noData.length > 0) {
+    console.warn(`\n[${label}] Still missing: ${noData.join(', ')}`);
+    console.warn('Add an entry to the appropriate FALLBACKS with a [lat, lng] centroid.');
+  }
+
+  console.log(`[${label}] ${fullCount} full polygons + ${dotCount} centroid dots = ${fullCount + dotCount} total`);
+  return output;
 }
 
 // ---------------------------------------------------------------------------
-// Write output
+// Write outputs
 // ---------------------------------------------------------------------------
 const publicDir = resolve(__dirname, '../public');
 mkdirSync(publicDir, { recursive: true });
-const outPath = resolve(publicDir, 'countryPolygons.json');
-writeFileSync(outPath, JSON.stringify(output));
 
-const sizeKb = Math.round(Buffer.byteLength(JSON.stringify(output)) / 1024);
-console.log(`\nWritten: ${outPath}`);
-console.log(`  ${fullCount} full polygons + ${dotCount} centroid dots = ${fullCount + dotCount} total`);
-console.log(`  File size: ${sizeKb} KB (uncompressed)`);
+// 10m — high resolution for Shape Guesser and distance calculations
+const topology10m = require('world-atlas/countries-10m.json');
+const output10m = buildOutput(topology10m, FALLBACKS_10m, '10m');
+const path10m = resolve(publicDir, 'countryPolygons.json');
+writeFileSync(path10m, JSON.stringify(output10m));
+const size10m = Math.round(Buffer.byteLength(JSON.stringify(output10m)) / 1024);
+console.log(`Written: ${path10m}  (${size10m} KB uncompressed)\n`);
+
+// 50m — lighter resolution for Globe Guesser (~1/5 the size)
+const topology50m = require('world-atlas/countries-50m.json');
+const output50m = buildOutput(topology50m, FALLBACKS_50m, '50m');
+const path50m = resolve(publicDir, 'countryPolygons50m.json');
+writeFileSync(path50m, JSON.stringify(output50m));
+const size50m = Math.round(Buffer.byteLength(JSON.stringify(output50m)) / 1024);
+console.log(`Written: ${path50m}  (${size50m} KB uncompressed)`);
