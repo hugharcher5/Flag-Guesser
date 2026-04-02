@@ -9,6 +9,12 @@
  *  - bumpImageUrl provides pseudo-3D terrain at near-zero cost vs displacement.
  *  - Rivers and lakes are deferred 3 s after mount (decorative, non-blocking).
  *  - Hover only fires for guessed polygons — used for the small-country magnifier.
+ *
+ * Post-guess animation:
+ *  - focusCentroid triggers a 1-second pointOfView animation to the guessed country.
+ *  - After the animation settles (1100 ms), onFocusComplete is called with the
+ *    country's screen position so GlobeMode can auto-show the magnifier for small
+ *    countries without any user hover interaction.
  */
 
 import { useRef, useEffect, useMemo, useCallback, useState } from 'react';
@@ -61,6 +67,21 @@ interface Props {
   /** Only the countries that have been guessed — keeps the polygon layer tiny. */
   guessedPolygons: GuessedPolygon[];
   onCountryHover: (code: string | null, pos: { x: number; y: number } | null) => void;
+  /**
+   * When set to a new object, the globe smoothly rotates to that lat/lng over
+   * 1 000 ms while keeping the current zoom level (altitude).
+   */
+  focusCentroid: { lat: number; lng: number } | null;
+  /**
+   * Called 1 100 ms after a focusCentroid change (animation settled) with the
+   * screen-space position of that point. Used to auto-position the magnifier.
+   */
+  onFocusComplete: (pos: { x: number; y: number }) => void;
+  /**
+   * Called on any mouse movement over the globe canvas. Used by GlobeMode to
+   * dismiss the auto-shown magnifier when the user interacts with the globe.
+   */
+  onGlobeMouseMove: () => void;
   height?: number;
 }
 
@@ -69,6 +90,9 @@ interface Props {
 export default function GlobeDisplay({
   guessedPolygons,
   onCountryHover,
+  focusCentroid,
+  onFocusComplete,
+  onGlobeMouseMove,
   height = 440,
 }: Props) {
   const globeRef = useRef<GlobeMethods>(null!);
@@ -76,6 +100,12 @@ export default function GlobeDisplay({
   const [width, setWidth] = useState(600);
   const [riverPaths, setRiverPaths] = useState<[number, number][][]>([]);
   const [lakeFeatures, setLakeFeatures] = useState<GeoFeature[]>([]);
+
+  // Keep stable refs to callbacks so event listeners never go stale
+  const onFocusCompleteRef = useRef(onFocusComplete);
+  onFocusCompleteRef.current = onFocusComplete;
+  const onGlobeMouseMoveRef = useRef(onGlobeMouseMove);
+  onGlobeMouseMoveRef.current = onGlobeMouseMove;
 
   // ── Responsive width ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -125,8 +155,30 @@ export default function GlobeDisplay({
     return () => clearTimeout(timer);
   }, []);
 
+  // ── Rotate to guessed country centroid after each guess ─────────────────────
+  useEffect(() => {
+    if (!focusCentroid) return;
+    const globe = globeRef.current;
+    if (!globe) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pov = globe.pointOfView() as any;
+    globe.pointOfView(
+      { lat: focusCentroid.lat, lng: focusCentroid.lng, altitude: pov?.altitude ?? 2.5 },
+      1000,
+    );
+
+    // After animation settles, call back with the country's screen position
+    const timer = setTimeout(() => {
+      if (!globeRef.current) return;
+      const pos = globeRef.current.getScreenCoords(focusCentroid.lat, focusCentroid.lng, 0);
+      onFocusCompleteRef.current(pos);
+    }, 1100);
+
+    return () => clearTimeout(timer);
+  }, [focusCentroid]);
+
   // ── Convert guessed countries to GeoJSON features ───────────────────────────
-  // Lakes are merged into the same layer to avoid a second polygon pass.
   const countryFeatures = useMemo<GeoFeature[]>(
     () =>
       guessedPolygons.map(({ code, geom, color }) => ({
@@ -183,7 +235,7 @@ export default function GlobeDisplay({
     [onCountryHover],
   );
 
-  // ── Globe ready: auto-rotation only (bump map handled by bumpImageUrl prop) ─
+  // ── Globe ready: auto-rotation + event listeners ────────────────────────────
   const handleGlobeReady = useCallback(() => {
     const globe = globeRef.current;
     if (!globe) return;
@@ -194,9 +246,18 @@ export default function GlobeDisplay({
     controls.autoRotateSpeed = 0.3;
 
     const canvas = globe.renderer().domElement;
-    const stop = () => { controls.autoRotate = false; };
-    canvas.addEventListener('mousedown', stop);
-    canvas.addEventListener('touchstart', stop, { passive: true });
+
+    // Stop auto-rotation on interaction
+    const stopRotation = () => { controls.autoRotate = false; };
+    canvas.addEventListener('mousedown', stopRotation);
+    canvas.addEventListener('touchstart', stopRotation, { passive: true });
+
+    // Notify GlobeMode of any mouse movement (used to dismiss auto-shown magnifier)
+    canvas.addEventListener(
+      'mousemove',
+      () => { onGlobeMouseMoveRef.current(); },
+      { passive: true },
+    );
   }, []);
 
   // ── Render ──────────────────────────────────────────────────────────────────

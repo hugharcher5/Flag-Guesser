@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import countries from '@/data/countries';
 import type { Country } from '@/data/countries';
 import { getCountryPolygons, type CountryGeometry } from '@/lib/geo/polygons';
 import { calcBorderDistance } from '@/lib/geo/borderCalc';
 import { getCountryColor } from '@/lib/globe/colorScale';
+import { SMALL_COUNTRY_CODES } from './MagnifyOverlay';
 import GlobeInput from './GlobeInput';
 import GuessList, { type GlobeGuessEntry } from './GuessList';
 import MagnifyOverlay from './MagnifyOverlay';
@@ -32,6 +33,25 @@ async function getGlobePolygons(): Promise<Map<string, CountryGeometry>> {
   }
 }
 
+/** Returns the geographic centroid of a CountryGeometry as { lat, lng }. */
+function geomCentroid(geom: CountryGeometry): { lat: number; lng: number } {
+  let sumLng = 0, sumLat = 0, count = 0;
+  const addRing = (ring: [number, number][]) => {
+    for (const [lng, lat] of ring) { sumLng += lng; sumLat += lat; count++; }
+  };
+  if (geom.type === 'Polygon') {
+    addRing(geom.coordinates[0] as [number, number][]);
+  } else {
+    let best: [number, number][] = [];
+    for (const poly of geom.coordinates) {
+      const outer = poly[0] as [number, number][];
+      if (outer.length > best.length) best = outer;
+    }
+    addRing(best);
+  }
+  return { lat: count > 0 ? sumLat / count : 0, lng: count > 0 ? sumLng / count : 0 };
+}
+
 export default function GlobeMode() {
   const [phase, setPhase] = useState<Phase>('loading');
   const [loadError, setLoadError] = useState('');
@@ -39,10 +59,33 @@ export default function GlobeMode() {
   const [eligible, setEligible] = useState<Country[]>([]);
   const [answer, setAnswer] = useState<Country | null>(null);
   const [guesses, setGuesses] = useState<GlobeGuessEntry[]>([]);
-  const [hoveredCode, setHoveredCode] = useState<string | null>(null);
-  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
 
-  // Load 50m polygon data once
+  // ── Globe rotation focus ─────────────────────────────────────────────────────
+  // Set to a new object on each guess to trigger GlobeDisplay's rotation effect.
+  const [focusCentroid, setFocusCentroid] = useState<{ lat: number; lng: number } | null>(null);
+
+  // ── Magnifier state ──────────────────────────────────────────────────────────
+  // Single source of truth for what the magnifier shows. Updated by both hover
+  // events (interactive) and auto-show logic (post-guess for small countries).
+  const [magnifierCode, setMagnifierCode] = useState<string | null>(null);
+  const [magnifierPos, setMagnifierPos] = useState<{ x: number; y: number } | null>(null);
+
+  // Whether the currently shown magnifier was triggered automatically (not by hover).
+  // Used to decide if globe mouse-movement should dismiss it.
+  const magnifierIsAutoRef = useRef(false);
+  // Auto-hide timer handle
+  const autoHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Code of the small country waiting for the rotation animation to complete
+  const pendingSmallCodeRef = useRef<string | null>(null);
+
+  const clearAutoHide = useCallback(() => {
+    if (autoHideTimerRef.current) {
+      clearTimeout(autoHideTimerRef.current);
+      autoHideTimerRef.current = null;
+    }
+  }, []);
+
+  // ── Load 50m polygon data once ───────────────────────────────────────────────
   useEffect(() => {
     getGlobePolygons()
       .then(polys => {
@@ -63,9 +106,15 @@ export default function GlobeMode() {
       const picked = el[Math.floor(Math.random() * el.length)];
       setAnswer(picked);
       setGuesses([]);
+      setFocusCentroid(null);
+      clearAutoHide();
+      magnifierIsAutoRef.current = false;
+      pendingSmallCodeRef.current = null;
+      setMagnifierCode(null);
+      setMagnifierPos(null);
       setPhase('playing');
     },
-    [],
+    [clearAutoHide],
   );
 
   const handlePlayAgain = useCallback(() => {
@@ -77,7 +126,6 @@ export default function GlobeMode() {
       if (!answer || !polygons || phase !== 'playing') return;
 
       const correct = guessed.code === answer.code;
-
       const guessedGeom = polygons.get(guessed.code);
       const answerGeom = polygons.get(answer.code);
 
@@ -90,29 +138,71 @@ export default function GlobeMode() {
       const guessNum = guesses.length + 1;
       const color = getCountryColor(distanceKm, correct);
 
-      const entry: GlobeGuessEntry = {
-        country: guessed,
-        distanceKm,
-        guessNumber: guessNum,
-        color,
-        correct,
-      };
+      setGuesses(prev => [
+        ...prev,
+        { country: guessed, distanceKm, guessNumber: guessNum, color, correct },
+      ]);
 
-      setGuesses(prev => [...prev, entry]);
       if (correct) setPhase('won');
+
+      // Rotate globe to guessed country centroid
+      if (guessedGeom) {
+        setFocusCentroid(geomCentroid(guessedGeom));
+      }
+
+      // Queue auto-magnifier if the guessed country is small
+      pendingSmallCodeRef.current = SMALL_COUNTRY_CODES.has(guessed.code)
+        ? guessed.code
+        : null;
     },
     [answer, polygons, phase, guesses.length],
   );
 
-  const handleHover = useCallback(
-    (code: string | null, pos: { x: number; y: number } | null) => {
-      setHoveredCode(code);
-      setHoverPos(pos);
+  // ── Called by GlobeDisplay after the 1-second rotation animation settles ────
+  const handleFocusComplete = useCallback(
+    (pos: { x: number; y: number }) => {
+      const code = pendingSmallCodeRef.current;
+      if (!code) return; // no small country was pending
+
+      pendingSmallCodeRef.current = null;
+      clearAutoHide();
+      magnifierIsAutoRef.current = true;
+      setMagnifierCode(code);
+      setMagnifierPos(pos);
+
+      // Auto-hide after 4 seconds
+      autoHideTimerRef.current = setTimeout(() => {
+        magnifierIsAutoRef.current = false;
+        setMagnifierCode(null);
+        setMagnifierPos(null);
+      }, 4000);
     },
-    [],
+    [clearAutoHide],
   );
 
-  // Only guessed countries (non-dot) forwarded to GlobeDisplay polygonsData
+  // ── Called by GlobeDisplay on any mouse movement over the canvas ─────────────
+  const handleGlobeMouseMove = useCallback(() => {
+    if (!magnifierIsAutoRef.current) return; // hover-driven magnifier: leave it alone
+    clearAutoHide();
+    magnifierIsAutoRef.current = false;
+    setMagnifierCode(null);
+    setMagnifierPos(null);
+  }, [clearAutoHide]);
+
+  // ── Hover events from GlobeDisplay (mouse over/off small guessed polygons) ───
+  const handleCountryHover = useCallback(
+    (code: string | null, pos: { x: number; y: number } | null) => {
+      // Hover always overrides (including clearing) the auto-shown magnifier
+      clearAutoHide();
+      magnifierIsAutoRef.current = false;
+      pendingSmallCodeRef.current = null;
+      setMagnifierCode(code);
+      setMagnifierPos(pos);
+    },
+    [clearAutoHide],
+  );
+
+  // ── Derived data ─────────────────────────────────────────────────────────────
   const guessedPolygons = useMemo<GuessedPolygon[]>(() => {
     if (!polygons) return [];
     return guesses.flatMap(g => {
@@ -122,7 +212,6 @@ export default function GlobeMode() {
     });
   }, [guesses, polygons]);
 
-  // Maps used by MagnifyOverlay
   const guessColors = useMemo(() => {
     const m = new Map<string, string>();
     for (const g of guesses) m.set(g.country.code, g.color);
@@ -179,12 +268,15 @@ export default function GlobeMode() {
         <div className="relative w-full">
           <GlobeDisplay
             guessedPolygons={guessedPolygons}
-            onCountryHover={handleHover}
+            onCountryHover={handleCountryHover}
+            focusCentroid={focusCentroid}
+            onFocusComplete={handleFocusComplete}
+            onGlobeMouseMove={handleGlobeMouseMove}
             height={440}
           />
           <MagnifyOverlay
-            hoveredCode={hoveredCode}
-            screenPos={hoverPos}
+            hoveredCode={magnifierCode}
+            screenPos={magnifierPos}
             polygons={polygons}
             guessColors={guessColors}
             guessDistances={guessDistances}
