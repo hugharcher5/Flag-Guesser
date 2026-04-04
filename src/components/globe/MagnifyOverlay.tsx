@@ -44,8 +44,8 @@ export default function MagnifyOverlay({
 
   const svgPath = useMemo(() => {
     if (!geom) return '';
-    return toSvgPath(geom, SVG_SIZE, SVG_SIZE, 6);
-  }, [geom]);
+    return toSvgPath(geom, SVG_SIZE, SVG_SIZE, 6, hoveredCode ?? undefined);
+  }, [geom, hoveredCode]);
 
   if (!hoveredCode || !screenPos || !geom) return null;
 

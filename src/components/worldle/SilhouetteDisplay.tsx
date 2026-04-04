@@ -9,6 +9,8 @@ const SVG_H = 320;
 
 interface Props {
   geometry: CountryGeometry | null;
+  /** ISO alpha-2 code — enables per-country projection overrides. */
+  code?: string;
   /** If true the silhouette is shown in blue (answer-revealed state). */
   revealed?: boolean;
   label?: string;
@@ -16,14 +18,14 @@ interface Props {
 
 /**
  * Renders a country silhouette as an inline SVG.
- * The shape is projected with equirectangular projection, centred and scaled
- * to fill the display area while preserving the country's aspect ratio.
+ * Uses a latitude-corrected equirectangular projection so high-latitude
+ * countries (Iceland, Russia, Canada, etc.) render without horizontal stretch.
  */
-export default function SilhouetteDisplay({ geometry, revealed = false, label }: Props) {
-  // Recompute path only when the geometry changes (not on every render)
+export default function SilhouetteDisplay({ geometry, code, revealed = false, label }: Props) {
+  // Recompute path only when the geometry or code changes
   const pathData = useMemo(
-    () => (geometry ? toSvgPath(geometry, SVG_W, SVG_H) : ''),
-    [geometry],
+    () => (geometry ? toSvgPath(geometry, SVG_W, SVG_H, 16, code) : ''),
+    [geometry, code],
   );
 
   return (

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { saveGameResult } from '@/lib/saveGameResult';
 import countries from '@/data/countries';
 import type { Country } from '@/data/countries';
 import { getCountryPolygons, type CountryGeometry } from '@/lib/geo/polygons';
 import { calcBorderDistance } from '@/lib/geo/borderCalc';
+import { toSvgPath } from '@/lib/geo/project';
 import SilhouetteDisplay from './SilhouetteDisplay';
 import GuessInput from './GuessInput';
 import GuessTable, { type GuessEntry } from './GuessTable';
@@ -13,6 +14,107 @@ import GuessTable, { type GuessEntry } from './GuessTable';
 const MAX_GUESSES = 6;
 
 type Phase = 'loading' | 'playing' | 'won' | 'lost';
+
+// ── Test-mode grid ────────────────────────────────────────────────────────────
+
+const TILE_W = 160;
+const TILE_H = 100;
+
+function SilhouetteGrid({ polygons }: { polygons: Map<string, CountryGeometry> }) {
+  const [filter, setFilter] = useState('');
+  const [highlight, setHighlight] = useState<'all' | 'dot' | 'real'>('all');
+
+  const tiles = useMemo(() => {
+    const q = filter.toLowerCase();
+    return countries
+      .filter(c => !q || c.name.toLowerCase().includes(q) || c.code.includes(q))
+      .map(c => {
+        const geom = polygons.get(c.code);
+        const isDot = !geom || !!geom._dot;
+        return { country: c, geom: geom ?? null, isDot };
+      })
+      .filter(t => {
+        if (highlight === 'dot') return t.isDot;
+        if (highlight === 'real') return !t.isDot;
+        return true;
+      });
+  }, [filter, highlight]);
+
+  return (
+    <div className="w-full flex flex-col gap-4">
+      <div className="sticky top-0 z-10 bg-gray-50 pb-3 pt-1 flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-gray-800">
+            Shape Test Mode
+            <span className="ml-2 text-sm font-normal text-gray-400">({tiles.length} shown)</span>
+          </h1>
+          <span className="text-xs bg-yellow-100 text-yellow-800 border border-yellow-300 rounded px-2 py-0.5 font-mono">
+            ?testMode=true
+          </span>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          <input
+            type="text"
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+            placeholder="Filter by name or code…"
+            className="flex-1 min-w-40 px-3 py-1.5 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <div className="flex rounded-lg border border-gray-300 overflow-hidden text-sm">
+            {(['all', 'real', 'dot'] as const).map(v => (
+              <button
+                key={v}
+                onClick={() => setHighlight(v)}
+                className={`px-3 py-1.5 capitalize ${highlight === v ? 'bg-gray-800 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+              >
+                {v === 'dot' ? 'dot-only' : v}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="grid gap-3"
+        style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${TILE_W}px, 1fr))` }}
+      >
+        {tiles.map(({ country, geom, isDot }) => {
+          const path = geom && !isDot ? toSvgPath(geom, TILE_W, TILE_H, 8, country.code) : '';
+          return (
+            <div
+              key={country.code}
+              className={`rounded-xl border bg-white flex flex-col overflow-hidden ${
+                isDot ? 'border-red-300' : 'border-gray-200'
+              }`}
+            >
+              <div
+                className={`flex items-center justify-center ${isDot ? 'bg-red-50' : 'bg-gray-50'}`}
+                style={{ height: TILE_H }}
+              >
+                {isDot ? (
+                  <span className="text-xs text-red-500 font-medium">no polygon</span>
+                ) : (
+                  <svg
+                    viewBox={`0 0 ${TILE_W} ${TILE_H}`}
+                    width={TILE_W}
+                    height={TILE_H}
+                    aria-label={country.name}
+                  >
+                    <path d={path} fill="#1e293b" fillRule="evenodd" />
+                  </svg>
+                )}
+              </div>
+              <div className="px-2 py-1.5 border-t border-gray-100">
+                <p className="text-xs font-semibold text-gray-800 truncate">{country.name}</p>
+                <p className="text-xs text-gray-400 font-mono">{country.code.toUpperCase()}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function SilhouetteMode() {
   const [phase, setPhase] = useState<Phase>('loading');
@@ -27,6 +129,12 @@ export default function SilhouetteMode() {
   const [answerGeom, setAnswerGeom] = useState<CountryGeometry | null>(null);
   const [guesses, setGuesses] = useState<GuessEntry[]>([]);
 
+  // Detect ?testMode=true — read once on mount (URL never changes during a session)
+  const [testMode] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return new URLSearchParams(window.location.search).get('testMode') === 'true';
+  });
+
   // Load polygon data once on mount
   useEffect(() => {
     getCountryPolygons()
@@ -37,7 +145,8 @@ export default function SilhouetteMode() {
         });
         setPolygons(polys);
         setEligible(el);
-        beginGame(polys, el);
+        if (!testMode) beginGame(polys, el);
+        else setPhase('playing'); // skip beginGame in test mode
       })
       .catch(() => setLoadError('Failed to load country data. Please refresh.'));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -108,6 +217,22 @@ export default function SilhouetteMode() {
 
   const usedCodes = new Set(guesses.map(g => g.country.code));
 
+  // ── Test mode ─────────────────────────────────────────────────────────────
+  if (testMode) {
+    if (!polygons) {
+      return (
+        <div className="w-full max-w-md flex flex-col items-center gap-6">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-800">Shape Test Mode</h1>
+          {loadError
+            ? <p className="text-red-600 text-sm text-center">{loadError}</p>
+            : <p className="text-sm text-gray-400">Loading polygon data…</p>
+          }
+        </div>
+      );
+    }
+    return <SilhouetteGrid polygons={polygons} />;
+  }
+
   // ── Loading ──────────────────────────────────────────────────────────────
   if (phase === 'loading') {
     return (
@@ -134,6 +259,7 @@ export default function SilhouetteMode() {
         {/* Reveal the silhouette in blue */}
         <SilhouetteDisplay
           geometry={answerGeom}
+          code={answer?.code}
           revealed
           label={answer?.name ?? 'Country'}
         />
@@ -216,7 +342,7 @@ export default function SilhouetteMode() {
       </div>
 
       {/* Country silhouette */}
-      <SilhouetteDisplay geometry={answerGeom} label="Hidden country silhouette" />
+      <SilhouetteDisplay geometry={answerGeom} code={answer?.code} label="Hidden country silhouette" />
 
       {/* Guess input with autocomplete */}
       <GuessInput usedCodes={usedCodes} onGuess={handleGuess} />
