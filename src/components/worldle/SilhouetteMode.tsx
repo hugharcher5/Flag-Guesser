@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { saveGameResult } from '@/lib/saveGameResult';
 import countries from '@/data/countries';
 import type { Country } from '@/data/countries';
 import { getCountryPolygons, type CountryGeometry } from '@/lib/geo/polygons';
@@ -84,8 +85,22 @@ export default function SilhouetteMode() {
 
       if (correct) {
         setPhase('won');
+        saveGameResult({
+          game_mode: 'country_shape_guesser',
+          score: (MAX_GUESSES + 1 - next.length) * 100,
+          guesses_count: next.length,
+          correct: true,
+          country_guessed: answer.name,
+        });
       } else if (next.length >= MAX_GUESSES) {
         setPhase('lost');
+        saveGameResult({
+          game_mode: 'country_shape_guesser',
+          score: 0,
+          guesses_count: next.length,
+          correct: false,
+          country_guessed: answer.name,
+        });
       }
     },
     [answer, answerGeom, polygons, phase, guesses],

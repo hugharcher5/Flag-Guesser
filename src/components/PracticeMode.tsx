@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import countries from "@/data/countries";
 import type { Country, Continent } from "@/data/countries";
 import { isCorrect } from "@/lib/fuzzy";
+import { saveGameResult } from "@/lib/saveGameResult";
 
 type Filter = Continent | "All";
 
@@ -79,6 +80,13 @@ export default function PracticeMode() {
         correct: s.correct + (correct ? 1 : 0),
         total: s.total + 1,
       }));
+      saveGameResult({
+        game_mode: 'flag_guesser',
+        score: correct ? 1 : 0,
+        guesses_count: 1,
+        correct,
+        country_guessed: current.name,
+      });
     },
     [guess, current, result]
   );

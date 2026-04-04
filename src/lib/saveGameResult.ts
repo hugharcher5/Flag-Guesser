@@ -1,0 +1,29 @@
+import { supabase } from '@/lib/supabase/client';
+
+interface SaveGamePayload {
+  game_mode: 'flag_guesser' | 'speed_quiz' | 'country_shape_guesser';
+  score: number;
+  guesses_count: number;
+  correct: boolean;
+  completion_time?: number;
+  country_guessed?: string;
+}
+
+/**
+ * Fire-and-forget wrapper around POST /api/save-game-result.
+ * Silently skips if the user is not signed in and swallows any errors
+ * so a network failure never breaks the game.
+ */
+export async function saveGameResult(payload: SaveGamePayload): Promise<void> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await fetch('/api/save-game-result', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // Game must keep working even if the API call fails.
+  }
+}

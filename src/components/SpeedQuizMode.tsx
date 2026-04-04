@@ -5,6 +5,7 @@ import countries from "@/data/countries";
 import type { Country } from "@/data/countries";
 import { isCorrect } from "@/lib/fuzzy";
 import { getRecords, updateRecords } from "@/lib/storage";
+import { saveGameResult } from "@/lib/saveGameResult";
 import type { SpeedQuizRecords } from "@/lib/storage";
 
 const QUIZ_DURATION_S = 900; // 15 minutes
@@ -109,6 +110,13 @@ export default function SpeedQuizMode() {
       isNewFastestCompletion,
     });
     setPhase("finished");
+    saveGameResult({
+      game_mode: 'speed_quiz',
+      score: finalCorrect,
+      guesses_count: TOTAL,
+      correct: completedAll,
+      completion_time: Math.floor(elapsedMs / 1000),
+    });
   }, []);
 
   // ── Timer ────────────────────────────────────────────────────────────────
