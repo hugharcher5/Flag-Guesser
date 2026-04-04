@@ -9,6 +9,8 @@
     "build:polygons": "node scripts/buildPolygons.mjs"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.10.0",
+    "@supabase/supabase-js": "^2.101.1",
     "@types/three": "^0.183.1",
     "next": "^15.0.0",
     "react": "^18.3.1",
