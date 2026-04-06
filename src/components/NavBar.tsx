@@ -17,7 +17,7 @@ const TABS: { key: AppMode; label: string }[] = [
 export default function NavBar({ mode, onModeChange }: NavBarProps) {
   return (
     <nav className="w-full bg-white border-b border-gray-200">
-      <div className="max-w-md mx-auto flex">
+      <div className="max-w-md mx-auto flex" suppressHydrationWarning>
         {TABS.map(({ key, label }) => (
           <button
             key={key}

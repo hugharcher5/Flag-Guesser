@@ -7,7 +7,7 @@ import type { Country } from '@/data/countries';
 import { getCountryPolygons, type CountryGeometry } from '@/lib/geo/polygons';
 import { calcBorderDistance } from '@/lib/geo/borderCalc';
 import { toSvgPath } from '@/lib/geo/project';
-import SilhouetteDisplay from './SilhouetteDisplay';
+import SilhouetteDisplay, { IMAGE_SILHOUETTES } from './SilhouetteDisplay';
 import GuessInput from './GuessInput';
 import GuessTable, { type GuessEntry } from './GuessTable';
 
@@ -79,7 +79,10 @@ function SilhouetteGrid({ polygons }: { polygons: Map<string, CountryGeometry> }
         style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${TILE_W}px, 1fr))` }}
       >
         {tiles.map(({ country, geom, isDot }) => {
-          const path = geom && !isDot ? toSvgPath(geom, TILE_W, TILE_H, 8, country.code) : '';
+          const hasImageFile = IMAGE_SILHOUETTES.has(country.code);
+          const path = !hasImageFile && geom && !isDot
+            ? toSvgPath(geom, TILE_W, TILE_H, 8, country.code)
+            : '';
           return (
             <div
               key={country.code}
@@ -93,6 +96,13 @@ function SilhouetteGrid({ polygons }: { polygons: Map<string, CountryGeometry> }
               >
                 {isDot ? (
                   <span className="text-xs text-red-500 font-medium">no polygon</span>
+                ) : hasImageFile ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`/silhouettes/${country.code}.svg`}
+                    alt={country.name}
+                    style={{ width: TILE_W, height: TILE_H, objectFit: 'contain' }}
+                  />
                 ) : (
                   <svg
                     viewBox={`0 0 ${TILE_W} ${TILE_H}`}
@@ -129,11 +139,11 @@ export default function SilhouetteMode() {
   const [answerGeom, setAnswerGeom] = useState<CountryGeometry | null>(null);
   const [guesses, setGuesses] = useState<GuessEntry[]>([]);
 
-  // Detect ?testMode=true — read once on mount (URL never changes during a session)
-  const [testMode] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return new URLSearchParams(window.location.search).get('testMode') === 'true';
-  });
+  // Detect ?testMode=true after mount (avoids SSR/client hydration mismatch)
+  const [testMode, setTestMode] = useState(false);
+  useEffect(() => {
+    setTestMode(new URLSearchParams(window.location.search).get('testMode') === 'true');
+  }, []);
 
   // Load polygon data once on mount
   useEffect(() => {
@@ -145,8 +155,9 @@ export default function SilhouetteMode() {
         });
         setPolygons(polys);
         setEligible(el);
-        if (!testMode) beginGame(polys, el);
-        else setPhase('playing'); // skip beginGame in test mode
+        const isTestMode = new URLSearchParams(window.location.search).get('testMode') === 'true';
+        if (!isTestMode) beginGame(polys, el);
+        else setPhase('playing');
       })
       .catch(() => setLoadError('Failed to load country data. Please refresh.'));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps

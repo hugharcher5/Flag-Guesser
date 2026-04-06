@@ -37,8 +37,8 @@ function ringCentroid(ring: Coord[]): Coord {
 //
 // Format: [minLng, maxLng, minLat, maxLat]
 //
-// For MultiPolygon countries only sub-polygons whose centroid falls within
-// this rectangle are rendered; everything else is silently excluded.
+// For MultiPolygon countries only sub-polygons whose outer-ring centroid falls
+// within this rectangle are rendered; everything outside is silently excluded.
 //
 // Two use-cases:
 //  1. Territory exclusion — strips DOM-TOM / Canary Islands / sub-Antarctic
@@ -49,61 +49,85 @@ function ringCentroid(ring: Coord[]): Coord {
 
 const DISPLAY_BBOX: Record<string, readonly [number, number, number, number]> = {
   // ── Overseas territory exclusion ──────────────────────────────────────────
-  // France: metropolitan mainland + Corsica; strips Martinique, Guadeloupe,
-  //         French Guiana, Réunion, Mayotte, New Caledonia, etc.
   fr: [-5.5,  10.0,  41.0,  52.5],
-  // Portugal: mainland only; strips Azores (~-28°E) and Madeira (~-17°E).
   pt: [-9.6,  -5.9,  36.5,  42.3],
-  // Spain: mainland + Balearic Islands; strips Canary Islands (~-18°E, 28°N).
   es: [-9.5,   4.5,  35.5,  44.0],
 
   // ── Archipelago zoom ──────────────────────────────────────────────────────
-  // Kiribati spans from Gilberts (173°E) to Line Islands (−157°E = 203° after
-  // normalisation) — 30° wide after antimeridian fix, but most of that is
-  // empty ocean. Zoom to the Gilbert Islands where the capital Tarawa sits.
   ki: [172.0, 177.0,  -2.0,   2.0],
-  // Micronesia: four island groups spread across 25° of longitude. Restrict
-  // to the main group extents so the states are large enough to see.
   fm: [137.0, 163.5,   5.0,  10.5],
-  // Marshall Islands: two parallel atoll chains over a 7°×10° box; keep full
-  // extent but provide explicit bbox so future sub-polygon tweaks are easy.
   mh: [165.5, 172.5,   4.5,  14.7],
-  // Seychelles: inner granitic islands (Mahé, Praslin, La Digue); strips the
-  // distant Aldabra, Farquhar, and Amirantes groups 10° away.
   sc: [ 55.0,  56.3,  -5.0,  -3.7],
-  // Palau: main island group; strips the remote Southwest Islands 200 km away.
   pw: [134.0, 134.8,   6.8,   7.8],
-  // Mauritius: main island only; strips Rodrigues (~63.4°E) and Agaléga (~56.6°E).
   mu: [ 57.2,  57.9, -20.6, -19.9],
-  // New Zealand: main North + South + Stewart islands; strips Chatham Islands
-  // (~-176°E = 184° after normalisation) and sub-Antarctic islands (~-52°S).
   nz: [166.0, 178.6, -47.5, -34.0],
-  // South Africa: mainland; strips the Prince Edward / Marion Islands (~-47°S)
-  // which pull the bounding box 12° south and shrink the mainland render.
   za: [ 15.5,  33.0, -35.5, -21.5],
+  // Tonga: keep only the 3 main island groups (Tongatapu, Ha'apai, Vava'u).
+  // Drops Niuafo'ou (-15.6°S, far north) and 'Ata (-22.3°S/-176.2°E, far south)
+  // which otherwise stretch the bbox to 8° and make all islands invisible.
+  to: [-176.0, -173.5, -21.5, -18.3],
+  // Tuvalu: 9 atolls in a north-south chain around 178°E.
+  tv: [175.5, 180.5, -10.5,  -5.0],
+};
+
+// ── Single-polygon rendering (keep only largest sub-polygon) ─────────────────
+//
+// Countries whose GeoJSON MultiPolygon contains small inner islands that
+// geographically sit *inside* the main territory. With evenodd fill these
+// inner islands cancel the fill, creating visible holes.  Keeping only the
+// dominant sub-polygon (by vertex count) removes them entirely.
+
+const KEEP_MAIN_ONLY = new Set(['kz']);
+
+// ── Dot-island rendering ──────────────────────────────────────────────────────
+//
+// For micro-archipelagos (Maldives, Marshall Islands, Micronesia, Tuvalu) the
+// individual atolls are so small that projecting their coastlines produces
+// sub-pixel shapes — or worse, distorted jagged spikes after any scaling.
+//
+// Instead, each sub-polygon is represented as a filled circle whose centre is
+// the projected centroid of the original polygon ring.  The radius (in SVG px)
+// is chosen so the dot pattern is legible at the game's 480×320 canvas.
+
+const DOT_RENDER: Record<string, number> = {
+  mv: 5,   // Maldives   — 176 atolls; small dots to avoid overcrowding
+  mh: 7,   // Marshall Islands — 21 atolls
+  fm: 8,   // Micronesia — 15 island groups; fewest count so largest dots
+  tv: 7,   // Tuvalu — 9 atolls
 };
 
 // ── Threshold for the fallback distance-based sub-polygon filter ─────────────
 const DISPLAY_THRESHOLD_DEG = 72;
 
 /**
- * Returns the coordinate rings to use for rendering.
+ * Returns only the OUTER rings of each sub-polygon selected for display.
  *
- * For Polygon geometries this is all rings unchanged.
+ * Inner rings (holes, at index ≥ 1 in each polygon) are always dropped so
+ * the silhouette renders as a solid fill regardless of the SVG fill-rule.
  *
  * For MultiPolygon geometries:
- *  1. If a DISPLAY_BBOX override exists for `code`, keep only sub-polygons
- *     whose outer-ring centroid falls inside that rectangle.
- *  2. Otherwise fall back to the original distance-threshold filter that
- *     removes sub-polygons more than 72° from the main territory.
+ *  1. KEEP_MAIN_ONLY — return only the outer ring of the largest sub-polygon.
+ *  2. DISPLAY_BBOX override — keep outer rings of sub-polygons whose centroid
+ *     falls inside the rectangle.
+ *  3. Distance-threshold fallback — keep outer rings within 72° of the main.
  */
 function displayRings(geom: CountryGeometry, code?: string): Coord[][] {
   if (geom.type === 'Polygon') {
-    return (geom as PolygonGeometry).coordinates as Coord[][];
+    // Outer ring only — drop any hole rings.
+    return [(geom as PolygonGeometry).coordinates[0] as Coord[]];
   }
 
   const polys = (geom as MultiPolygonGeometry).coordinates as Coord[][][];
-  if (polys.length === 1) return polys[0] as Coord[][];
+  if (polys.length === 1) return [polys[0][0] as Coord[]]; // outer ring only
+
+  // ── KEEP_MAIN_ONLY path ──────────────────────────────────────────────────
+  if (code && KEEP_MAIN_ONLY.has(code)) {
+    let mainIdx = 0;
+    for (let i = 1; i < polys.length; i++) {
+      if (polys[i][0].length > polys[mainIdx][0].length) mainIdx = i;
+    }
+    return [polys[mainIdx][0] as Coord[]];
+  }
 
   // ── DISPLAY_BBOX path ────────────────────────────────────────────────────
   const bboxOverride = code ? DISPLAY_BBOX[code] : undefined;
@@ -113,15 +137,13 @@ function displayRings(geom: CountryGeometry, code?: string): Coord[][] {
     for (const poly of polys) {
       const [cLng, cLat] = ringCentroid(poly[0] as Coord[]);
       if (cLng >= minLng && cLng <= maxLng && cLat >= minLat && cLat <= maxLat) {
-        for (const ring of poly) kept.push(ring as Coord[]);
+        kept.push(poly[0] as Coord[]); // outer ring only
       }
     }
     if (kept.length > 0) return kept;
-    // If nothing matched (e.g. bbox too tight), fall through to distance filter
   }
 
-  // ── Distance-threshold path (original logic) ─────────────────────────────
-  // Find the main sub-polygon: the one with the most outer-ring vertices.
+  // ── Distance-threshold path ───────────────────────────────────────────────
   let mainIdx = 0;
   for (let i = 1; i < polys.length; i++) {
     if (polys[i][0].length > polys[mainIdx][0].length) mainIdx = i;
@@ -131,21 +153,16 @@ function displayRings(geom: CountryGeometry, code?: string): Coord[][] {
   const kept: Coord[][] = [];
 
   for (let i = 0; i < polys.length; i++) {
-    if (i === mainIdx) {
-      for (const ring of polys[i]) kept.push(ring as Coord[]);
-      continue;
-    }
+    const outerRing = polys[i][0] as Coord[];
+    if (i === mainIdx) { kept.push(outerRing); continue; }
 
-    const [rawLng, cLat] = ringCentroid(polys[i][0]);
-
-    // Normalise longitude difference so it wraps correctly across ±180°.
+    const [rawLng, cLat] = ringCentroid(outerRing);
     let dLng = rawLng - mainLng;
     while (dLng > 180) dLng -= 360;
     while (dLng < -180) dLng += 360;
 
-    const dist = Math.sqrt(dLng * dLng + (cLat - mainLat) ** 2);
-    if (dist <= DISPLAY_THRESHOLD_DEG) {
-      for (const ring of polys[i]) kept.push(ring as Coord[]);
+    if (Math.sqrt(dLng * dLng + (cLat - mainLat) ** 2) <= DISPLAY_THRESHOLD_DEG) {
+      kept.push(outerRing);
     }
   }
 
@@ -177,6 +194,13 @@ function normaliseAntimeridian(rings: Coord[][]): Coord[][] {
   );
 }
 
+/** SVG path string for a filled circle centred at (cx, cy) with radius r. */
+function circlePath(cx: number, cy: number, r: number): string {
+  const x = cx.toFixed(1), y = cy.toFixed(1), rs = r.toFixed(1);
+  const d2r = (2 * r).toFixed(1);
+  return `M${(cx - r).toFixed(1)},${y}a${rs},${rs} 0 1,0 ${d2r},0a${rs},${rs} 0 1,0 -${d2r},0Z`;
+}
+
 /**
  * Converts a country geometry to an SVG path `d` attribute string.
  *
@@ -205,41 +229,41 @@ export function toSvgPath(
   const geoW = box.maxLng - box.minLng;
   const geoH = box.maxLat - box.minLat;
 
-  // Degenerate: geometry is a true point — nothing to draw.
   if (geoW === 0 && geoH === 0) return '';
 
-  // ── Latitude cosine correction ────────────────────────────────────────────
-  // In the equirectangular projection 1° of longitude spans the same pixel
-  // distance as 1° of latitude regardless of where on the globe we are.
-  // At high latitudes this makes countries look too wide: at 65°N a degree of
-  // longitude covers only cos(65°) ≈ 0.42× the east-west distance of a degree
-  // of latitude.  Multiplying the longitude scale by cos(midLat) corrects for
-  // this so the rendered shape matches what people recognise from world maps.
   const midLat = (box.minLat + box.maxLat) / 2;
   const cosLat = Math.cos(midLat * Math.PI / 180);
-
-  // Effective east-west extent after correction (may be 0 for countries with
-  // all points at the same longitude, e.g. a vertical chain of islands).
   const effectiveW = geoW * cosLat;
 
   const drawW = svgW - padding * 2;
   const drawH = svgH - padding * 2;
 
-  // Compute scale; guard against zero-extent in either dimension.
   const scaleX = effectiveW > 0 ? drawW / effectiveW : Infinity;
   const scaleY = geoH > 0 ? drawH / geoH : Infinity;
   const scale = isFinite(Math.min(scaleX, scaleY)) ? Math.min(scaleX, scaleY) : 0;
   if (scale <= 0) return '';
 
-  // Centre the projected shape in the SVG
   const ox = (svgW - effectiveW * scale) / 2;
   const oy = (svgH - geoH * scale) / 2;
 
-  // Project: longitude gets the cosine correction applied; latitude is linear.
   const px = (lng: number) => ox + (lng - box.minLng) * cosLat * scale;
-  // SVG y-axis grows downward; latitude grows upward → flip
   const py = (lat: number) => oy + (box.maxLat - lat) * scale;
 
+  // ── Dot-island rendering ─────────────────────────────────────────────────
+  // For micro-archipelagos, draw each island as a filled circle at its
+  // projected centroid instead of rendering the (sub-pixel) coastline.
+  const dotR = code ? (DOT_RENDER[code] ?? 0) : 0;
+  if (dotR > 0) {
+    return rings
+      .filter(ring => ring.length >= 3)
+      .map(ring => {
+        const [cLng, cLat] = ringCentroid(ring);
+        return circlePath(px(cLng), py(cLat), dotR);
+      })
+      .join('');
+  }
+
+  // ── Normal coastline rendering ────────────────────────────────────────────
   return rings
     .filter(ring => ring.length >= 3)
     .map(ring => {
