@@ -63,6 +63,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to save game result' }, { status: 500 });
   }
 
+  // Ensure a profile row exists — create one if the sign-in trigger missed it.
+  const username =
+    user.user_metadata?.full_name ??
+    user.user_metadata?.name ??
+    user.email?.split('@')[0] ??
+    'Player';
+
+  const { error: upsertError } = await supabase
+    .from('profiles')
+    .upsert(
+      { id: user.id, username, total_games: 0, total_points: 0, best_score: 0, games_by_mode: {} },
+      { onConflict: 'id', ignoreDuplicates: true },
+    );
+
+  if (upsertError) {
+    console.error('profile upsert error:', upsertError.message);
+    return NextResponse.json({ error: 'Failed to initialise profile' }, { status: 500 });
+  }
+
   // Fetch current profile stats
   const { data: profile, error: profileError } = await supabase
     .from('profiles')

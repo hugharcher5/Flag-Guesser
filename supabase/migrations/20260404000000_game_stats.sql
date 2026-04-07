@@ -78,6 +78,9 @@ alter table public.game_results enable row level security;
 create policy "profiles: public read"
   on public.profiles for select using (true);
 
+create policy "profiles: owner insert"
+  on public.profiles for insert with check (auth.uid() = id);
+
 create policy "profiles: owner update"
   on public.profiles for update using (auth.uid() = id);
 
