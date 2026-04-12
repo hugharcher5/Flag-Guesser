@@ -1,12 +1,13 @@
 import { supabase } from '@/lib/supabase/client';
 
 interface SaveGamePayload {
-  game_mode: 'flag_guesser' | 'speed_quiz' | 'country_shape_guesser';
+  game_mode: 'flag_guesser' | 'country_shape_guesser';
   score: number;
   guesses_count: number;
   correct: boolean;
   completion_time?: number;
   country_guessed?: string;
+  continent_breakdown?: Record<string, { correct: number; seen: number }>;
 }
 
 /**

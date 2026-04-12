@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 
-const VALID_MODES = ['flag_guesser', 'speed_quiz', 'country_shape_guesser'];
+const VALID_MODES = ['flag_guesser', 'country_shape_guesser'];
 const MAX_LIMIT = 50;
 
 export async function GET(request: Request) {

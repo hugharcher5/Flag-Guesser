@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 
-const VALID_MODES = ['flag_guesser', 'speed_quiz', 'country_shape_guesser'] as const;
+const VALID_MODES = ['flag_guesser', 'country_shape_guesser'] as const;
 type GameMode = (typeof VALID_MODES)[number];
 
 interface SaveGameBody {
@@ -11,6 +11,7 @@ interface SaveGameBody {
   correct: boolean;
   completion_time?: number;
   country_guessed?: string;
+  continent_breakdown?: Record<string, { correct: number; seen: number }>;
 }
 
 export async function POST(request: Request) {
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { game_mode, score, guesses_count, correct, completion_time, country_guessed } = body;
+  const { game_mode, score, guesses_count, correct, completion_time, country_guessed, continent_breakdown } = body;
 
   // Validate required fields
   if (!VALID_MODES.includes(game_mode)) {
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
     correct,
     completion_time: typeof completion_time === 'number' ? completion_time : null,
     country_guessed: typeof country_guessed === 'string' ? country_guessed : null,
+    continent_breakdown: continent_breakdown ?? null,
   });
 
   if (insertError) {
