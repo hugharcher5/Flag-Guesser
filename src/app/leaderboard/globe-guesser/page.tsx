@@ -11,7 +11,6 @@ interface LeaderboardEntry {
   avg_guesses: number;
   games_won: number;
   games_played: number;
-  best_score: number;
 }
 
 function RankBadge({ rank }: { rank: number }) {

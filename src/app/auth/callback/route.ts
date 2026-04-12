@@ -4,6 +4,8 @@
  * After the user approves the Google sign-in, Supabase redirects here with a
  * one-time `code` query parameter. This route exchanges that code for a session
  * (stored as cookies) and then forwards the user to /dashboard.
+ *
+ * New users whose profile is not yet set up are sent to /auth/setup first.
  */
 
 import { NextResponse } from 'next/server';
@@ -34,10 +36,23 @@ export async function GET(request: Request) {
       },
     );
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
       console.error('Auth callback error:', error.message);
       return NextResponse.redirect(`${origin}/?auth_error=1`);
+    }
+
+    // Redirect new users to onboarding if they haven't completed profile setup.
+    if (session?.user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('setup_complete')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      if (!profile?.setup_complete) {
+        return NextResponse.redirect(`${origin}/auth/setup`);
+      }
     }
   }
 

@@ -58,7 +58,6 @@ export async function GET(request: Request) {
           avg_guesses: +(stats.total_guesses / stats.games_played).toFixed(2),
           games_won: stats.games_won,
           games_played: stats.games_played,
-          best_score: stats.best_score,
         };
       })
       .filter((e): e is NonNullable<typeof e> => e !== null)
