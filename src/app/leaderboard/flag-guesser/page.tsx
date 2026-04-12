@@ -6,7 +6,7 @@ interface LeaderboardEntry {
   rank: number;
   username: string;
   best_completion_time: number | null;
-  total_score: number;
+  best_score: number;
   games_played: number;
 }
 
@@ -94,7 +94,7 @@ export default function FlagGuesserLeaderboard() {
                   <th className="px-5 py-3 text-left w-12">#</th>
                   <th className="px-5 py-3 text-left">Username</th>
                   <th className="px-5 py-3 text-right">Best Time</th>
-                  <th className="px-5 py-3 text-right">Score</th>
+                  <th className="px-5 py-3 text-right">Best Score</th>
                   <th className="px-5 py-3 text-right">Games</th>
                 </tr>
               </thead>
@@ -116,7 +116,7 @@ export default function FlagGuesserLeaderboard() {
                         : <span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-5 py-3.5 text-right tabular-nums font-semibold text-gray-800">
-                      {entry.total_score.toLocaleString()}
+                      {entry.best_score.toLocaleString()}
                     </td>
                     <td className="px-5 py-3.5 text-right tabular-nums text-gray-500">
                       {entry.games_played.toLocaleString()}

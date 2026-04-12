@@ -58,7 +58,7 @@ export async function GET(request: Request) {
     const userIds = [...userMap.keys()];
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, username')
+      .select('id, username, best_score')
       .in('id', userIds);
 
     if (profilesError) {
@@ -66,14 +66,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
     }
 
-    const profileMap = new Map((profiles ?? []).map((p) => [p.id, p.username]));
+    const profileMap = new Map((profiles ?? []).map((p) => [p.id, { username: p.username, best_score: p.best_score }]));
 
-    // Sort: fastest completion_time first (nulls last), then highest total_score.
+    // Sort: fastest completion_time first (nulls last), then highest best_score.
     const sorted = [...userMap.entries()]
       .map(([userId, stats]) => ({
-        username: profileMap.get(userId) ?? 'Unknown',
+        username: profileMap.get(userId)?.username ?? 'Unknown',
         best_completion_time: stats.bestCompletionTime,
-        total_score: stats.totalScore,
+        best_score: profileMap.get(userId)?.best_score ?? 0,
         games_played: stats.gamesPlayed,
       }))
       .sort((a, b) => {
@@ -82,7 +82,7 @@ export async function GET(request: Request) {
         }
         if (a.best_completion_time !== null) return -1;
         if (b.best_completion_time !== null) return 1;
-        return b.total_score - a.total_score;
+        return b.best_score - a.best_score;
       })
       .slice(0, limit)
       .map((entry, i) => ({ rank: i + 1, ...entry }));
