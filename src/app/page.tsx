@@ -24,7 +24,7 @@ export default function Page() {
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-gray-50">
-      <NavBar mode={mode} onModeChange={setMode} />
+      <NavBar mode={mode} onModeChange={setMode} isSignedIn={!!user} />
       {/* Auth strip — sign-in prompt or signed-in indicator */}
       <div className="flex justify-end items-center px-4 py-2 bg-white border-b border-gray-100">
         {user ? (
