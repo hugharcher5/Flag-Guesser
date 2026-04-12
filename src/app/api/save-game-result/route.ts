@@ -1,17 +1,28 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 
-const VALID_MODES = ['flag_guesser', 'country_shape_guesser'] as const;
+const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser'] as const;
 type GameMode = (typeof VALID_MODES)[number];
+
+// Modes where the server computes the score (client value is ignored).
+const SERVER_SCORED_MODES: Set<GameMode> = new Set(['country_shape_guesser', 'globe_guesser']);
 
 interface SaveGameBody {
   game_mode: GameMode;
-  score: number;
+  score?: number;       // Optional for server-scored modes
   guesses_count: number;
   correct: boolean;
   completion_time?: number;
   country_guessed?: string;
   continent_breakdown?: Record<string, { correct: number; seen: number }>;
+}
+
+interface ModeStats {
+  games_played: number;
+  total_points: number;
+  games_won: number;
+  total_guesses: number;
+  best_score: number;
 }
 
 export async function POST(request: Request) {
@@ -38,9 +49,6 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  if (typeof score !== 'number' || score < 0) {
-    return NextResponse.json({ error: 'score must be a non-negative number' }, { status: 400 });
-  }
   if (typeof guesses_count !== 'number' || guesses_count < 0) {
     return NextResponse.json({ error: 'guesses_count must be a non-negative number' }, { status: 400 });
   }
@@ -48,11 +56,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'correct must be a boolean' }, { status: 400 });
   }
 
+  // For flag_guesser the client provides the score; for shape/globe compute server-side.
+  let resolvedScore: number;
+  if (SERVER_SCORED_MODES.has(game_mode)) {
+    // (correct_guesses / total_guesses) × 100 — single-answer game so correct_guesses = 0 or 1
+    resolvedScore = correct && guesses_count > 0 ? Math.round(100 / guesses_count) : 0;
+  } else {
+    if (typeof score !== 'number' || score < 0) {
+      return NextResponse.json({ error: 'score must be a non-negative number' }, { status: 400 });
+    }
+    resolvedScore = score;
+  }
+
   // Insert game result
   const { error: insertError } = await supabase.from('game_results').insert({
     user_id: user.id,
     game_mode,
-    score,
+    score: resolvedScore,
     guesses_count,
     correct,
     completion_time: typeof completion_time === 'number' ? completion_time : null,
@@ -65,7 +85,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to save game result' }, { status: 500 });
   }
 
-  // Ensure a profile row exists — create one if the sign-in trigger missed it.
+  // Ensure a profile row exists
   const username =
     user.user_metadata?.full_name ??
     user.user_metadata?.name ??
@@ -96,16 +116,30 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
   }
 
-  // Update aggregated stats
-  const games_by_mode = (profile.games_by_mode ?? {}) as Record<string, number>;
+  const games_by_mode = (profile.games_by_mode ?? {}) as Record<string, unknown>;
+
+  if (game_mode === 'flag_guesser') {
+    // Legacy: just increment the count
+    games_by_mode[game_mode] = (games_by_mode[game_mode] as number ?? 0) + 1;
+  } else {
+    // Rich per-mode stats used by leaderboards
+    const prev = (games_by_mode[game_mode] as ModeStats | undefined) ?? {
+      games_played: 0, total_points: 0, games_won: 0, total_guesses: 0, best_score: 0,
+    };
+    games_by_mode[game_mode] = {
+      games_played: prev.games_played + 1,
+      total_points: prev.total_points + resolvedScore,
+      games_won: prev.games_won + (correct ? 1 : 0),
+      total_guesses: prev.total_guesses + guesses_count,
+      best_score: Math.max(prev.best_score, resolvedScore),
+    };
+  }
+
   const updatedStats = {
     total_games: profile.total_games + 1,
-    total_points: profile.total_points + score,
-    best_score: Math.max(profile.best_score, score),
-    games_by_mode: {
-      ...games_by_mode,
-      [game_mode]: (games_by_mode[game_mode] ?? 0) + 1,
-    },
+    total_points: profile.total_points + resolvedScore,
+    best_score: Math.max(profile.best_score, resolvedScore),
+    games_by_mode,
   };
 
   const { data: updatedProfile, error: updateError } = await supabase

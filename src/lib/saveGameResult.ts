@@ -1,8 +1,8 @@
 import { supabase } from '@/lib/supabase/client';
 
 interface SaveGamePayload {
-  game_mode: 'flag_guesser' | 'country_shape_guesser';
-  score: number;
+  game_mode: 'flag_guesser' | 'country_shape_guesser' | 'globe_guesser';
+  score?: number;       // Optional for shape/globe — server computes it
   guesses_count: number;
   correct: boolean;
   completion_time?: number;

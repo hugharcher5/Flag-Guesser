@@ -22,15 +22,15 @@ const LEADERBOARDS: LeaderboardEntry[] = [
   {
     title: "Country Shape Guesser",
     description: "Guess the country from its silhouette in 6 tries.",
-    href: "/leaderboard/country-shape",
-    available: false,
+    href: "/leaderboard/shape-guesser",
+    available: true,
     emoji: "🗺️",
   },
   {
     title: "Globe Guesser",
     description: "Find countries on the 3D globe with fewest guesses.",
-    href: "/leaderboard/globe",
-    available: false,
+    href: "/leaderboard/globe-guesser",
+    available: true,
     emoji: "🌍",
   },
 ];

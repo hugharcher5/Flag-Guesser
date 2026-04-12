@@ -1,8 +1,20 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 
-const VALID_MODES = ['flag_guesser', 'country_shape_guesser'];
+const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser'];
 const MAX_LIMIT = 50;
+
+// These modes store rich stats in profiles.games_by_mode and use the profiles
+// table (public read) for leaderboard queries instead of game_results (owner-only).
+const PROFILE_STATS_MODES = new Set(['country_shape_guesser', 'globe_guesser']);
+
+interface ModeStats {
+  games_played: number;
+  total_points: number;
+  games_won: number;
+  total_guesses: number;
+  best_score: number;
+}
 
 export async function GET(request: Request) {
   const supabase = await createSupabaseServer();
@@ -24,8 +36,42 @@ export async function GET(request: Request) {
     );
   }
 
-  if (mode) {
-    // Query game_results to compute per-user best completion_time and total score.
+  // ── Shape / Globe leaderboard — read from profiles (public read) ─────────────
+  if (mode && PROFILE_STATS_MODES.has(mode)) {
+    const { data: profiles, error: profilesErr } = await supabase
+      .from('profiles')
+      .select('username, games_by_mode')
+      .limit(500);
+
+    if (profilesErr) {
+      console.error('leaderboard profiles fetch error:', profilesErr.message);
+      return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
+    }
+
+    const entries = (profiles ?? [])
+      .map((p) => {
+        const stats = (p.games_by_mode as Record<string, ModeStats> | null)?.[mode];
+        if (!stats || stats.games_played === 0) return null;
+        return {
+          username: p.username ?? 'Unknown',
+          total_points: stats.total_points,
+          avg_guesses: +(stats.total_guesses / stats.games_played).toFixed(2),
+          games_won: stats.games_won,
+          games_played: stats.games_played,
+          best_score: stats.best_score,
+        };
+      })
+      .filter((e): e is NonNullable<typeof e> => e !== null)
+      // Default sort: total_points descending, then games_won as tiebreaker
+      .sort((a, b) => b.total_points - a.total_points || b.games_won - a.games_won)
+      .slice(0, limit)
+      .map((e, i) => ({ rank: i + 1, ...e }));
+
+    return NextResponse.json({ leaderboard: entries, mode }, { status: 200 });
+  }
+
+  // ── Flag Guesser leaderboard — aggregate from game_results ───────────────────
+  if (mode === 'flag_guesser') {
     const { data: modeResults, error: modeError } = await supabase
       .from('game_results')
       .select('user_id, score, correct, completion_time')
@@ -36,12 +82,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
     }
 
-    // Aggregate per user: best completion_time (for correct games) and total score.
-    const userMap = new Map<string, { bestCompletionTime: number | null; totalScore: number; gamesPlayed: number }>();
+    const userMap = new Map<string, { bestCompletionTime: number | null; gamesPlayed: number }>();
     for (const r of modeResults ?? []) {
-      const entry = userMap.get(r.user_id) ?? { bestCompletionTime: null, totalScore: 0, gamesPlayed: 0 };
+      const entry = userMap.get(r.user_id) ?? { bestCompletionTime: null, gamesPlayed: 0 };
       entry.gamesPlayed++;
-      entry.totalScore += r.score ?? 0;
       if (r.correct && r.completion_time != null) {
         if (entry.bestCompletionTime === null || r.completion_time < entry.bestCompletionTime) {
           entry.bestCompletionTime = r.completion_time;
@@ -54,7 +98,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ leaderboard: [], mode }, { status: 200 });
     }
 
-    // Fetch usernames for all users who have played this mode.
     const userIds = [...userMap.keys()];
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
@@ -66,9 +109,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
     }
 
-    const profileMap = new Map((profiles ?? []).map((p) => [p.id, { username: p.username, best_score: p.best_score }]));
+    const profileMap = new Map(
+      (profiles ?? []).map((p) => [p.id, { username: p.username, best_score: p.best_score }]),
+    );
 
-    // Sort: fastest completion_time first (nulls last), then highest best_score.
     const sorted = [...userMap.entries()]
       .map(([userId, stats]) => ({
         username: profileMap.get(userId)?.username ?? 'Unknown',
@@ -90,7 +134,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ leaderboard: sorted, mode }, { status: 200 });
   }
 
-  // No mode filter — global leaderboard by total_points.
+  // ── No mode filter — global leaderboard by total_points ──────────────────────
   const { data, error } = await supabase
     .from('profiles')
     .select('username, total_points, total_games, best_score')

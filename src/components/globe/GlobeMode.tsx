@@ -8,6 +8,7 @@ import { getCountryPolygons, type CountryGeometry } from '@/lib/geo/polygons';
 import { calcBorderDistance } from '@/lib/geo/borderCalc';
 import { getCountryColor } from '@/lib/globe/colorScale';
 import { SMALL_COUNTRY_CODES } from './MagnifyOverlay';
+import { saveGameResult } from '@/lib/saveGameResult';
 import GlobeInput from './GlobeInput';
 import GuessList, { type GlobeGuessEntry } from './GuessList';
 import MagnifyOverlay from './MagnifyOverlay';
@@ -143,7 +144,15 @@ export default function GlobeMode() {
         { country: guessed, distanceKm, guessNumber: guessNum, color, correct },
       ]);
 
-      if (correct) setPhase('won');
+      if (correct) {
+        setPhase('won');
+        saveGameResult({
+          game_mode: 'globe_guesser',
+          guesses_count: guesses.length + 1,
+          correct: true,
+          country_guessed: answer.name,
+        });
+      }
 
       // Rotate globe to guessed country centroid
       if (guessedGeom) {
