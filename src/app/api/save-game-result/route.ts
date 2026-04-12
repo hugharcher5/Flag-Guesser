@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser'] as const;
 type GameMode = (typeof VALID_MODES)[number];
@@ -24,6 +25,48 @@ interface ModeStats {
   total_guesses: number;
   best_score: number;
 }
+
+interface FlagModeStats {
+  games_played: number;
+  best_score: number;
+  best_completion_time: number | null;
+  total_points: number;
+}
+
+// ── Username helpers ──────────────────────────────────────────────────────────
+
+/** Turns a display name into a valid username base (max 16 chars, leaving room for _N suffix). */
+function sanitizeUsername(raw: string): string {
+  const sanitized = raw
+    .replace(/[^a-zA-Z0-9_]/g, '_') // anything invalid → underscore
+    .replace(/_+/g, '_')             // collapse runs of underscores
+    .replace(/^_+|_+$/g, '')         // trim leading/trailing underscores
+    .slice(0, 16);
+  return sanitized || 'Player';
+}
+
+/**
+ * Finds an available username by appending _2, _3, … up to _10.
+ * Falls back to a short timestamp-based name if all are taken.
+ */
+async function findAvailableUsername(
+  supabase: SupabaseClient,
+  base: string,
+): Promise<string> {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const candidate = (attempt === 0 ? base : `${base}_${attempt + 1}`).slice(0, 20);
+    const { data } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', candidate)
+      .maybeSingle();
+    if (!data) return candidate;
+  }
+  // Fallback: timestamp suffix is unique enough in practice
+  return `user_${Date.now().toString().slice(-8)}`;
+}
+
+// ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(request: Request) {
   const supabase = await createSupabaseServer();
@@ -59,7 +102,6 @@ export async function POST(request: Request) {
   // For flag_guesser the client provides the score; for shape/globe compute server-side.
   let resolvedScore: number;
   if (SERVER_SCORED_MODES.has(game_mode)) {
-    // (correct_guesses / total_guesses) × 100 — single-answer game so correct_guesses = 0 or 1
     resolvedScore = correct && guesses_count > 0 ? Math.round(100 / guesses_count) : 0;
   } else {
     if (typeof score !== 'number' || score < 0) {
@@ -68,7 +110,41 @@ export async function POST(request: Request) {
     resolvedScore = score;
   }
 
-  // Insert game result
+  // ── Ensure profile exists BEFORE inserting game_results (FK constraint) ───────
+  const { data: existingProfile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (!existingProfile) {
+    const rawName =
+      user.user_metadata?.full_name ??
+      user.user_metadata?.name ??
+      user.email?.split('@')[0] ??
+      'Player';
+
+    const baseUsername = sanitizeUsername(rawName);
+    const uniqueUsername = await findAvailableUsername(supabase, baseUsername);
+
+    const { error: createError } = await supabase.from('profiles').insert({
+      id: user.id,
+      username: uniqueUsername,
+      total_games: 0,
+      total_points: 0,
+      best_score: 0,
+      games_by_mode: {},
+      setup_complete: true,
+    });
+
+    // Code 23505 = unique_violation (race condition: another request created it first)
+    if (createError && createError.code !== '23505') {
+      console.error('profile auto-create error:', createError.message);
+      return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 });
+    }
+  }
+
+  // ── Insert game result ────────────────────────────────────────────────────────
   const { error: insertError } = await supabase.from('game_results').insert({
     user_id: user.id,
     game_mode,
@@ -85,26 +161,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to save game result' }, { status: 500 });
   }
 
-  // Ensure a profile row exists
-  const username =
-    user.user_metadata?.full_name ??
-    user.user_metadata?.name ??
-    user.email?.split('@')[0] ??
-    'Player';
-
-  const { error: upsertError } = await supabase
-    .from('profiles')
-    .upsert(
-      { id: user.id, username, total_games: 0, total_points: 0, best_score: 0, games_by_mode: {} },
-      { onConflict: 'id', ignoreDuplicates: true },
-    );
-
-  if (upsertError) {
-    console.error('profile upsert error:', upsertError.message);
-    return NextResponse.json({ error: 'Failed to initialise profile' }, { status: 500 });
-  }
-
-  // Fetch current profile stats
+  // ── Fetch current profile stats ───────────────────────────────────────────────
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('total_games, total_points, best_score, games_by_mode')
@@ -116,13 +173,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
   }
 
+  // ── Update aggregated stats ───────────────────────────────────────────────────
   const games_by_mode = (profile.games_by_mode ?? {}) as Record<string, unknown>;
 
   if (game_mode === 'flag_guesser') {
-    // Legacy: just increment the count
-    games_by_mode[game_mode] = (games_by_mode[game_mode] as number ?? 0) + 1;
+    // Upgrade legacy number format to rich stats object on first write
+    const prevRaw = games_by_mode[game_mode];
+    const prev: FlagModeStats = typeof prevRaw === 'number'
+      ? { games_played: prevRaw, best_score: 0, best_completion_time: null, total_points: 0 }
+      : (prevRaw as FlagModeStats | undefined) ?? { games_played: 0, best_score: 0, best_completion_time: null, total_points: 0 };
+
+    const newBestTime = correct && typeof completion_time === 'number'
+      ? (prev.best_completion_time === null ? completion_time : Math.min(prev.best_completion_time, completion_time))
+      : prev.best_completion_time;
+
+    games_by_mode[game_mode] = {
+      games_played: prev.games_played + 1,
+      best_score: Math.max(prev.best_score, resolvedScore),
+      best_completion_time: newBestTime,
+      total_points: prev.total_points + resolvedScore,
+    };
   } else {
-    // Rich per-mode stats used by leaderboards
     const prev = (games_by_mode[game_mode] as ModeStats | undefined) ?? {
       games_played: 0, total_points: 0, games_won: 0, total_guesses: 0, best_score: 0,
     };
@@ -135,16 +206,14 @@ export async function POST(request: Request) {
     };
   }
 
-  const updatedStats = {
-    total_games: profile.total_games + 1,
-    total_points: profile.total_points + resolvedScore,
-    best_score: Math.max(profile.best_score, resolvedScore),
-    games_by_mode,
-  };
-
   const { data: updatedProfile, error: updateError } = await supabase
     .from('profiles')
-    .update(updatedStats)
+    .update({
+      total_games: profile.total_games + 1,
+      total_points: profile.total_points + resolvedScore,
+      best_score: Math.max(profile.best_score, resolvedScore),
+      games_by_mode,
+    })
     .eq('id', user.id)
     .select('username, total_games, total_points, best_score, games_by_mode')
     .single();

@@ -69,60 +69,51 @@ export async function GET(request: Request) {
     return NextResponse.json({ leaderboard: entries, mode }, { status: 200 });
   }
 
-  // ── Flag Guesser leaderboard — aggregate from game_results ───────────────────
+  // ── Flag Guesser leaderboard — read from profiles (public read) ──────────────
   if (mode === 'flag_guesser') {
-    const { data: modeResults, error: modeError } = await supabase
-      .from('game_results')
-      .select('user_id, score, correct, completion_time')
-      .eq('game_mode', mode);
-
-    if (modeError) {
-      console.error('leaderboard fetch error:', modeError.message);
-      return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
+    interface FlagStats {
+      games_played: number;
+      best_score: number;
+      best_completion_time: number | null;
+      total_points: number;
     }
 
-    const userMap = new Map<string, { bestCompletionTime: number | null; gamesPlayed: number }>();
-    for (const r of modeResults ?? []) {
-      const entry = userMap.get(r.user_id) ?? { bestCompletionTime: null, gamesPlayed: 0 };
-      entry.gamesPlayed++;
-      if (r.correct && r.completion_time != null) {
-        if (entry.bestCompletionTime === null || r.completion_time < entry.bestCompletionTime) {
-          entry.bestCompletionTime = r.completion_time;
-        }
-      }
-      userMap.set(r.user_id, entry);
-    }
-
-    if (userMap.size === 0) {
-      return NextResponse.json({ leaderboard: [], mode }, { status: 200 });
-    }
-
-    const userIds = [...userMap.keys()];
-    const { data: profiles, error: profilesError } = await supabase
+    const { data: profiles, error: profilesErr } = await supabase
       .from('profiles')
-      .select('id, username, best_score')
-      .in('id', userIds);
+      .select('username, best_score, games_by_mode')
+      .limit(500);
 
-    if (profilesError) {
-      console.error('leaderboard profiles fetch error:', profilesError.message);
+    if (profilesErr) {
+      console.error('leaderboard profiles fetch error:', profilesErr.message);
       return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
     }
 
-    const profileMap = new Map(
-      (profiles ?? []).map((p) => [p.id, { username: p.username, best_score: p.best_score }]),
-    );
+    const entries = (profiles ?? [])
+      .map((p) => {
+        const raw = (p.games_by_mode as Record<string, unknown> | null)?.['flag_guesser'];
+        if (!raw) return null;
 
-    const sorted = [...userMap.entries()]
-      .map(([userId, stats]) => ({
-        username: profileMap.get(userId)?.username ?? 'Unknown',
-        best_completion_time: stats.bestCompletionTime,
-        best_score: profileMap.get(userId)?.best_score ?? 0,
-        games_played: stats.gamesPlayed,
-      }))
-      .sort((a, b) => {
-        if (a.best_completion_time !== null && b.best_completion_time !== null) {
-          return a.best_completion_time - b.best_completion_time;
+        // Handle legacy number format (games_played count only, no rich stats yet)
+        if (typeof raw === 'number') {
+          return raw > 0
+            ? { username: p.username ?? 'Unknown', best_completion_time: null, best_score: p.best_score ?? 0, games_played: raw }
+            : null;
         }
+
+        const stats = raw as FlagStats;
+        if (!stats.games_played) return null;
+        return {
+          username: p.username ?? 'Unknown',
+          best_completion_time: stats.best_completion_time ?? null,
+          best_score: p.best_score ?? 0,
+          games_played: stats.games_played,
+        };
+      })
+      .filter((e): e is NonNullable<typeof e> => e !== null)
+      .sort((a, b) => {
+        // Players with a completion time rank above those without
+        if (a.best_completion_time !== null && b.best_completion_time !== null)
+          return a.best_completion_time - b.best_completion_time;
         if (a.best_completion_time !== null) return -1;
         if (b.best_completion_time !== null) return 1;
         return b.best_score - a.best_score;
@@ -130,7 +121,7 @@ export async function GET(request: Request) {
       .slice(0, limit)
       .map((entry, i) => ({ rank: i + 1, ...entry }));
 
-    return NextResponse.json({ leaderboard: sorted, mode }, { status: 200 });
+    return NextResponse.json({ leaderboard: entries, mode }, { status: 200 });
   }
 
   // ── No mode filter — global leaderboard by total_points ──────────────────────
