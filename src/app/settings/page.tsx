@@ -9,16 +9,22 @@ import countries from '@/data/countries';
 
 const COUNTRY_OPTIONS = [...countries].sort((a, b) => a.name.localeCompare(b.name));
 
-function flagEmoji(code: string): string {
-  return code
-    .toUpperCase()
-    .split('')
-    .map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65))
-    .join('');
-}
-
 function countryCodeFromName(name: string): string | undefined {
   return countries.find((c) => c.name === name)?.code;
+}
+
+/** Convert country name or code to country code for flag image lookup. */
+function getCountryCode(value: string | null | undefined): string | null {
+  if (!value) return null;
+
+  // If it's already a 2-letter code, return it
+  if (value.length === 2 && /^[A-Za-z]{2}$/.test(value)) {
+    return value.toUpperCase();
+  }
+
+  // Otherwise try to look up the code by country name
+  const country = countries.find(c => c.name === value);
+  return country?.code ?? null;
 }
 
 // ── Validation ────────────────────────────────────────────────────────────────
@@ -209,10 +215,19 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider w-20">Country</span>
-              <span className="text-sm text-gray-800">
-                {savedCountry
-                  ? `${currentCountryCode ? flagEmoji(currentCountryCode) : ''} ${savedCountry}`.trim()
-                  : '—'}
+              <span className="text-sm text-gray-800 flex items-center gap-1.5">
+                {savedCountry ? (
+                  <>
+                    <img
+                      src={`https://flagcdn.com/w40/${getCountryCode(savedCountry)?.toLowerCase()}.png`}
+                      alt={savedCountry}
+                      className="w-5 h-auto rounded-sm"
+                    />
+                    {savedCountry}
+                  </>
+                ) : (
+                  '—'
+                )}
               </span>
             </div>
           </div>
@@ -282,7 +297,7 @@ export default function SettingsPage() {
                   <option value="">Select your country…</option>
                   {COUNTRY_OPTIONS.map((c) => (
                     <option key={c.code} value={c.name}>
-                      {flagEmoji(c.code)} {c.name}
+                      {c.name}
                     </option>
                   ))}
                 </select>

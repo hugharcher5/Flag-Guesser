@@ -80,7 +80,7 @@ export async function GET(request: Request) {
 
     const { data: profiles, error: profilesErr } = await supabase
       .from('profiles')
-      .select('username, best_score, games_by_mode')
+      .select('username, best_score, country, games_by_mode')
       .limit(500);
 
     if (profilesErr) {
@@ -96,7 +96,7 @@ export async function GET(request: Request) {
         // Handle legacy number format (games_played count only, no rich stats yet)
         if (typeof raw === 'number') {
           return raw > 0
-            ? { username: p.username ?? 'Unknown', best_completion_time: null, best_score: p.best_score ?? 0, games_played: raw }
+            ? { username: p.username ?? 'Unknown', country: p.country ?? null, best_completion_time: null, best_score: p.best_score ?? 0, games_played: raw }
             : null;
         }
 
@@ -104,6 +104,7 @@ export async function GET(request: Request) {
         if (!stats.games_played) return null;
         return {
           username: p.username ?? 'Unknown',
+          country: p.country ?? null,
           best_completion_time: stats.best_completion_time ?? null,
           best_score: p.best_score ?? 0,
           games_played: stats.games_played,

@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import countries from "@/data/countries";
 
 interface LeaderboardEntry {
   rank: number;
   username: string;
+  country: string | null;
   best_completion_time: number | null;
   best_score: number;
   games_played: number;
@@ -14,6 +16,20 @@ function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+/** Convert country name or code to country code for flag image lookup. */
+function getCountryCode(value: string | null): string | null {
+  if (!value) return null;
+
+  // If it's already a 2-letter code, return it
+  if (value.length === 2 && /^[A-Za-z]{2}$/.test(value)) {
+    return value.toUpperCase();
+  }
+
+  // Otherwise try to look up the code by country name
+  const country = countries.find(c => c.name === value);
+  return country?.code ?? null;
 }
 
 function RankBadge({ rank }: { rank: number }) {
@@ -108,7 +124,17 @@ export default function FlagGuesserLeaderboard() {
                       <RankBadge rank={entry.rank} />
                     </td>
                     <td className="px-5 py-3.5 font-medium text-gray-800">
-                      {entry.username}
+                      <span className="flex items-center gap-2">
+                        {entry.country && (
+                          <img
+                            src={`https://flagcdn.com/w40/${getCountryCode(entry.country)?.toLowerCase()}.png`}
+                            alt={entry.country}
+                            title={entry.country}
+                            className="w-6 h-auto rounded-sm"
+                          />
+                        )}
+                        {entry.username}
+                      </span>
                     </td>
                     <td className="px-5 py-3.5 text-right tabular-nums text-gray-600 font-mono">
                       {entry.best_completion_time !== null

@@ -35,14 +35,14 @@ export default function GuessList({ guesses }: Props) {
           </span>
 
           {/* Flag */}
-          <img
-            src={`https://flagcdn.com/w40/${g.country.code}.png`}
-            alt={g.country.name}
-            width={28}
-            height={20}
-            className="rounded shrink-0 object-cover"
-            style={{ height: 20 }}
-          />
+          <div className="shrink-0 flex items-center justify-center" style={{ width: 28, height: 20 }}>
+            <img
+              src={`https://flagcdn.com/w40/${g.country.code}.png`}
+              alt={g.country.name}
+              className="rounded max-w-full max-h-full object-contain"
+              style={{ maxWidth: 28, maxHeight: 20 }}
+            />
+          </div>
 
           {/* Country name */}
           <span
