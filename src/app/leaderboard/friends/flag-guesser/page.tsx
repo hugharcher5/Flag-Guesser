@@ -12,24 +12,17 @@ interface LeaderboardEntry {
   games_played: number;
 }
 
+function getCountryCode(value: string | null | undefined): string | null {
+  if (!value) return null;
+  if (value.length === 2 && /^[A-Za-z]{2}$/.test(value)) return value.toUpperCase();
+  const country = countries.find((c) => c.name === value);
+  return country?.code ?? null;
+}
+
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-}
-
-/** Convert country name or code to country code for flag image lookup. */
-function getCountryCode(value: string | null): string | null {
-  if (!value) return null;
-
-  // If it's already a 2-letter code, return it
-  if (value.length === 2 && /^[A-Za-z]{2}$/.test(value)) {
-    return value.toUpperCase();
-  }
-
-  // Otherwise try to look up the code by country name
-  const country = countries.find(c => c.name === value);
-  return country?.code ?? null;
 }
 
 function RankBadge({ rank }: { rank: number }) {
@@ -39,13 +32,13 @@ function RankBadge({ rank }: { rank: number }) {
   return <span className="text-gray-500">{rank}</span>;
 }
 
-export default function FlagGuesserLeaderboard() {
+export default function FriendsFlagGuesserLeaderboard() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/leaderboard?mode=flag_guesser&limit=50")
+    fetch("/api/friends/leaderboard?mode=flag_guesser")
       .then((res) => {
         if (res.status === 401) throw new Error("Sign in to view the leaderboard.");
         if (!res.ok) throw new Error("Failed to load leaderboard.");
@@ -63,33 +56,32 @@ export default function FlagGuesserLeaderboard() {
         {/* Header */}
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold tracking-tight text-gray-800">
-            Flag Guesser Leaderboard
+            Friends Leaderboard — Flag Guesser
           </h1>
           <p className="text-sm text-gray-500">
-            Top 50 players · sorted by fastest completion, then score
+            You and your friends · sorted by fastest completion, then score
           </p>
         </div>
 
         {/* Global / Friends toggle */}
         <div className="flex gap-2">
-          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-800 text-white cursor-default">
-            Global
-          </span>
           <a
-            href="/leaderboard/friends/flag-guesser"
+            href="/leaderboard/flag-guesser"
             className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-gray-300 transition-colors"
           >
-            Friends
+            Global
           </a>
+          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-800 text-white cursor-default">
+            Friends
+          </span>
         </div>
 
         {/* Card */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
-          {/* Loading skeleton */}
           {loading && (
             <div className="flex flex-col divide-y divide-gray-100">
-              {Array.from({ length: 8 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-4 px-5 py-4">
                   <div className="w-6 h-4 bg-gray-100 rounded animate-pulse" />
                   <div className="flex-1 h-4 bg-gray-100 rounded animate-pulse" />
@@ -101,21 +93,18 @@ export default function FlagGuesserLeaderboard() {
             </div>
           )}
 
-          {/* Error state */}
           {!loading && error && (
             <div className="px-5 py-10 text-center">
               <p className="text-sm text-red-600 font-medium">{error}</p>
             </div>
           )}
 
-          {/* Empty state */}
           {!loading && !error && entries.length === 0 && (
             <div className="px-5 py-10 text-center">
-              <p className="text-sm text-gray-400">No games played yet. Be the first!</p>
+              <p className="text-sm text-gray-400">No games played yet. Challenge your friends!</p>
             </div>
           )}
 
-          {/* Table */}
           {!loading && !error && entries.length > 0 && (
             <table className="w-full text-sm">
               <thead>
@@ -128,52 +117,63 @@ export default function FlagGuesserLeaderboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {entries.map((entry) => (
-                  <tr
-                    key={entry.rank}
-                    className={`transition-colors hover:bg-gray-50 ${entry.rank <= 3 ? "bg-amber-50/30" : ""}`}
-                  >
-                    <td className="px-5 py-3.5 text-center tabular-nums">
-                      <RankBadge rank={entry.rank} />
-                    </td>
-                    <td className="px-5 py-3.5 font-medium text-gray-800">
-                      <span className="flex items-center gap-2">
-                        {entry.country && (
-                          <img
-                            src={`https://flagcdn.com/w40/${getCountryCode(entry.country)?.toLowerCase()}.png`}
-                            alt={entry.country}
-                            title={entry.country}
-                            className="w-6 h-auto rounded-sm"
-                          />
-                        )}
-                        {entry.username}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-gray-600 font-mono">
-                      {entry.best_completion_time !== null
-                        ? formatTime(entry.best_completion_time)
-                        : <span className="text-gray-300">—</span>}
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums font-semibold text-gray-800">
-                      {entry.best_score.toLocaleString()}
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-gray-500">
-                      {entry.games_played.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
+                {entries.map((entry) => {
+                  const code = getCountryCode(entry.country);
+                  return (
+                    <tr
+                      key={entry.rank}
+                      className={`transition-colors hover:bg-gray-50 ${entry.rank <= 3 ? "bg-amber-50/30" : ""}`}
+                    >
+                      <td className="px-5 py-3.5 text-center tabular-nums">
+                        <RankBadge rank={entry.rank} />
+                      </td>
+                      <td className="px-5 py-3.5 font-medium text-gray-800">
+                        <span className="flex items-center gap-1.5">
+                          {code && (
+                            <img
+                              src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
+                              alt={entry.country ?? ""}
+                              title={entry.country ?? ""}
+                              className="w-5 h-auto rounded-sm object-contain shrink-0"
+                            />
+                          )}
+                          {entry.username}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-right tabular-nums text-gray-600 font-mono">
+                        {entry.best_completion_time !== null
+                          ? formatTime(entry.best_completion_time)
+                          : <span className="text-gray-300">—</span>}
+                      </td>
+                      <td className="px-5 py-3.5 text-right tabular-nums font-semibold text-gray-800">
+                        {entry.best_score.toLocaleString()}
+                      </td>
+                      <td className="px-5 py-3.5 text-right tabular-nums text-gray-500">
+                        {entry.games_played.toLocaleString()}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
         </div>
 
-        {/* Back link */}
-        <a
-          href="/"
-          className="self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
-        >
-          ← Back to games
-        </a>
+        {/* Links */}
+        <div className="flex items-center justify-between">
+          <a
+            href="/leaderboard"
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          >
+            ← All leaderboards
+          </a>
+          <a
+            href="/leaderboard/flag-guesser"
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          >
+            View global leaderboard →
+          </a>
+        </div>
 
       </div>
     </div>

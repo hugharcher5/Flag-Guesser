@@ -81,6 +81,19 @@ export default function ShapeGuesserLeaderboard() {
           </p>
         </div>
 
+        {/* Global / Friends toggle */}
+        <div className="flex gap-2">
+          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-800 text-white cursor-default">
+            Global
+          </span>
+          <a
+            href="/leaderboard/friends/shape-guesser"
+            className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-gray-300 transition-colors"
+          >
+            Friends
+          </a>
+        </div>
+
         {/* Sort tabs */}
         <div className="flex flex-wrap gap-2">
           {SORT_OPTIONS.map((opt) => (

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type SortKey = "total_points" | "avg_guesses" | "games_won";
+type SortKey = "total_points" | "avg_guesses" | "games_won" | "games_played";
 
 interface LeaderboardEntry {
   rank: number;
@@ -24,25 +24,27 @@ const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: "total_points", label: "Total Points" },
   { key: "avg_guesses", label: "Avg Guesses" },
   { key: "games_won", label: "Games Won" },
+  { key: "games_played", label: "Games Played" },
 ];
 
 function sortEntries(entries: LeaderboardEntry[], sort: SortKey): LeaderboardEntry[] {
   const sorted = [...entries].sort((a, b) => {
     if (sort === "avg_guesses") return a.avg_guesses - b.avg_guesses;
     if (sort === "games_won") return b.games_won - a.games_won;
+    if (sort === "games_played") return b.games_played - a.games_played;
     return b.total_points - a.total_points;
   });
   return sorted.map((e, i) => ({ ...e, rank: i + 1 }));
 }
 
-export default function GlobeGuesserLeaderboard() {
+export default function FriendsShapeGuesserLeaderboard() {
   const [rawEntries, setRawEntries] = useState<LeaderboardEntry[]>([]);
   const [sort, setSort] = useState<SortKey>("total_points");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/leaderboard?mode=globe_guesser&limit=50")
+    fetch("/api/friends/leaderboard?mode=country_shape_guesser")
       .then((res) => {
         if (res.status === 401) throw new Error("Sign in to view the leaderboard.");
         if (!res.ok) throw new Error("Failed to load leaderboard.");
@@ -54,13 +56,14 @@ export default function GlobeGuesserLeaderboard() {
   }, []);
 
   const entries = sortEntries(rawEntries, sort);
-
   const metricHeader = SORT_OPTIONS.find((o) => o.key === sort)?.label ?? "";
+  const showGamesPlayedCol = sort !== "games_played";
 
   function metricValue(entry: LeaderboardEntry): string {
+    if (sort === "total_points") return entry.total_points.toLocaleString();
     if (sort === "avg_guesses") return entry.avg_guesses.toFixed(1);
     if (sort === "games_won") return entry.games_won.toLocaleString();
-    return entry.total_points.toLocaleString();
+    return entry.games_played.toLocaleString();
   }
 
   return (
@@ -70,24 +73,24 @@ export default function GlobeGuesserLeaderboard() {
         {/* Header */}
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold tracking-tight text-gray-800">
-            Globe Guesser Leaderboard
+            Friends Leaderboard — Shape Guesser
           </h1>
           <p className="text-sm text-gray-500">
-            Top 50 players · find countries on the 3D globe
+            You and your friends · guess the country from its silhouette
           </p>
         </div>
 
         {/* Global / Friends toggle */}
         <div className="flex gap-2">
-          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-800 text-white cursor-default">
-            Global
-          </span>
           <a
-            href="/leaderboard/friends/globe-guesser"
+            href="/leaderboard/shape-guesser"
             className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-gray-300 transition-colors"
           >
-            Friends
+            Global
           </a>
+          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-800 text-white cursor-default">
+            Friends
+          </span>
         </div>
 
         {/* Sort tabs */}
@@ -110,10 +113,9 @@ export default function GlobeGuesserLeaderboard() {
         {/* Card */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
-          {/* Loading skeleton */}
           {loading && (
             <div className="flex flex-col divide-y divide-gray-100">
-              {Array.from({ length: 8 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-4 px-5 py-4">
                   <div className="w-6 h-4 bg-gray-100 rounded animate-pulse" />
                   <div className="flex-1 h-4 bg-gray-100 rounded animate-pulse" />
@@ -124,21 +126,18 @@ export default function GlobeGuesserLeaderboard() {
             </div>
           )}
 
-          {/* Error state */}
           {!loading && error && (
             <div className="px-5 py-10 text-center">
               <p className="text-sm text-red-600 font-medium">{error}</p>
             </div>
           )}
 
-          {/* Empty state */}
           {!loading && !error && entries.length === 0 && (
             <div className="px-5 py-10 text-center">
-              <p className="text-sm text-gray-400">No games played yet. Be the first!</p>
+              <p className="text-sm text-gray-400">No games played yet. Challenge your friends!</p>
             </div>
           )}
 
-          {/* Table */}
           {!loading && !error && entries.length > 0 && (
             <table className="w-full text-sm">
               <thead>
@@ -146,7 +145,9 @@ export default function GlobeGuesserLeaderboard() {
                   <th className="px-5 py-3 text-left w-12">#</th>
                   <th className="px-5 py-3 text-left">Username</th>
                   <th className="px-5 py-3 text-right">{metricHeader}</th>
-                  <th className="px-5 py-3 text-right">Games</th>
+                  {showGamesPlayedCol && (
+                    <th className="px-5 py-3 text-right">Games</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -158,15 +159,15 @@ export default function GlobeGuesserLeaderboard() {
                     <td className="px-5 py-3.5 text-center tabular-nums">
                       <RankBadge rank={entry.rank} />
                     </td>
-                    <td className="px-5 py-3.5 font-medium text-gray-800">
-                      {entry.username}
-                    </td>
+                    <td className="px-5 py-3.5 font-medium text-gray-800">{entry.username}</td>
                     <td className="px-5 py-3.5 text-right tabular-nums font-semibold text-gray-800">
                       {metricValue(entry)}
                     </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-gray-500">
-                      {entry.games_played.toLocaleString()}
-                    </td>
+                    {showGamesPlayedCol && (
+                      <td className="px-5 py-3.5 text-right tabular-nums text-gray-500">
+                        {entry.games_played.toLocaleString()}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -174,13 +175,21 @@ export default function GlobeGuesserLeaderboard() {
           )}
         </div>
 
-        {/* Back link */}
-        <a
-          href="/leaderboard"
-          className="self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
-        >
-          ← All leaderboards
-        </a>
+        {/* Links */}
+        <div className="flex items-center justify-between">
+          <a
+            href="/leaderboard"
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          >
+            ← All leaderboards
+          </a>
+          <a
+            href="/leaderboard/shape-guesser"
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          >
+            View global leaderboard →
+          </a>
+        </div>
 
       </div>
     </div>
