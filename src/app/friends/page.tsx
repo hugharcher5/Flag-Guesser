@@ -67,6 +67,12 @@ export default function FriendsPage() {
   const [addMsg, setAddMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const addMsgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  interface SearchResult { username: string; country: string | null; }
+  const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [noResults, setNoResults] = useState(false);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   // Auth guard + initial load
@@ -96,6 +102,28 @@ export default function FriendsPage() {
     setSent(sentData.requests ?? []);
   }
 
+  // Debounced username search
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    const q = addUsername.trim();
+    if (q.length < 2) {
+      setSuggestions([]);
+      setNoResults(false);
+      setShowSuggestions(false);
+      return;
+    }
+    searchDebounceRef.current = setTimeout(async () => {
+      const res = await fetch(`/api/friends/search?q=${encodeURIComponent(q)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const results: SearchResult[] = data.results ?? [];
+      setSuggestions(results);
+      setNoResults(results.length === 0);
+      setShowSuggestions(true);
+    }, 300);
+    return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
+  }, [addUsername]);
+
   function showAddMsg(type: 'success' | 'error', text: string) {
     setAddMsg({ type, text });
     if (addMsgTimerRef.current) clearTimeout(addMsgTimerRef.current);
@@ -116,6 +144,8 @@ export default function FriendsPage() {
     setAddLoading(false);
     if (res.ok) {
       setAddUsername('');
+      setSuggestions([]);
+      setShowSuggestions(false);
       showAddMsg('success', `Friend request sent to ${username}!`);
       // Reload sent list
       fetch('/api/friends/sent').then((r) => r.json()).then((d) => setSent(d.requests ?? []));
@@ -213,17 +243,51 @@ export default function FriendsPage() {
           {/* Add Friend */}
           <form onSubmit={handleAdd} className="flex flex-col gap-2">
             <label className="text-sm font-medium text-gray-700">Add Friend</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Username"
-                value={addUsername}
-                onChange={(e) => setAddUsername(e.target.value)}
-                autoCapitalize="none"
-                spellCheck={false}
-                maxLength={20}
-                className="flex-1 px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              />
+            <div className="flex gap-2 relative">
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  placeholder="Username"
+                  value={addUsername}
+                  onChange={(e) => setAddUsername(e.target.value)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                  onFocus={() => { if (suggestions.length > 0 || noResults) setShowSuggestions(true); }}
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  maxLength={20}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                />
+                {showSuggestions && (
+                  <div className="absolute top-full left-0 right-0 mt-1 z-10 bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
+                    {suggestions.length > 0 ? (
+                      suggestions.map((s) => {
+                        const code = getCountryCode(s.country);
+                        return (
+                          <div
+                            key={s.username}
+                            onMouseDown={() => {
+                              setAddUsername(s.username);
+                              setShowSuggestions(false);
+                            }}
+                            className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-800"
+                          >
+                            {code && (
+                              <img
+                                src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
+                                alt={s.country ?? ''}
+                                className="w-5 h-auto rounded-sm object-contain shrink-0"
+                              />
+                            )}
+                            <span className="font-medium">{s.username}</span>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="px-3 py-2 text-sm text-gray-400">No users found</div>
+                    )}
+                  </div>
+                )}
+              </div>
               <button
                 type="submit"
                 disabled={!addUsername.trim() || addLoading}
