@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import countries from '@/data/countries';
+import UserMenu from '@/components/UserMenu';
 
 type Tab = 'friends' | 'received' | 'sent';
 
@@ -348,6 +349,7 @@ export default function FriendsPage() {
                     >
                       {actionLoading === f.friendshipId ? '…' : 'Remove'}
                     </button>
+                    <UserMenu username={f.username} friendStatus="accepted" />
                   </div>
                 ))
               )}
@@ -386,6 +388,7 @@ export default function FriendsPage() {
                         Reject
                       </button>
                     </div>
+                    <UserMenu username={r.username} friendStatus="pending_received" />
                   </div>
                 ))
               )}
@@ -415,6 +418,7 @@ export default function FriendsPage() {
                     >
                       {actionLoading === r.friendshipId ? '…' : 'Cancel'}
                     </button>
+                    <UserMenu username={r.username} friendStatus="pending_sent" />
                   </div>
                 ))
               )}

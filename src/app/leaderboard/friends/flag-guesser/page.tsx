@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import countries from "@/data/countries";
+import UserMenu from "@/components/UserMenu";
+import { supabase } from "@/lib/supabase/client";
 
 interface LeaderboardEntry {
+  id: string;
   rank: number;
   username: string;
   country: string | null;
@@ -36,6 +39,15 @@ export default function FriendsFlagGuesserLeaderboard() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      const { data } = await supabase.from("profiles").select("username").eq("id", user.id).maybeSingle();
+      setCurrentUsername(data?.username ?? null);
+    });
+  }, []);
 
   useEffect(() => {
     fetch("/api/friends/leaderboard?mode=flag_guesser")
@@ -114,11 +126,13 @@ export default function FriendsFlagGuesserLeaderboard() {
                   <th className="px-5 py-3 text-right">Best Time</th>
                   <th className="px-5 py-3 text-right">Best Score</th>
                   <th className="px-5 py-3 text-right">Games</th>
+                  <th className="w-10" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {entries.map((entry) => {
                   const code = getCountryCode(entry.country);
+                  const fStatus = entry.username === currentUsername ? "self" : "accepted";
                   return (
                     <tr
                       key={entry.rank}
@@ -150,6 +164,9 @@ export default function FriendsFlagGuesserLeaderboard() {
                       </td>
                       <td className="px-5 py-3.5 text-right tabular-nums text-gray-500">
                         {entry.games_played.toLocaleString()}
+                      </td>
+                      <td className="px-2 py-3.5 text-right">
+                        <UserMenu username={entry.username} friendStatus={fStatus} />
                       </td>
                     </tr>
                   );

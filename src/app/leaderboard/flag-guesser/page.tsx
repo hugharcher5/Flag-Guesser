@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import countries from "@/data/countries";
+import UserMenu from "@/components/UserMenu";
+import { useFriendStatuses } from "@/lib/useFriendStatuses";
 
 interface LeaderboardEntry {
+  id: string;
   rank: number;
   username: string;
   country: string | null;
@@ -12,24 +15,17 @@ interface LeaderboardEntry {
   games_played: number;
 }
 
+function getCountryCode(value: string | null | undefined): string | null {
+  if (!value) return null;
+  if (value.length === 2 && /^[A-Za-z]{2}$/.test(value)) return value.toUpperCase();
+  const country = countries.find((c) => c.name === value);
+  return country?.code ?? null;
+}
+
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-}
-
-/** Convert country name or code to country code for flag image lookup. */
-function getCountryCode(value: string | null): string | null {
-  if (!value) return null;
-
-  // If it's already a 2-letter code, return it
-  if (value.length === 2 && /^[A-Za-z]{2}$/.test(value)) {
-    return value.toUpperCase();
-  }
-
-  // Otherwise try to look up the code by country name
-  const country = countries.find(c => c.name === value);
-  return country?.code ?? null;
 }
 
 function RankBadge({ rank }: { rank: number }) {
@@ -43,6 +39,8 @@ export default function FlagGuesserLeaderboard() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { statusMap, currentUsername, refresh } = useFriendStatuses();
 
   useEffect(() => {
     fetch("/api/leaderboard?mode=flag_guesser&limit=50")
@@ -125,43 +123,53 @@ export default function FlagGuesserLeaderboard() {
                   <th className="px-5 py-3 text-right">Best Time</th>
                   <th className="px-5 py-3 text-right">Best Score</th>
                   <th className="px-5 py-3 text-right">Games</th>
+                  <th className="w-10" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {entries.map((entry) => (
-                  <tr
-                    key={entry.rank}
-                    className={`transition-colors hover:bg-gray-50 ${entry.rank <= 3 ? "bg-amber-50/30" : ""}`}
-                  >
-                    <td className="px-5 py-3.5 text-center tabular-nums">
-                      <RankBadge rank={entry.rank} />
-                    </td>
-                    <td className="px-5 py-3.5 font-medium text-gray-800">
-                      <span className="flex items-center gap-2">
-                        {entry.country && (
-                          <img
-                            src={`https://flagcdn.com/w40/${getCountryCode(entry.country)?.toLowerCase()}.png`}
-                            alt={entry.country}
-                            title={entry.country}
-                            className="w-6 h-auto rounded-sm"
-                          />
-                        )}
-                        {entry.username}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-gray-600 font-mono">
-                      {entry.best_completion_time !== null
-                        ? formatTime(entry.best_completion_time)
-                        : <span className="text-gray-300">—</span>}
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums font-semibold text-gray-800">
-                      {entry.best_score.toLocaleString()}
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-gray-500">
-                      {entry.games_played.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
+                {entries.map((entry) => {
+                  const code = getCountryCode(entry.country);
+                  const fStatus = entry.username === currentUsername
+                    ? "self"
+                    : (statusMap.get(entry.username) ?? "none");
+                  return (
+                    <tr
+                      key={entry.rank}
+                      className={`transition-colors hover:bg-gray-50 ${entry.rank <= 3 ? "bg-amber-50/30" : ""}`}
+                    >
+                      <td className="px-5 py-3.5 text-center tabular-nums">
+                        <RankBadge rank={entry.rank} />
+                      </td>
+                      <td className="px-5 py-3.5 font-medium text-gray-800">
+                        <span className="flex items-center gap-2">
+                          {code && (
+                            <img
+                              src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
+                              alt={entry.country ?? ""}
+                              title={entry.country ?? ""}
+                              className="w-6 h-auto rounded-sm"
+                            />
+                          )}
+                          {entry.username}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-right tabular-nums text-gray-600 font-mono">
+                        {entry.best_completion_time !== null
+                          ? formatTime(entry.best_completion_time)
+                          : <span className="text-gray-300">—</span>}
+                      </td>
+                      <td className="px-5 py-3.5 text-right tabular-nums font-semibold text-gray-800">
+                        {entry.best_score.toLocaleString()}
+                      </td>
+                      <td className="px-5 py-3.5 text-right tabular-nums text-gray-500">
+                        {entry.games_played.toLocaleString()}
+                      </td>
+                      <td className="px-2 py-3.5 text-right">
+                        <UserMenu username={entry.username} friendStatus={fStatus} onFriendAdded={refresh} />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}

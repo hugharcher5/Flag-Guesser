@@ -59,7 +59,7 @@ export async function GET(request: Request) {
   if (mode === 'flag_guesser') {
     const { data: profiles, error: profileErr } = await supabase
       .from('profiles')
-      .select('username, best_score, country, games_by_mode')
+      .select('id, username, best_score, country, games_by_mode')
       .in('id', profileIds);
 
     if (profileErr) {
@@ -74,13 +74,14 @@ export async function GET(request: Request) {
 
         if (typeof raw === 'number') {
           return raw > 0
-            ? { username: p.username ?? 'Unknown', country: p.country ?? null, best_completion_time: null, best_score: p.best_score ?? 0, games_played: raw }
+            ? { id: p.id, username: p.username ?? 'Unknown', country: p.country ?? null, best_completion_time: null, best_score: p.best_score ?? 0, games_played: raw }
             : null;
         }
 
         const stats = raw as FlagStats;
         if (!stats.games_played) return null;
         return {
+          id: p.id,
           username: p.username ?? 'Unknown',
           country: p.country ?? null,
           best_completion_time: stats.best_completion_time ?? null,
@@ -104,7 +105,7 @@ export async function GET(request: Request) {
   // ── Shape / Globe ────────────────────────────────────────────────────────────
   const { data: profiles, error: profileErr } = await supabase
     .from('profiles')
-    .select('username, games_by_mode')
+    .select('id, username, games_by_mode')
     .in('id', profileIds);
 
   if (profileErr) {
@@ -117,6 +118,7 @@ export async function GET(request: Request) {
       const stats = (p.games_by_mode as Record<string, ModeStats> | null)?.[mode];
       if (!stats || stats.games_played === 0) return null;
       return {
+        id: p.id,
         username: p.username ?? 'Unknown',
         total_points: stats.total_points,
         avg_guesses: +(stats.total_guesses / stats.games_played).toFixed(2),

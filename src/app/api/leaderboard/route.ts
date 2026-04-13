@@ -40,7 +40,7 @@ export async function GET(request: Request) {
   if (mode && PROFILE_STATS_MODES.has(mode)) {
     const { data: profiles, error: profilesErr } = await supabase
       .from('profiles')
-      .select('username, games_by_mode')
+      .select('id, username, games_by_mode')
       .limit(500);
 
     if (profilesErr) {
@@ -53,6 +53,7 @@ export async function GET(request: Request) {
         const stats = (p.games_by_mode as Record<string, ModeStats> | null)?.[mode];
         if (!stats || stats.games_played === 0) return null;
         return {
+          id: p.id,
           username: p.username ?? 'Unknown',
           total_points: stats.total_points,
           avg_guesses: +(stats.total_guesses / stats.games_played).toFixed(2),
@@ -80,7 +81,7 @@ export async function GET(request: Request) {
 
     const { data: profiles, error: profilesErr } = await supabase
       .from('profiles')
-      .select('username, best_score, country, games_by_mode')
+      .select('id, username, best_score, country, games_by_mode')
       .limit(500);
 
     if (profilesErr) {
@@ -96,13 +97,14 @@ export async function GET(request: Request) {
         // Handle legacy number format (games_played count only, no rich stats yet)
         if (typeof raw === 'number') {
           return raw > 0
-            ? { username: p.username ?? 'Unknown', country: p.country ?? null, best_completion_time: null, best_score: p.best_score ?? 0, games_played: raw }
+            ? { id: p.id, username: p.username ?? 'Unknown', country: p.country ?? null, best_completion_time: null, best_score: p.best_score ?? 0, games_played: raw }
             : null;
         }
 
         const stats = raw as FlagStats;
         if (!stats.games_played) return null;
         return {
+          id: p.id,
           username: p.username ?? 'Unknown',
           country: p.country ?? null,
           best_completion_time: stats.best_completion_time ?? null,
@@ -128,7 +130,7 @@ export async function GET(request: Request) {
   // ── No mode filter — global leaderboard by total_points ──────────────────────
   const { data, error } = await supabase
     .from('profiles')
-    .select('username, total_points, total_games, best_score')
+    .select('id, username, total_points, total_games, best_score')
     .order('total_points', { ascending: false })
     .limit(limit);
 

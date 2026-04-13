@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import UserMenu from "@/components/UserMenu";
+import { useFriendStatuses } from "@/lib/useFriendStatuses";
 
 type SortKey = "total_points" | "avg_guesses" | "games_won";
 
 interface LeaderboardEntry {
+  id: string;
   rank: number;
   username: string;
   total_points: number;
@@ -41,6 +44,8 @@ export default function GlobeGuesserLeaderboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { statusMap, currentUsername, refresh } = useFriendStatuses();
+
   useEffect(() => {
     fetch("/api/leaderboard?mode=globe_guesser&limit=50")
       .then((res) => {
@@ -54,7 +59,6 @@ export default function GlobeGuesserLeaderboard() {
   }, []);
 
   const entries = sortEntries(rawEntries, sort);
-
   const metricHeader = SORT_OPTIONS.find((o) => o.key === sort)?.label ?? "";
 
   function metricValue(entry: LeaderboardEntry): string {
@@ -110,7 +114,6 @@ export default function GlobeGuesserLeaderboard() {
         {/* Card */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
-          {/* Loading skeleton */}
           {loading && (
             <div className="flex flex-col divide-y divide-gray-100">
               {Array.from({ length: 8 }).map((_, i) => (
@@ -124,21 +127,18 @@ export default function GlobeGuesserLeaderboard() {
             </div>
           )}
 
-          {/* Error state */}
           {!loading && error && (
             <div className="px-5 py-10 text-center">
               <p className="text-sm text-red-600 font-medium">{error}</p>
             </div>
           )}
 
-          {/* Empty state */}
           {!loading && !error && entries.length === 0 && (
             <div className="px-5 py-10 text-center">
               <p className="text-sm text-gray-400">No games played yet. Be the first!</p>
             </div>
           )}
 
-          {/* Table */}
           {!loading && !error && entries.length > 0 && (
             <table className="w-full text-sm">
               <thead>
@@ -147,28 +147,37 @@ export default function GlobeGuesserLeaderboard() {
                   <th className="px-5 py-3 text-left">Username</th>
                   <th className="px-5 py-3 text-right">{metricHeader}</th>
                   <th className="px-5 py-3 text-right">Games</th>
+                  <th className="w-10" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {entries.map((entry) => (
-                  <tr
-                    key={entry.username}
-                    className={`transition-colors hover:bg-gray-50 ${entry.rank <= 3 ? "bg-amber-50/30" : ""}`}
-                  >
-                    <td className="px-5 py-3.5 text-center tabular-nums">
-                      <RankBadge rank={entry.rank} />
-                    </td>
-                    <td className="px-5 py-3.5 font-medium text-gray-800">
-                      {entry.username}
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums font-semibold text-gray-800">
-                      {metricValue(entry)}
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-gray-500">
-                      {entry.games_played.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
+                {entries.map((entry) => {
+                  const fStatus = entry.username === currentUsername
+                    ? "self"
+                    : (statusMap.get(entry.username) ?? "none");
+                  return (
+                    <tr
+                      key={entry.username}
+                      className={`transition-colors hover:bg-gray-50 ${entry.rank <= 3 ? "bg-amber-50/30" : ""}`}
+                    >
+                      <td className="px-5 py-3.5 text-center tabular-nums">
+                        <RankBadge rank={entry.rank} />
+                      </td>
+                      <td className="px-5 py-3.5 font-medium text-gray-800">
+                        {entry.username}
+                      </td>
+                      <td className="px-5 py-3.5 text-right tabular-nums font-semibold text-gray-800">
+                        {metricValue(entry)}
+                      </td>
+                      <td className="px-5 py-3.5 text-right tabular-nums text-gray-500">
+                        {entry.games_played.toLocaleString()}
+                      </td>
+                      <td className="px-2 py-3.5 text-right">
+                        <UserMenu username={entry.username} friendStatus={fStatus} onFriendAdded={refresh} />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
