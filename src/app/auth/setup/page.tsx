@@ -64,7 +64,8 @@ export default function SetupPage() {
 
   // ── Auth guard: redirect unauthenticated users; pre-fill from profile ────────
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    supabase.auth.getUser().then(async (result) => {
+      const user = result.data.user;
       if (!user) {
         router.replace('/');
         return;
