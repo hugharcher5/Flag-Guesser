@@ -5,6 +5,8 @@
  * client. Redirects to home if there is no active session.
  */
 
+export const dynamic = 'force-dynamic';
+
 import { redirect } from 'next/navigation';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import SignOutButton from '@/components/auth/SignOutButton';

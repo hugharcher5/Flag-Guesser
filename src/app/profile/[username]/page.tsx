@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { notFound } from 'next/navigation';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import ProfileClient, {

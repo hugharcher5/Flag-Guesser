@@ -8,6 +8,8 @@
  * New users whose profile is not yet set up are sent to /auth/setup first.
  */
 
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';

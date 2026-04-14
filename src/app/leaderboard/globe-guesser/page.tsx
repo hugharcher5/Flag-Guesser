@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from "react";
 import UserMenu from "@/components/UserMenu";
 import { useFriendStatuses } from "@/lib/useFriendStatuses";

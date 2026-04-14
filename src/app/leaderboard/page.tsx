@@ -3,6 +3,8 @@
  * Add new entries to LEADERBOARDS to make them appear in the grid.
  */
 
+export const dynamic = 'force-dynamic';
+
 interface LeaderboardEntry {
   title: string;
   description: string;
