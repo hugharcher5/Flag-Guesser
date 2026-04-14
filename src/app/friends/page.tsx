@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
+import type { UserResponse } from '@supabase/supabase-js';
 import countries from '@/data/countries';
 import UserMenu from '@/components/UserMenu';
 
@@ -80,7 +81,7 @@ export default function FriendsPage() {
 
   // Auth guard + initial load
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: UserResponse) => {
       if (!user) {
         router.replace('/');
         return;

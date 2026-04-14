@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import SignInButton from "@/components/auth/SignInButton";
 import { supabase } from "@/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import type { User, UserResponse, Session } from "@supabase/supabase-js";
 import type { AppMode } from "@/components/NavBar";
 import FlagGuesserMode from "@/components/FlagGuesserMode";
 import SilhouetteMode from "@/components/worldle/SilhouetteMode";
@@ -17,9 +17,9 @@ export default function Page() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getUser().then(({ data }: UserResponse) => setUser(data.user));
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_, session) => setUser(session?.user ?? null),
+      (_: string, session: Session | null) => setUser(session?.user ?? null),
     );
     return () => subscription.unsubscribe();
   }, []);

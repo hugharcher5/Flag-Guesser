@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
 import UserMenu from "@/components/UserMenu";
 import { supabase } from "@/lib/supabase/client";
+import type { UserResponse } from "@supabase/supabase-js";
 
 type SortKey = "total_points" | "avg_guesses" | "games_won";
 
@@ -48,7 +49,7 @@ export default function FriendsGlobeGuesserLeaderboard() {
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }: UserResponse) => {
       if (!user) return;
       const { data } = await supabase.from("profiles").select("username").eq("id", user.id).maybeSingle();
       setCurrentUsername(data?.username ?? null);

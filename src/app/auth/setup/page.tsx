@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
+import type { UserResponse } from '@supabase/supabase-js';
 import countries from '@/data/countries';
 
 // ── Country list ─────────────────────────────────────────────────────────────
@@ -64,7 +65,7 @@ export default function SetupPage() {
 
   // ── Auth guard: redirect unauthenticated users; pre-fill from profile ────────
   useEffect(() => {
-    supabase.auth.getUser().then(async (result) => {
+    supabase.auth.getUser().then(async (result: UserResponse) => {
       const user = result.data.user;
       if (!user) {
         router.replace('/');

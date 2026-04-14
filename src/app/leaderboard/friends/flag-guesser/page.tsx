@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import countries from "@/data/countries";
 import UserMenu from "@/components/UserMenu";
 import { supabase } from "@/lib/supabase/client";
+import type { UserResponse } from "@supabase/supabase-js";
 
 interface LeaderboardEntry {
   id: string;
@@ -44,7 +45,7 @@ export default function FriendsFlagGuesserLeaderboard() {
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }: UserResponse) => {
       if (!user) return;
       const { data } = await supabase.from("profiles").select("username").eq("id", user.id).maybeSingle();
       setCurrentUsername(data?.username ?? null);
