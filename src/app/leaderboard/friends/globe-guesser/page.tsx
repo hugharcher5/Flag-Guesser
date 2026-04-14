@@ -75,7 +75,7 @@ export default function FriendsGlobeGuesserLeaderboard() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-gray-50 flex flex-col items-center px-4 py-10">
+    <div className="min-h-[100dvh] bg-gray-50 flex flex-col items-center px-4 py-10 pb-24">
       <div className="w-full max-w-2xl flex flex-col gap-6">
 
         {/* Header */}
@@ -119,7 +119,7 @@ export default function FriendsGlobeGuesserLeaderboard() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-visible">
 
           {loading && (
             <div className="flex flex-col divide-y divide-gray-100">
