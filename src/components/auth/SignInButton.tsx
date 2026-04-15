@@ -3,16 +3,26 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 
+function isInAppBrowser(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  return /Snapchat|Instagram|FBAN|FBAV|TikTok|musical_ly|BytedanceWebview|Twitter|Line|WeChat|MicroMessenger/i.test(ua)
+    || (ua.includes('wv') && ua.includes('Android'));
+}
+
 export default function SignInButton() {
   const [error, setError] = useState('');
+  const [showInAppWarning, setShowInAppWarning] = useState(false);
 
   const handleSignIn = async () => {
+    if (isInAppBrowser()) {
+      setShowInAppWarning(true);
+      return;
+    }
     setError('');
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        // Supabase will redirect here after Google authorises the user.
-        // The route handler at /auth/callback exchanges the code for a session.
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
@@ -36,6 +46,32 @@ export default function SignInButton() {
         </svg>
         Sign in with Google
       </button>
+
+      {showInAppWarning && (
+        <div className="mt-1 w-72 rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start gap-2.5">
+              <span className="text-lg leading-none mt-0.5">🌐</span>
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Open in your browser to sign in</p>
+                <p className="mt-0.5 text-xs text-gray-500 leading-relaxed">
+                  Google doesn&apos;t allow sign-in from Snapchat or Instagram. Open this page in Chrome or Safari and you&apos;re good to go!
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowInAppWarning(false)}
+              aria-label="Dismiss"
+              className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors mt-0.5"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+                <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   );
