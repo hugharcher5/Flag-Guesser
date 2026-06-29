@@ -11,6 +11,7 @@ import type { AppMode } from "@/components/NavBar";
 import FlagGuesserMode from "@/components/FlagGuesserMode";
 import SilhouetteMode from "@/components/worldle/SilhouetteMode";
 import GlobeMode from "@/components/globe/GlobeMode";
+import CapitalGuesserMode from "@/components/CapitalGuesserMode";
 
 export default function Page() {
   const [mode, setMode] = useState<AppMode>("flag");
@@ -47,6 +48,8 @@ export default function Page() {
           <FlagGuesserMode />
         ) : mode === "silhouette" ? (
           <SilhouetteMode />
+        ) : mode === "capital" ? (
+          <CapitalGuesserMode />
         ) : (
           <GlobeMode />
         )}

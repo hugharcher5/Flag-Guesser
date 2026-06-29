@@ -1,4 +1,5 @@
 import type { Country } from "@/data/countries";
+import type { Capital } from "@/data/capitals";
 
 const THRESHOLD_RATIO = 0.2;
 const MAX_DISTANCE = 2;
@@ -86,5 +87,42 @@ export function isCorrect(
   return !allCountries.some((c) => {
     if (c.code === country.code) return false;
     return bestDist(g, c) < currentDist;
+  });
+}
+
+// ── Capital matching ──────────────────────────────────────────────────────────
+
+function capitalNames(c: Capital): string[] {
+  return [c.name, ...(c.aliases ?? [])];
+}
+
+function bestCapitalDist(g: string, c: Capital): number {
+  return Math.min(...capitalNames(c).map((n) => levenshtein(g, normalize(n))));
+}
+
+export function isCapitalCorrect(
+  guess: string,
+  target: Capital,
+  allCapitals: Capital[],
+): boolean {
+  const g = normalize(guess);
+
+  if (capitalNames(target).some((n) => normalize(n) === g)) return true;
+
+  if (
+    allCapitals.some(
+      (c) =>
+        c !== target &&
+        capitalNames(c).some((n) => normalize(n) === g),
+    )
+  )
+    return false;
+
+  if (!capitalNames(target).some((n) => closeEnough(guess, n))) return false;
+
+  const currentDist = bestCapitalDist(g, target);
+  return !allCapitals.some((c) => {
+    if (c === target) return false;
+    return bestCapitalDist(g, c) < currentDist;
   });
 }

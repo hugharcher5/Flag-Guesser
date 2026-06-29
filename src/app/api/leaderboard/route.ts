@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 
-const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser'];
+const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser', 'capital_guesser'];
 const MAX_LIMIT = 50;
 
 // These modes store rich stats in profiles.games_by_mode and use the profiles
@@ -72,8 +72,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ leaderboard: entries, mode }, { status: 200 });
   }
 
-  // ── Flag Guesser leaderboard — read from profiles (public read) ──────────────
-  if (mode === 'flag_guesser') {
+  // ── Flag / Capital Guesser leaderboard — read from profiles (public read) ────
+  if (mode === 'flag_guesser' || mode === 'capital_guesser') {
     interface FlagStats {
       games_played: number;
       best_score: number;
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
 
     const entries = (profiles ?? [])
       .map((p) => {
-        const raw = (p.games_by_mode as Record<string, unknown> | null)?.['flag_guesser'];
+        const raw = (p.games_by_mode as Record<string, unknown> | null)?.[mode];
         if (!raw) return null;
 
         // Handle legacy number format (games_played count only, no rich stats yet)

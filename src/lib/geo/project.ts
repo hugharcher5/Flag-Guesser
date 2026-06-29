@@ -201,6 +201,82 @@ function circlePath(cx: number, cy: number, r: number): string {
   return `M${(cx - r).toFixed(1)},${y}a${rs},${rs} 0 1,0 ${d2r},0a${rs},${rs} 0 1,0 -${d2r},0Z`;
 }
 
+interface Projection {
+  px: (lng: number) => number;
+  py: (lat: number) => number;
+  rings: Coord[][];
+  dotR: number;
+  scale: number;
+}
+
+function computeProjection(
+  geom: CountryGeometry,
+  svgW: number,
+  svgH: number,
+  padding: number,
+  code?: string,
+): Projection | null {
+  let rings = displayRings(geom, code);
+  let box = computeBBox(rings);
+
+  if (box.maxLng - box.minLng > 180) {
+    rings = normaliseAntimeridian(rings);
+    box = computeBBox(rings);
+  }
+
+  const geoW = box.maxLng - box.minLng;
+  const geoH = box.maxLat - box.minLat;
+
+  if (geoW === 0 && geoH === 0) return null;
+
+  const midLat = (box.minLat + box.maxLat) / 2;
+  const cosLat = Math.cos(midLat * Math.PI / 180);
+  const effectiveW = geoW * cosLat;
+
+  const drawW = svgW - padding * 2;
+  const drawH = svgH - padding * 2;
+
+  const scaleX = effectiveW > 0 ? drawW / effectiveW : Infinity;
+  const scaleY = geoH > 0 ? drawH / geoH : Infinity;
+  const scale = isFinite(Math.min(scaleX, scaleY)) ? Math.min(scaleX, scaleY) : 0;
+  if (scale <= 0) return null;
+
+  const ox = (svgW - effectiveW * scale) / 2;
+  const oy = (svgH - geoH * scale) / 2;
+
+  const px = (lng: number) => ox + (lng - box.minLng) * cosLat * scale;
+  const py = (lat: number) => oy + (box.maxLat - lat) * scale;
+  const dotR = code ? (DOT_RENDER[code] ?? 0) : 0;
+
+  return { px, py, rings, dotR, scale };
+}
+
+function buildPath(proj: Projection): string {
+  const { px, py, rings, dotR } = proj;
+
+  if (dotR > 0) {
+    return rings
+      .filter(ring => ring.length >= 3)
+      .map(ring => {
+        const [cLng, cLat] = ringCentroid(ring);
+        return circlePath(px(cLng), py(cLat), dotR);
+      })
+      .join('');
+  }
+
+  return rings
+    .filter(ring => ring.length >= 3)
+    .map(ring => {
+      const [x0, y0] = [px(ring[0][0]), py(ring[0][1])];
+      const rest = ring
+        .slice(1)
+        .map(([lng, lat]) => `L${px(lng).toFixed(1)},${py(lat).toFixed(1)}`)
+        .join('');
+      return `M${x0.toFixed(1)},${y0.toFixed(1)}${rest}Z`;
+    })
+    .join('');
+}
+
 /**
  * Converts a country geometry to an SVG path `d` attribute string.
  *
@@ -217,62 +293,25 @@ export function toSvgPath(
   padding = 16,
   code?: string,
 ): string {
-  let rings = displayRings(geom, code);
-  let box = computeBBox(rings);
+  const proj = computeProjection(geom, svgW, svgH, padding, code);
+  if (!proj) return '';
+  return buildPath(proj);
+}
 
-  // Detect antimeridian crossing: bbox wider than 180°
-  if (box.maxLng - box.minLng > 180) {
-    rings = normaliseAntimeridian(rings);
-    box = computeBBox(rings);
-  }
-
-  const geoW = box.maxLng - box.minLng;
-  const geoH = box.maxLat - box.minLat;
-
-  if (geoW === 0 && geoH === 0) return '';
-
-  const midLat = (box.minLat + box.maxLat) / 2;
-  const cosLat = Math.cos(midLat * Math.PI / 180);
-  const effectiveW = geoW * cosLat;
-
-  const drawW = svgW - padding * 2;
-  const drawH = svgH - padding * 2;
-
-  const scaleX = effectiveW > 0 ? drawW / effectiveW : Infinity;
-  const scaleY = geoH > 0 ? drawH / geoH : Infinity;
-  const scale = isFinite(Math.min(scaleX, scaleY)) ? Math.min(scaleX, scaleY) : 0;
-  if (scale <= 0) return '';
-
-  const ox = (svgW - effectiveW * scale) / 2;
-  const oy = (svgH - geoH * scale) / 2;
-
-  const px = (lng: number) => ox + (lng - box.minLng) * cosLat * scale;
-  const py = (lat: number) => oy + (box.maxLat - lat) * scale;
-
-  // ── Dot-island rendering ─────────────────────────────────────────────────
-  // For micro-archipelagos, draw each island as a filled circle at its
-  // projected centroid instead of rendering the (sub-pixel) coastline.
-  const dotR = code ? (DOT_RENDER[code] ?? 0) : 0;
-  if (dotR > 0) {
-    return rings
-      .filter(ring => ring.length >= 3)
-      .map(ring => {
-        const [cLng, cLat] = ringCentroid(ring);
-        return circlePath(px(cLng), py(cLat), dotR);
-      })
-      .join('');
-  }
-
-  // ── Normal coastline rendering ────────────────────────────────────────────
-  return rings
-    .filter(ring => ring.length >= 3)
-    .map(ring => {
-      const [x0, y0] = [px(ring[0][0]), py(ring[0][1])];
-      const rest = ring
-        .slice(1)
-        .map(([lng, lat]) => `L${px(lng).toFixed(1)},${py(lat).toFixed(1)}`)
-        .join('');
-      return `M${x0.toFixed(1)},${y0.toFixed(1)}${rest}Z`;
-    })
-    .join('');
+/**
+ * Projects a [lng, lat] point through the same transform used for a country's
+ * silhouette path. Returns SVG pixel coordinates or null if projection fails.
+ */
+export function projectPointOnSilhouette(
+  geom: CountryGeometry,
+  svgW: number,
+  svgH: number,
+  padding: number,
+  code: string | undefined,
+  lng: number,
+  lat: number,
+): { x: number; y: number } | null {
+  const proj = computeProjection(geom, svgW, svgH, padding, code);
+  if (!proj) return null;
+  return { x: proj.px(lng), y: proj.py(lat) };
 }

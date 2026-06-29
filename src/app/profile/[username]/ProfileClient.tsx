@@ -27,15 +27,17 @@ export interface ProfileClientProps {
   totalPoints: number;
   totalGames: number;
   flagStats: FlagModeStats | null;
+  capitalStats: FlagModeStats | null;
   shapeStats: BasicModeStats | null;
   globeStats: BasicModeStats | null;
   initialFriendStatus: FriendStatus;
   friendshipId: string | null;
 }
 
-type TabKey = 'flag' | 'shape' | 'globe';
+type TabKey = 'flag' | 'capital' | 'shape' | 'globe';
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'flag', label: 'Flag Guesser' },
+  { key: 'capital', label: 'Capital Guesser' },
   { key: 'shape', label: 'Shape Guesser' },
   { key: 'globe', label: 'Globe Guesser' },
 ];
@@ -148,6 +150,7 @@ export default function ProfileClient({
   totalPoints,
   totalGames,
   flagStats,
+  capitalStats,
   shapeStats,
   globeStats,
   initialFriendStatus,
@@ -260,6 +263,29 @@ export default function ProfileClient({
           ) : (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
               No Flag Guesser games yet.
+            </div>
+          )
+        )}
+
+        {activeTab === 'capital' && (
+          capitalStats && capitalStats.gamesPlayed > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <StatCard label="Games Played" value={String(capitalStats.gamesPlayed)} />
+              <StatCard
+                label="Best Score"
+                value={`${capitalStats.bestScore} / ${TOTAL_FLAGS}`}
+                sub={capitalStats.bestScore === TOTAL_FLAGS ? 'Perfect!' : undefined}
+              />
+              <StatCard
+                label="Best Time"
+                value={capitalStats.bestCompletionTime !== null ? formatTime(capitalStats.bestCompletionTime) : '—'}
+                sub={capitalStats.bestCompletionTime !== null ? 'all 195 correct' : undefined}
+              />
+              <StatCard label="Total Points" value={capitalStats.totalPoints.toLocaleString()} />
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
+              No Capital Guesser games yet.
             </div>
           )
         )}

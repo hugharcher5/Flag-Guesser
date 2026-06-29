@@ -107,6 +107,7 @@ export default async function ProfilePage({
 
   const gamesbyMode = (profile.games_by_mode as GamesbyMode) ?? {};
   const flagStats = parseFlagStats(gamesbyMode['flag_guesser'], profile.best_score ?? 0);
+  const capitalStats = parseFlagStats(gamesbyMode['capital_guesser'], 0);
   const shapeStats = parseBasicStats(gamesbyMode['country_shape_guesser']);
   const globeStats = parseBasicStats(gamesbyMode['globe_guesser']);
 
@@ -118,6 +119,7 @@ export default async function ProfilePage({
       totalPoints={profile.total_points ?? 0}
       totalGames={profile.total_games ?? 0}
       flagStats={flagStats}
+      capitalStats={capitalStats}
       shapeStats={shapeStats}
       globeStats={globeStats}
       initialFriendStatus={friendStatus}

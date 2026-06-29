@@ -39,13 +39,19 @@ export default async function StatsPage() {
 
   const username = profile?.username ?? user.email ?? 'Player';
 
-  // ── Fetch all three modes in parallel ────────────────────────────────────────
-  const [flagRes, shapeRes, globeRes] = await Promise.all([
+  // ── Fetch all four modes in parallel ─────────────────────────────────────────
+  const [flagRes, capitalRes, shapeRes, globeRes] = await Promise.all([
     supabase
       .from('game_results')
       .select('score, correct, completion_time, continent_breakdown, created_at')
       .eq('user_id', user.id)
       .eq('game_mode', 'flag_guesser')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('game_results')
+      .select('score, correct, completion_time, continent_breakdown, created_at')
+      .eq('user_id', user.id)
+      .eq('game_mode', 'capital_guesser')
       .order('created_at', { ascending: false }),
     supabase
       .from('game_results')
@@ -106,6 +112,52 @@ export default async function StatsPage() {
     hasContinentData: continentRows.length > 0,
   };
 
+  // ── Capital Guesser stats ──────────────────────────────────────────────────────
+  const capitalGames = capitalRes.data ?? [];
+  const capitalGamesPlayed = capitalGames.length;
+  const capitalWins = capitalGames.filter((g) => g.correct).length;
+  const capitalScores = capitalGames.map((g) => g.score);
+  const capitalBestScore = capitalScores.length > 0 ? Math.max(...capitalScores) : 0;
+  const capitalTotalPoints = capitalScores.reduce((s, x) => s + x, 0);
+  const capitalAvgScore = capitalGamesPlayed > 0 ? capitalTotalPoints / capitalGamesPlayed : 0;
+  const capitalCompletionTimes = capitalGames
+    .filter((g) => g.correct && typeof g.completion_time === 'number')
+    .map((g) => g.completion_time as number);
+  const capitalBestCompletionTime = capitalCompletionTimes.length > 0 ? Math.min(...capitalCompletionTimes) : null;
+
+  const capitalContinentAgg: ContBreakdown = {};
+  for (const game of capitalGames) {
+    const bd = game.continent_breakdown as ContBreakdown | null;
+    if (!bd) continue;
+    for (const [cont, stats] of Object.entries(bd)) {
+      if (!capitalContinentAgg[cont]) capitalContinentAgg[cont] = { correct: 0, seen: 0 };
+      capitalContinentAgg[cont].correct += stats.correct;
+      capitalContinentAgg[cont].seen += stats.seen;
+    }
+  }
+  const capitalContinentRows: ContinentRow[] = CONTINENT_ORDER
+    .filter((cont) => capitalContinentAgg[cont])
+    .map((cont) => ({
+      name: cont,
+      correct: capitalContinentAgg[cont].correct,
+      seen: capitalContinentAgg[cont].seen,
+      accuracy: capitalContinentAgg[cont].seen > 0
+        ? (capitalContinentAgg[cont].correct / capitalContinentAgg[cont].seen) * 100
+        : 0,
+    }));
+
+  const capitalStats: FlagStats = {
+    gamesPlayed: capitalGamesPlayed,
+    wins: capitalWins,
+    winRate: capitalGamesPlayed > 0 ? (capitalWins / capitalGamesPlayed) * 100 : 0,
+    bestScore: capitalBestScore,
+    totalPoints: capitalTotalPoints,
+    avgScore: capitalAvgScore,
+    bestCompletionTime: capitalBestCompletionTime,
+    continentRows: capitalContinentRows,
+    hasContinentData: capitalContinentRows.length > 0,
+  };
+
   // ── Shape / Globe stats ───────────────────────────────────────────────────────
   const shapeStats = computeBasicStats(
     (shapeRes.data ?? []).map((g) => ({ score: g.score, guesses_count: g.guesses_count, correct: g.correct })),
@@ -118,6 +170,7 @@ export default async function StatsPage() {
     <StatsClient
       username={username}
       flagStats={flagStats}
+      capitalStats={capitalStats}
       shapeStats={shapeStats}
       globeStats={globeStats}
     />

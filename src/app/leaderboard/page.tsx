@@ -35,6 +35,13 @@ const LEADERBOARDS: LeaderboardEntry[] = [
     available: true,
     emoji: "🌍",
   },
+  {
+    title: "Capital Guesser",
+    description: "Name all world capitals as fast as you can.",
+    href: "/leaderboard/capital-guesser",
+    available: true,
+    emoji: "🏛️",
+  },
 ];
 
 export default function LeaderboardHub() {
