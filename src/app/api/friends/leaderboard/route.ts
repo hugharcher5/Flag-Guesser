@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 
-const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser'];
+const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser', 'capital_guesser'];
 
 interface FlagStats {
   games_played: number;
@@ -57,8 +57,8 @@ export async function GET(request: Request) {
   // Include current user in the leaderboard
   const profileIds = [user.id, ...friendIds];
 
-  // ── Flag Guesser ─────────────────────────────────────────────────────────────
-  if (mode === 'flag_guesser') {
+  // ── Flag / Capital Guesser ───────────────────────────────────────────────────
+  if (mode === 'flag_guesser' || mode === 'capital_guesser') {
     const { data: profiles, error: profileErr } = await supabase
       .from('profiles')
       .select('id, username, best_score, country, games_by_mode')
@@ -71,7 +71,7 @@ export async function GET(request: Request) {
 
     const entries = (profiles ?? [])
       .map((p) => {
-        const raw = (p.games_by_mode as Record<string, unknown> | null)?.['flag_guesser'];
+        const raw = (p.games_by_mode as Record<string, unknown> | null)?.[mode];
         if (!raw) return null;
 
         if (typeof raw === 'number') {

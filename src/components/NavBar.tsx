@@ -1,6 +1,6 @@
 "use client";
 
-export type AppMode = "flag" | "silhouette" | "globe";
+export type AppMode = "flag" | "silhouette" | "globe" | "capital";
 
 interface NavBarProps {
   mode: AppMode;
@@ -12,6 +12,7 @@ const TABS: { key: AppMode; label: string }[] = [
   { key: "flag", label: "Flag Guesser" },
   { key: "silhouette", label: "Shape Guesser" },
   { key: "globe", label: "Globe Guesser" },
+  { key: "capital", label: "Capital Guesser" },
 ];
 
 export default function NavBar({ mode, onModeChange, isSignedIn }: NavBarProps) {
@@ -23,7 +24,7 @@ export default function NavBar({ mode, onModeChange, isSignedIn }: NavBarProps) 
             <button
               key={key}
               onClick={() => onModeChange(key)}
-              className={`flex-1 py-3 text-sm font-semibold transition-colors touch-manipulation ${
+              className={`flex-1 py-3 text-xs sm:text-sm font-semibold transition-colors touch-manipulation ${
                 mode === key
                   ? "border-b-2 border-blue-600 text-blue-600"
                   : "text-gray-500 hover:text-gray-700"

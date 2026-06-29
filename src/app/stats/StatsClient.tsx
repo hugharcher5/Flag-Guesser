@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type TabKey = "flag_guesser" | "shape_guesser" | "globe_guesser";
+type TabKey = "flag_guesser" | "capital_guesser" | "shape_guesser" | "globe_guesser";
 
 export interface ContinentRow {
   name: string;
@@ -35,12 +35,14 @@ export interface BasicModeStats {
 interface Props {
   username: string;
   flagStats: FlagStats;
+  capitalStats: FlagStats;
   shapeStats: BasicModeStats;
   globeStats: BasicModeStats;
 }
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "flag_guesser", label: "Flag Guesser" },
+  { key: "capital_guesser", label: "Capital Guesser" },
   { key: "shape_guesser", label: "Shape Guesser" },
   { key: "globe_guesser", label: "Globe Guesser" },
 ];
@@ -228,7 +230,7 @@ function BasicModeTab({
   );
 }
 
-export default function StatsClient({ username, flagStats, shapeStats, globeStats }: Props) {
+export default function StatsClient({ username, flagStats, capitalStats, shapeStats, globeStats }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>("flag_guesser");
 
   return (
@@ -261,6 +263,8 @@ export default function StatsClient({ username, flagStats, shapeStats, globeStat
         {/* Tab content */}
         {activeTab === "flag_guesser" && <FlagGuesserTab stats={flagStats} />}
 
+        {activeTab === "capital_guesser" && <FlagGuesserTab stats={capitalStats} />}
+
         {activeTab === "shape_guesser" && (
           <BasicModeTab
             stats={shapeStats}
@@ -284,6 +288,11 @@ export default function StatsClient({ username, flagStats, shapeStats, globeStat
           </a>
           {activeTab === "flag_guesser" && (
             <a href="/leaderboard/flag-guesser" className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+              Leaderboard →
+            </a>
+          )}
+          {activeTab === "capital_guesser" && (
+            <a href="/leaderboard/capital-guesser" className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
               Leaderboard →
             </a>
           )}

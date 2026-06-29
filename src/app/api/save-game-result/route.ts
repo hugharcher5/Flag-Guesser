@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser'] as const;
+const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser', 'capital_guesser'] as const;
 type GameMode = (typeof VALID_MODES)[number];
 
 // Modes where the server computes the score (client value is ignored).
@@ -178,7 +178,7 @@ export async function POST(request: Request) {
   // ── Update aggregated stats ───────────────────────────────────────────────────
   const games_by_mode = (profile.games_by_mode ?? {}) as Record<string, unknown>;
 
-  if (game_mode === 'flag_guesser') {
+  if (game_mode === 'flag_guesser' || game_mode === 'capital_guesser') {
     // Upgrade legacy number format to rich stats object on first write
     const prevRaw = games_by_mode[game_mode];
     const prev: FlagModeStats = typeof prevRaw === 'number'
