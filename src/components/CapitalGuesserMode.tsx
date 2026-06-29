@@ -144,6 +144,61 @@ function CapitalDisplay({
   );
 }
 
+interface MissedItem {
+  code: string;
+  label: string;
+  sublabel?: string;
+  flagUrl?: string;
+}
+
+function MissedAnswersSection({ items }: { items: MissedItem[] }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="w-full rounded-2xl border border-gray-200 bg-white overflow-hidden">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+      >
+        <span className="text-sm font-semibold text-gray-700">
+          Missed Answers ({items.length})
+        </span>
+        <svg
+          className={`w-4 h-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="border-t border-gray-100 divide-y divide-gray-50 max-h-80 overflow-y-auto">
+          {items.map((item) => (
+            <div key={item.code} className="flex items-center gap-3 px-5 py-3">
+              {item.flagUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={item.flagUrl}
+                  alt=""
+                  className="w-8 h-auto rounded-sm shrink-0 shadow-sm"
+                />
+              )}
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-medium text-gray-800 truncate">{item.label}</span>
+                {item.sublabel && (
+                  <span className="text-xs text-gray-400 truncate">{item.sublabel}</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CapitalGuesserMode() {
   const [phase, setPhase] = useState<Phase>("loading");
   const [entries, setEntries] = useState<CountryWithCapital[]>([]);
@@ -422,6 +477,18 @@ export default function CapitalGuesserMode() {
               ? `New fastest completion — ${formatMs(finished.elapsedMs)}`
               : `New best score — ${finished.correctCount} / ${total}`}
           </div>
+        )}
+
+        {/* Missed answers */}
+        {queue.length > 0 && (
+          <MissedAnswersSection
+            items={queue.map((e) => ({
+              code: e.country.code,
+              label: e.country.name,
+              sublabel: e.capital.name,
+              flagUrl: `https://flagcdn.com/w80/${e.country.code}.png`,
+            }))}
+          />
         )}
 
         <button
