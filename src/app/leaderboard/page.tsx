@@ -42,6 +42,13 @@ const LEADERBOARDS: LeaderboardEntry[] = [
     available: true,
     emoji: "🏛️",
   },
+  {
+    title: "Landmark Guesser",
+    description: "Pin 500 famous landmarks on the globe. Ranked by average distance.",
+    href: "/leaderboard/landmark-guesser",
+    available: true,
+    emoji: "📍",
+  },
 ];
 
 export default function LeaderboardHub() {

@@ -5,6 +5,7 @@ import { createSupabaseServer } from '@/lib/supabase/server';
 import ProfileClient, {
   type FlagModeStats,
   type BasicModeStats,
+  type LandmarkModeStats,
 } from './ProfileClient';
 
 interface RawFlagStats {
@@ -20,6 +21,12 @@ interface RawModeStats {
   games_won?: number;
   total_guesses?: number;
   best_score?: number;
+}
+
+interface RawLandmarkStats {
+  games_played?: number;
+  total_distance_km?: number;
+  best_avg_km?: number | null;
 }
 
 type GamesbyMode = Record<string, unknown>;
@@ -39,6 +46,19 @@ function parseFlagStats(raw: unknown, profileBestScore: number): FlagModeStats |
     bestScore: profileBestScore,
     bestCompletionTime: s.best_completion_time ?? null,
     totalPoints: s.total_points ?? 0,
+  };
+}
+
+function parseLandmarkStats(raw: unknown): LandmarkModeStats | null {
+  if (!raw) return null;
+  const s = raw as RawLandmarkStats;
+  if (!s.games_played) return null;
+  return {
+    gamesPlayed: s.games_played,
+    bestAvgKm: s.best_avg_km ?? null,
+    avgKm: s.games_played > 0 && s.total_distance_km != null
+      ? +(s.total_distance_km / s.games_played).toFixed(1)
+      : null,
   };
 }
 
@@ -110,6 +130,7 @@ export default async function ProfilePage({
   const capitalStats = parseFlagStats(gamesbyMode['capital_guesser'], 0);
   const shapeStats = parseBasicStats(gamesbyMode['country_shape_guesser']);
   const globeStats = parseBasicStats(gamesbyMode['globe_guesser']);
+  const landmarkStats = parseLandmarkStats(gamesbyMode['landmark_guesser']);
 
   return (
     <ProfileClient
@@ -122,6 +143,7 @@ export default async function ProfilePage({
       capitalStats={capitalStats}
       shapeStats={shapeStats}
       globeStats={globeStats}
+      landmarkStats={landmarkStats}
       initialFriendStatus={friendStatus}
       friendshipId={friendshipId}
     />

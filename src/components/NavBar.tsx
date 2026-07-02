@@ -1,6 +1,6 @@
 "use client";
 
-export type AppMode = "flag" | "silhouette" | "globe" | "capital";
+export type AppMode = "flag" | "silhouette" | "globe" | "capital" | "landmark";
 
 interface NavBarProps {
   mode: AppMode;
@@ -9,10 +9,11 @@ interface NavBarProps {
 }
 
 const TABS: { key: AppMode; label: string }[] = [
-  { key: "flag", label: "Flag Guesser" },
-  { key: "silhouette", label: "Shape Guesser" },
-  { key: "globe", label: "Globe Guesser" },
-  { key: "capital", label: "Capital Guesser" },
+  { key: "flag", label: "Flags" },
+  { key: "silhouette", label: "Shapes" },
+  { key: "globe", label: "Globe" },
+  { key: "capital", label: "Capitals" },
+  { key: "landmark", label: "Landmarks" },
 ];
 
 export default function NavBar({ mode, onModeChange, isSignedIn }: NavBarProps) {

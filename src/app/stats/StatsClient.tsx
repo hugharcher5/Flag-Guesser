@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type TabKey = "flag_guesser" | "capital_guesser" | "shape_guesser" | "globe_guesser";
+type TabKey = "flag_guesser" | "capital_guesser" | "shape_guesser" | "globe_guesser" | "landmark_guesser";
 
 export interface ContinentRow {
   name: string;
@@ -32,19 +32,27 @@ export interface BasicModeStats {
   avgGuesses: number;
 }
 
+export interface LandmarkStats {
+  gamesPlayed: number;
+  bestAvgKm: number | null;
+  avgKm: number | null;
+}
+
 interface Props {
   username: string;
   flagStats: FlagStats;
   capitalStats: FlagStats;
   shapeStats: BasicModeStats;
   globeStats: BasicModeStats;
+  landmarkStats: LandmarkStats;
 }
 
 const TABS: { key: TabKey; label: string }[] = [
-  { key: "flag_guesser", label: "Flag Guesser" },
-  { key: "capital_guesser", label: "Capital Guesser" },
-  { key: "shape_guesser", label: "Shape Guesser" },
-  { key: "globe_guesser", label: "Globe Guesser" },
+  { key: "flag_guesser", label: "Flags" },
+  { key: "capital_guesser", label: "Capitals" },
+  { key: "shape_guesser", label: "Shapes" },
+  { key: "globe_guesser", label: "Globe" },
+  { key: "landmark_guesser", label: "Landmarks" },
 ];
 
 const TOTAL_FLAGS = 195;
@@ -230,7 +238,49 @@ function BasicModeTab({
   );
 }
 
-export default function StatsClient({ username, flagStats, capitalStats, shapeStats, globeStats }: Props) {
+function formatKm(km: number | null): string {
+  if (km === null) return "—";
+  if (km < 100) return `${km.toFixed(1)} km`;
+  return `${Math.round(km).toLocaleString()} km`;
+}
+
+function LandmarkTab({ stats }: { stats: LandmarkStats }) {
+  if (stats.gamesPlayed === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
+        No games played yet. Play a round of Landmark Guesser to see your stats here.
+      </div>
+    );
+  }
+  return (
+    <section className="flex flex-col gap-4">
+      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Overview</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <StatCard label="Games Played" value={String(stats.gamesPlayed)} />
+        <StatCard
+          label="Best Avg Distance"
+          value={formatKm(stats.bestAvgKm)}
+          sub="lower is better"
+        />
+        <StatCard
+          label="Overall Avg"
+          value={formatKm(stats.avgKm)}
+          sub="across all sessions"
+        />
+      </div>
+      <div>
+        <a
+          href="/leaderboard/landmark-guesser"
+          className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+        >
+          View leaderboard →
+        </a>
+      </div>
+    </section>
+  );
+}
+
+export default function StatsClient({ username, flagStats, capitalStats, shapeStats, globeStats, landmarkStats }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>("flag_guesser");
 
   return (
@@ -280,6 +330,8 @@ export default function StatsClient({ username, flagStats, capitalStats, shapeSt
             leaderboardHref="/leaderboard/globe-guesser"
           />
         )}
+
+        {activeTab === "landmark_guesser" && <LandmarkTab stats={landmarkStats} />}
 
         {/* Nav */}
         <div className="flex gap-4">

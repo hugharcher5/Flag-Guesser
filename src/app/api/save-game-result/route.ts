@@ -4,11 +4,11 @@ import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser', 'capital_guesser'] as const;
+const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser', 'capital_guesser', 'landmark_guesser'] as const;
 type GameMode = (typeof VALID_MODES)[number];
 
 // Modes where the server computes the score (client value is ignored).
-const SERVER_SCORED_MODES: Set<GameMode> = new Set(['country_shape_guesser', 'globe_guesser']);
+const SERVER_SCORED_MODES: Set<GameMode> = new Set(['country_shape_guesser', 'globe_guesser', 'landmark_guesser']);
 
 interface SaveGameBody {
   game_mode: GameMode;
@@ -18,6 +18,7 @@ interface SaveGameBody {
   completion_time?: number;
   country_guessed?: string;
   continent_breakdown?: Record<string, { correct: number; seen: number }>;
+  avg_distance_km?: number;
 }
 
 interface ModeStats {
@@ -33,6 +34,12 @@ interface FlagModeStats {
   best_score: number;
   best_completion_time: number | null;
   total_points: number;
+}
+
+interface LandmarkModeStats {
+  games_played: number;
+  total_distance_km: number;
+  best_avg_km: number | null;
 }
 
 // ── Username helpers ──────────────────────────────────────────────────────────
@@ -85,7 +92,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { game_mode, score, guesses_count, correct, completion_time, country_guessed, continent_breakdown } = body;
+  const { game_mode, score, guesses_count, correct, completion_time, country_guessed, continent_breakdown, avg_distance_km } = body;
 
   // Validate required fields
   if (!VALID_MODES.includes(game_mode)) {
@@ -178,7 +185,20 @@ export async function POST(request: Request) {
   // ── Update aggregated stats ───────────────────────────────────────────────────
   const games_by_mode = (profile.games_by_mode ?? {}) as Record<string, unknown>;
 
-  if (game_mode === 'flag_guesser' || game_mode === 'capital_guesser') {
+  if (game_mode === 'landmark_guesser') {
+    const prev = (games_by_mode['landmark_guesser'] as LandmarkModeStats | undefined) ?? {
+      games_played: 0, total_distance_km: 0, best_avg_km: null,
+    };
+    const sessionAvg = typeof avg_distance_km === 'number' ? avg_distance_km : null;
+    const newBestAvg = sessionAvg !== null
+      ? (prev.best_avg_km === null ? sessionAvg : Math.min(prev.best_avg_km, sessionAvg))
+      : prev.best_avg_km;
+    games_by_mode['landmark_guesser'] = {
+      games_played: prev.games_played + 1,
+      total_distance_km: prev.total_distance_km + (sessionAvg ?? 0),
+      best_avg_km: newBestAvg,
+    };
+  } else if (game_mode === 'flag_guesser' || game_mode === 'capital_guesser') {
     // Upgrade legacy number format to rich stats object on first write
     const prevRaw = games_by_mode[game_mode];
     const prev: FlagModeStats = typeof prevRaw === 'number'

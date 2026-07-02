@@ -12,6 +12,7 @@ import FlagGuesserMode from "@/components/FlagGuesserMode";
 import SilhouetteMode from "@/components/worldle/SilhouetteMode";
 import GlobeMode from "@/components/globe/GlobeMode";
 import CapitalGuesserMode from "@/components/CapitalGuesserMode";
+import LandmarkMode from "@/components/landmark/LandmarkMode";
 
 export default function Page() {
   const [mode, setMode] = useState<AppMode>("flag");
@@ -50,6 +51,8 @@ export default function Page() {
           <SilhouetteMode />
         ) : mode === "capital" ? (
           <CapitalGuesserMode />
+        ) : mode === "landmark" ? (
+          <LandmarkMode />
         ) : (
           <GlobeMode />
         )}
