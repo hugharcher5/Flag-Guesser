@@ -5,6 +5,7 @@ import { createSupabaseServer } from '@/lib/supabase/server';
 import StatsClient, {
   type FlagStats,
   type BasicModeStats,
+  type LandmarkStats,
   type ContinentRow,
 } from './StatsClient';
 
@@ -39,8 +40,8 @@ export default async function StatsPage() {
 
   const username = profile?.username ?? user.email ?? 'Player';
 
-  // ── Fetch all four modes in parallel ─────────────────────────────────────────
-  const [flagRes, capitalRes, shapeRes, globeRes] = await Promise.all([
+  // ── Fetch all five modes in parallel ─────────────────────────────────────────
+  const [flagRes, capitalRes, shapeRes, globeRes, landmarkProfileRes] = await Promise.all([
     supabase
       .from('game_results')
       .select('score, correct, completion_time, continent_breakdown, created_at')
@@ -63,6 +64,11 @@ export default async function StatsPage() {
       .select('score, guesses_count, correct, created_at')
       .eq('user_id', user.id)
       .eq('game_mode', 'globe_guesser'),
+    supabase
+      .from('profiles')
+      .select('games_by_mode')
+      .eq('id', user.id)
+      .single(),
   ]);
 
   // ── Flag Guesser stats ────────────────────────────────────────────────────────
@@ -166,6 +172,15 @@ export default async function StatsPage() {
     (globeRes.data ?? []).map((g) => ({ score: g.score, guesses_count: g.guesses_count, correct: g.correct })),
   );
 
+  // ── Landmark stats ─────────────────────────────────────────────────────────────
+  interface RawLmStats { games_played: number; total_distance_km: number; best_avg_km: number | null; }
+  const lmRaw = (landmarkProfileRes.data?.games_by_mode as Record<string, RawLmStats> | null)?.['landmark_guesser'];
+  const landmarkStats: LandmarkStats = {
+    gamesPlayed: lmRaw?.games_played ?? 0,
+    bestAvgKm: lmRaw?.best_avg_km ?? null,
+    avgKm: lmRaw && lmRaw.games_played > 0 ? +(lmRaw.total_distance_km / lmRaw.games_played).toFixed(1) : null,
+  };
+
   return (
     <StatsClient
       username={username}
@@ -173,6 +188,7 @@ export default async function StatsPage() {
       capitalStats={capitalStats}
       shapeStats={shapeStats}
       globeStats={globeStats}
+      landmarkStats={landmarkStats}
     />
   );
 }

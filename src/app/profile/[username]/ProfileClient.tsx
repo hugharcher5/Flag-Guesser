@@ -20,6 +20,12 @@ export interface BasicModeStats {
   bestScore: number;
 }
 
+export interface LandmarkModeStats {
+  gamesPlayed: number;
+  bestAvgKm: number | null;
+  avgKm: number | null;
+}
+
 export interface ProfileClientProps {
   username: string;
   country: string | null;
@@ -30,16 +36,18 @@ export interface ProfileClientProps {
   capitalStats: FlagModeStats | null;
   shapeStats: BasicModeStats | null;
   globeStats: BasicModeStats | null;
+  landmarkStats: LandmarkModeStats | null;
   initialFriendStatus: FriendStatus;
   friendshipId: string | null;
 }
 
-type TabKey = 'flag' | 'capital' | 'shape' | 'globe';
+type TabKey = 'flag' | 'capital' | 'shape' | 'globe' | 'landmark';
 const TABS: { key: TabKey; label: string }[] = [
-  { key: 'flag', label: 'Flag Guesser' },
-  { key: 'capital', label: 'Capital Guesser' },
-  { key: 'shape', label: 'Shape Guesser' },
-  { key: 'globe', label: 'Globe Guesser' },
+  { key: 'flag', label: 'Flags' },
+  { key: 'capital', label: 'Capitals' },
+  { key: 'shape', label: 'Shapes' },
+  { key: 'globe', label: 'Globe' },
+  { key: 'landmark', label: 'Landmarks' },
 ];
 const TOTAL_FLAGS = 195;
 
@@ -143,6 +151,12 @@ function FriendButton({
   return null;
 }
 
+function formatKm(km: number | null): string {
+  if (km === null) return '—';
+  if (km < 100) return `${km.toFixed(1)} km`;
+  return `${Math.round(km).toLocaleString()} km`;
+}
+
 export default function ProfileClient({
   username,
   country,
@@ -153,6 +167,7 @@ export default function ProfileClient({
   capitalStats,
   shapeStats,
   globeStats,
+  landmarkStats,
   initialFriendStatus,
   friendshipId,
 }: ProfileClientProps) {
@@ -332,6 +347,27 @@ export default function ProfileClient({
           ) : (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
               No Globe Guesser games yet.
+            </div>
+          )
+        )}
+
+        {activeTab === 'landmark' && (
+          landmarkStats && landmarkStats.gamesPlayed > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <StatCard label="Games Played" value={String(landmarkStats.gamesPlayed)} />
+              <StatCard
+                label="Best Avg Distance"
+                value={formatKm(landmarkStats.bestAvgKm)}
+                sub="lower is better"
+              />
+              <StatCard
+                label="Overall Avg"
+                value={formatKm(landmarkStats.avgKm)}
+              />
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
+              No Landmark Guesser games yet.
             </div>
           )
         )}

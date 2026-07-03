@@ -3,12 +3,13 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 
-const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser', 'capital_guesser'];
+const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser', 'capital_guesser', 'landmark_guesser'];
 const MAX_LIMIT = 50;
 
 // These modes store rich stats in profiles.games_by_mode and use the profiles
 // table (public read) for leaderboard queries instead of game_results (owner-only).
 const PROFILE_STATS_MODES = new Set(['country_shape_guesser', 'globe_guesser']);
+const LANDMARK_MODE = 'landmark_guesser';
 
 interface ModeStats {
   games_played: number;
@@ -36,6 +37,47 @@ export async function GET(request: Request) {
       { error: `mode must be one of: ${VALID_MODES.join(', ')}` },
       { status: 400 },
     );
+  }
+
+  // ── Landmark Guesser leaderboard — sorted by best avg distance ascending ──────
+  if (mode === LANDMARK_MODE) {
+    interface LmStats { games_played: number; total_distance_km: number; best_avg_km: number | null; }
+
+    const { data: profiles, error: profilesErr } = await supabase
+      .from('profiles')
+      .select('id, username, country, games_by_mode')
+      .limit(500);
+
+    if (profilesErr) {
+      console.error('landmark leaderboard fetch error:', profilesErr.message);
+      return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
+    }
+
+    const entries = (profiles ?? [])
+      .map((p) => {
+        const stats = (p.games_by_mode as Record<string, LmStats> | null)?.['landmark_guesser'];
+        if (!stats || stats.games_played === 0) return null;
+        const avg_km = stats.games_played > 0 ? stats.total_distance_km / stats.games_played : null;
+        return {
+          id: p.id,
+          username: p.username ?? 'Unknown',
+          country: (p.country as string | null) ?? null,
+          games_played: stats.games_played,
+          avg_km: avg_km !== null ? +avg_km.toFixed(1) : null,
+          best_avg_km: stats.best_avg_km !== null ? +stats.best_avg_km.toFixed(1) : null,
+        };
+      })
+      .filter((e): e is NonNullable<typeof e> => e !== null)
+      .sort((a, b) => {
+        if (a.best_avg_km !== null && b.best_avg_km !== null) return a.best_avg_km - b.best_avg_km;
+        if (a.best_avg_km !== null) return -1;
+        if (b.best_avg_km !== null) return 1;
+        return 0;
+      })
+      .slice(0, limit)
+      .map((e, i) => ({ rank: i + 1, ...e }));
+
+    return NextResponse.json({ leaderboard: entries, mode }, { status: 200 });
   }
 
   // ── Shape / Globe leaderboard — read from profiles (public read) ─────────────

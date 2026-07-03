@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 
-const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser', 'capital_guesser'];
+const VALID_MODES = ['flag_guesser', 'country_shape_guesser', 'globe_guesser', 'capital_guesser', 'landmark_guesser'];
 
 interface FlagStats {
   games_played: number;
@@ -56,6 +56,46 @@ export async function GET(request: Request) {
 
   // Include current user in the leaderboard
   const profileIds = [user.id, ...friendIds];
+
+  // ── Landmark Guesser ─────────────────────────────────────────────────────────
+  if (mode === 'landmark_guesser') {
+    interface LmStats { games_played: number; total_distance_km: number; best_avg_km: number | null; }
+
+    const { data: profiles, error: profileErr } = await supabase
+      .from('profiles')
+      .select('id, username, country, games_by_mode')
+      .in('id', profileIds);
+
+    if (profileErr) {
+      console.error('friends landmark leaderboard error:', profileErr.message);
+      return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
+    }
+
+    const entries = (profiles ?? [])
+      .map((p) => {
+        const stats = (p.games_by_mode as Record<string, LmStats> | null)?.['landmark_guesser'];
+        if (!stats || stats.games_played === 0) return null;
+        const avg_km = stats.games_played > 0 ? stats.total_distance_km / stats.games_played : null;
+        return {
+          id: p.id,
+          username: p.username ?? 'Unknown',
+          country: (p.country as string | null) ?? null,
+          games_played: stats.games_played,
+          avg_km: avg_km !== null ? +avg_km.toFixed(1) : null,
+          best_avg_km: stats.best_avg_km !== null ? +stats.best_avg_km.toFixed(1) : null,
+        };
+      })
+      .filter((e): e is NonNullable<typeof e> => e !== null)
+      .sort((a, b) => {
+        if (a.best_avg_km !== null && b.best_avg_km !== null) return a.best_avg_km - b.best_avg_km;
+        if (a.best_avg_km !== null) return -1;
+        if (b.best_avg_km !== null) return 1;
+        return 0;
+      })
+      .map((e, i) => ({ rank: i + 1, ...e }));
+
+    return NextResponse.json({ leaderboard: entries, mode }, { status: 200 });
+  }
 
   // ── Flag / Capital Guesser ───────────────────────────────────────────────────
   if (mode === 'flag_guesser' || mode === 'capital_guesser') {
