@@ -173,12 +173,13 @@ export default async function StatsPage() {
   );
 
   // ── Landmark stats ─────────────────────────────────────────────────────────────
-  interface RawLmStats { games_played: number; total_distance_km: number; best_avg_km: number | null; }
+  interface RawLmStats { games_played: number; total_distance_km: number; best_avg_km: number | null; best_single_km?: number | null; }
   const lmRaw = (landmarkProfileRes.data?.games_by_mode as Record<string, RawLmStats> | null)?.['landmark_guesser'];
   const landmarkStats: LandmarkStats = {
     gamesPlayed: lmRaw?.games_played ?? 0,
     bestAvgKm: lmRaw?.best_avg_km ?? null,
     avgKm: lmRaw && lmRaw.games_played > 0 ? +(lmRaw.total_distance_km / lmRaw.games_played).toFixed(1) : null,
+    bestSingleKm: lmRaw?.best_single_km ?? null,
   };
 
   return (

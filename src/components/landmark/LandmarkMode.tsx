@@ -118,12 +118,14 @@ export default function LandmarkMode() {
       const allResults = [...results];
       const totalDist = allResults.reduce((s, r) => s + r.distanceKm, 0);
       const avgDist = allResults.length > 0 ? totalDist / allResults.length : 0;
+      const bestSingle = allResults.length > 0 ? Math.min(...allResults.map(r => r.distanceKm)) : undefined;
       saveGameResult({
         game_mode: 'landmark_guesser',
         score: 0,
         guesses_count: allResults.length,
         correct: false,
         avg_distance_km: avgDist,
+        best_single_km: bestSingle,
       });
     } else {
       setIndex(nextIndex);
@@ -220,7 +222,12 @@ export default function LandmarkMode() {
     <div className="w-full max-w-md flex flex-col gap-4">
       {/* Progress */}
       <div className="flex items-center justify-between text-xs text-gray-400 font-medium">
-        <span>Landmark {index + 1} of {queue.length}</span>
+        <div className="flex flex-col gap-0.5">
+          <span>Landmark {index + 1} of {queue.length}</span>
+          {avgKm !== null && (
+            <span className="text-gray-400">Avg so far: <span className="text-gray-600 font-semibold tabular-nums">{formatKm(avgKm)}</span></span>
+          )}
+        </div>
         <div className="flex gap-1">
           {queue.map((_, i) => (
             <div
