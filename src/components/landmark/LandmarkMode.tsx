@@ -234,22 +234,9 @@ export default function LandmarkMode() {
       </div>
 
       {/* Landmark name card */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col gap-1">
-        {currentImage === undefined && (
-          <div className="w-full h-48 bg-gray-100 animate-pulse" />
-        )}
-        {typeof currentImage === 'string' && (
-          <img
-            src={currentImage}
-            alt={current?.name ?? ''}
-            className="w-full h-48 object-cover"
-            onError={() => setCurrentImage(null)}
-          />
-        )}
-        <div className="px-5 py-4 flex flex-col gap-1">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Where is this?</span>
-          <h2 className="text-2xl font-bold text-gray-800">{current?.name}</h2>
-        </div>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
+        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Where is this?</span>
+        <h2 className="text-2xl font-bold text-gray-800">{current?.name}</h2>
       </div>
 
       {/* Globe */}
