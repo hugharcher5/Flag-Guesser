@@ -1,15 +1,9 @@
 'use client';
 
-import { useRef, useEffect, useState, useCallback } from 'react';
-import Globe from 'react-globe.gl';
-import type { GlobeMethods } from 'react-globe.gl';
-
-interface PinPoint {
-  lat: number;
-  lng: number;
-  color: string;
-  size: number;
-}
+import { useRef, useEffect } from 'react';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { useMapLibreGlobe } from '../maplibre-globe/useMapLibreGlobe';
 
 interface Props {
   guessPin: { lat: number; lng: number } | null;
@@ -20,6 +14,17 @@ interface Props {
   height?: number;
 }
 
+function makePinEl(color: string): HTMLDivElement {
+  const el = document.createElement('div');
+  el.style.width = '18px';
+  el.style.height = '18px';
+  el.style.borderRadius = '50%';
+  el.style.background = color;
+  el.style.border = '2px solid white';
+  el.style.boxShadow = '0 1px 4px rgba(0,0,0,0.5)';
+  return el;
+}
+
 export default function LandmarkGlobeDisplay({
   guessPin,
   answerPin,
@@ -28,77 +33,75 @@ export default function LandmarkGlobeDisplay({
   onFocusComplete,
   height = 440,
 }: Props) {
-  const globeRef = useRef<GlobeMethods>(null!);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(600);
+  const guessMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const answerMarkerRef = useRef<maplibregl.Marker | null>(null);
 
+  const onGlobeClickRef = useRef(onGlobeClick);
+  onGlobeClickRef.current = onGlobeClick;
   const onFocusCompleteRef = useRef(onFocusComplete);
   onFocusCompleteRef.current = onFocusComplete;
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const obs = new ResizeObserver(entries => {
-      setWidth(entries[0].contentRect.width);
-    });
-    obs.observe(el);
-    setWidth(el.offsetWidth);
-    return () => obs.disconnect();
-  }, []);
+  const { mapRef, ready } = useMapLibreGlobe(containerRef);
 
+  // ── Click-to-place pin ──────────────────────────────────────────────────────
   useEffect(() => {
-    if (!focusCentroid) return;
-    const globe = globeRef.current;
-    if (!globe) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pov = globe.pointOfView() as any;
-    globe.pointOfView(
-      { lat: focusCentroid.lat, lng: focusCentroid.lng, altitude: pov?.altitude ?? 2.5 },
-      1000,
-    );
+    if (!ready || !mapRef.current) return;
+    const map = mapRef.current;
+    const handleClick = (e: maplibregl.MapMouseEvent) => {
+      onGlobeClickRef.current(e.lngLat.lat, e.lngLat.lng);
+    };
+    map.on('click', handleClick);
+    return () => { map.off('click', handleClick); };
+  }, [ready, mapRef]);
+
+  // ── Guess pin (red) ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return;
+    if (!guessPin) {
+      guessMarkerRef.current?.remove();
+      guessMarkerRef.current = null;
+      return;
+    }
+    if (!guessMarkerRef.current) {
+      guessMarkerRef.current = new maplibregl.Marker({ element: makePinEl('#ef4444') });
+    }
+    guessMarkerRef.current.setLngLat([guessPin.lng, guessPin.lat]).addTo(mapRef.current);
+  }, [ready, mapRef, guessPin]);
+
+  // ── Answer pin (green) ───────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return;
+    if (!answerPin) {
+      answerMarkerRef.current?.remove();
+      answerMarkerRef.current = null;
+      return;
+    }
+    if (!answerMarkerRef.current) {
+      answerMarkerRef.current = new maplibregl.Marker({ element: makePinEl('#22c55e') });
+    }
+    answerMarkerRef.current.setLngLat([answerPin.lng, answerPin.lat]).addTo(mapRef.current);
+  }, [ready, mapRef, answerPin]);
+
+  // ── Rotate to true location after a guess is confirmed ──────────────────────
+  useEffect(() => {
+    if (!focusCentroid || !ready || !mapRef.current) return;
+    const map = mapRef.current;
+    map.flyTo({ center: [focusCentroid.lng, focusCentroid.lat], zoom: map.getZoom(), duration: 1000 });
+
     const timer = setTimeout(() => {
       onFocusCompleteRef.current?.();
     }, 1100);
+
     return () => clearTimeout(timer);
-  }, [focusCentroid]);
-
-  const handleGlobeReady = useCallback(() => {
-    const globe = globeRef.current;
-    if (!globe) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const controls = globe.controls() as any;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.3;
-    const canvas = globe.renderer().domElement;
-    const stop = () => { controls.autoRotate = false; };
-    canvas.addEventListener('mousedown', stop);
-    canvas.addEventListener('touchstart', stop, { passive: true });
-  }, []);
-
-  const points: PinPoint[] = [];
-  if (guessPin) points.push({ lat: guessPin.lat, lng: guessPin.lng, color: '#ef4444', size: 0.6 });
-  if (answerPin) points.push({ lat: answerPin.lat, lng: answerPin.lng, color: '#22c55e', size: 0.6 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusCentroid, ready]);
 
   return (
-    <div ref={containerRef} className="w-full rounded-2xl overflow-hidden" style={{ height }}>
-      <Globe
-        ref={globeRef}
-        width={width}
-        height={height}
-        globeImageUrl="/earth-day.jpg"
-        bumpImageUrl="/earth-topology.png"
-        onGlobeReady={handleGlobeReady}
-        backgroundColor="#e8f4f8"
-        showAtmosphere={false}
-        onGlobeClick={({ lat, lng }: { lat: number; lng: number }) => onGlobeClick(lat, lng)}
-        pointsData={points}
-        pointLat={(p: object) => (p as PinPoint).lat}
-        pointLng={(p: object) => (p as PinPoint).lng}
-        pointColor={(p: object) => (p as PinPoint).color}
-        pointRadius={(p: object) => (p as PinPoint).size}
-        pointAltitude={0.01}
-        pointResolution={12}
-      />
-    </div>
+    <div
+      ref={containerRef}
+      className="w-full rounded-2xl overflow-hidden"
+      style={{ height, background: '#e8f4f8' }}
+    />
   );
 }

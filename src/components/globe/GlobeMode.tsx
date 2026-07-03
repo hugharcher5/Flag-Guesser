@@ -14,7 +14,7 @@ import GuessList, { type GlobeGuessEntry } from './GuessList';
 import MagnifyOverlay from './MagnifyOverlay';
 import type { GuessedPolygon } from './GlobeDisplay';
 
-// Three.js / react-globe.gl must not run on the server
+// MapLibre GL must not run on the server
 const GlobeDisplay = dynamic(() => import('./GlobeDisplay'), { ssr: false });
 
 type Phase = 'loading' | 'playing' | 'won';
