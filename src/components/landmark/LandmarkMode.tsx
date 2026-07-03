@@ -58,13 +58,14 @@ export default function LandmarkMode() {
   const [focusCentroid, setFocusCentroid] = useState<{ lat: number; lng: number } | null>(null);
   const [results, setResults] = useState<RoundResult[]>([]);
   const [currentDist, setCurrentDist] = useState<number | null>(null);
-  const [currentImage, setCurrentImage] = useState<string | null>(null);
+  // undefined = loading, null = no image available, string = url
+  const [currentImage, setCurrentImage] = useState<string | null | undefined>(undefined);
 
   const current = queue[index] ?? null;
 
   useEffect(() => {
     if (!current) return;
-    setCurrentImage(null);
+    setCurrentImage(undefined);
     const title = (current.wikiTitle ?? current.name).replace(/ /g, '_');
     const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
     const ctrl = new AbortController();
@@ -72,9 +73,9 @@ export default function LandmarkMode() {
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         const src = d?.thumbnail?.source as string | undefined;
-        if (src) setCurrentImage(src.replace(/\/\d+px-/, '/800px-'));
+        setCurrentImage(src ? src.replace(/\/\d+px-/, '/800px-') : null);
       })
-      .catch(() => {});
+      .catch(() => setCurrentImage(null));
     return () => ctrl.abort();
   }, [current]);
 
@@ -234,15 +235,16 @@ export default function LandmarkMode() {
 
       {/* Landmark name card */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col gap-1">
-        {currentImage && (
+        {currentImage === undefined && (
+          <div className="w-full h-48 bg-gray-100 animate-pulse" />
+        )}
+        {typeof currentImage === 'string' && (
           <img
             src={currentImage}
             alt={current?.name ?? ''}
             className="w-full h-48 object-cover"
+            onError={() => setCurrentImage(null)}
           />
-        )}
-        {!currentImage && (
-          <div className="w-full h-48 bg-gray-100 animate-pulse" />
         )}
         <div className="px-5 py-4 flex flex-col gap-1">
           <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Where is this?</span>
