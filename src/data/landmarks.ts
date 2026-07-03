@@ -5,6 +5,8 @@ export interface Landmark {
   lng: number;
   city: string;
   country: string;
+  /** Override for Wikipedia article title when the landmark name doesn't match directly */
+  wikiTitle?: string;
 }
 
 const landmarks: Landmark[] = [
@@ -15,13 +17,13 @@ const landmarks: Landmark[] = [
   { id: "arc-de-triomphe", name: "Arc de Triomphe", lat: 48.8738, lng: 2.2950, city: "Paris", country: "France" },
   { id: "versailles", name: "Palace of Versailles", lat: 48.8049, lng: 2.1204, city: "Versailles", country: "France" },
   { id: "mont-saint-michel", name: "Mont Saint-Michel", lat: 48.6361, lng: -1.5115, city: "Normandy", country: "France" },
-  { id: "sacre-coeur", name: "Sacré-Cœur Basilica", lat: 48.8867, lng: 2.3431, city: "Paris", country: "France" },
+  { id: "sacre-coeur", name: "Sacré-Cœur Basilica", lat: 48.8867, lng: 2.3431, city: "Paris", country: "France", wikiTitle: "Sacré-Cœur, Paris" },
   { id: "carcassonne", name: "Carcassonne", lat: 43.2107, lng: 2.3517, city: "Occitanie", country: "France" },
   { id: "pont-du-gard", name: "Pont du Gard", lat: 43.9475, lng: 4.5353, city: "Occitanie", country: "France" },
   { id: "colosseum", name: "Colosseum", lat: 41.8902, lng: 12.4922, city: "Rome", country: "Italy" },
   { id: "vatican", name: "Vatican City", lat: 41.9029, lng: 12.4534, city: "Vatican City", country: "Vatican" },
   { id: "trevi-fountain", name: "Trevi Fountain", lat: 41.9009, lng: 12.4834, city: "Rome", country: "Italy" },
-  { id: "pantheon-rome", name: "Pantheon", lat: 41.8986, lng: 12.4769, city: "Rome", country: "Italy" },
+  { id: "pantheon-rome", name: "Pantheon", lat: 41.8986, lng: 12.4769, city: "Rome", country: "Italy", wikiTitle: "Pantheon, Rome" },
   { id: "pisa-tower", name: "Leaning Tower of Pisa", lat: 43.7230, lng: 10.3966, city: "Pisa", country: "Italy" },
   { id: "venice-grand-canal", name: "Venice Grand Canal", lat: 45.4408, lng: 12.3155, city: "Venice", country: "Italy" },
   { id: "st-marks-basilica", name: "St. Mark's Basilica", lat: 45.4345, lng: 12.3388, city: "Venice", country: "Italy" },
@@ -140,15 +142,15 @@ const landmarks: Landmark[] = [
   { id: "my-son-sanctuary", name: "Mỹ Sơn Sanctuary", lat: 15.7627, lng: 108.1225, city: "Quảng Nam", country: "Vietnam" },
   { id: "shinjuku-station", name: "Shinjuku Station", lat: 35.6896, lng: 139.7006, city: "Tokyo", country: "Japan" },
   { id: "mount-fuji", name: "Mount Fuji", lat: 35.3606, lng: 138.7274, city: "Shizuoka", country: "Japan" },
-  { id: "fushimi-inari", name: "Fushimi Inari Shrine", lat: 34.9671, lng: 135.7727, city: "Kyoto", country: "Japan" },
-  { id: "kinkakuji", name: "Kinkaku-ji (Golden Pavilion)", lat: 35.0394, lng: 135.7292, city: "Kyoto", country: "Japan" },
+  { id: "fushimi-inari", name: "Fushimi Inari Shrine", lat: 34.9671, lng: 135.7727, city: "Kyoto", country: "Japan", wikiTitle: "Fushimi Inari-taisha" },
+  { id: "kinkakuji", name: "Kinkaku-ji (Golden Pavilion)", lat: 35.0394, lng: 135.7292, city: "Kyoto", country: "Japan", wikiTitle: "Kinkaku-ji" },
   { id: "hiroshima-dome", name: "Hiroshima Peace Memorial", lat: 34.3955, lng: 132.4531, city: "Hiroshima", country: "Japan" },
   { id: "itsukushima", name: "Itsukushima Shrine", lat: 34.2952, lng: 132.3195, city: "Hiroshima", country: "Japan" },
   { id: "senso-ji", name: "Senso-ji Temple", lat: 35.7148, lng: 139.7967, city: "Tokyo", country: "Japan" },
   { id: "nara-deer-park", name: "Nara Deer Park", lat: 34.6851, lng: 135.8050, city: "Nara", country: "Japan" },
   { id: "tokyo-tower", name: "Tokyo Tower", lat: 35.6586, lng: 139.7454, city: "Tokyo", country: "Japan" },
   { id: "osaka-castle", name: "Osaka Castle", lat: 34.6873, lng: 135.5262, city: "Osaka", country: "Japan" },
-  { id: "arashiyama", name: "Arashiyama Bamboo Grove", lat: 35.0170, lng: 135.6714, city: "Kyoto", country: "Japan" },
+  { id: "arashiyama", name: "Arashiyama Bamboo Grove", lat: 35.0170, lng: 135.6714, city: "Kyoto", country: "Japan", wikiTitle: "Arashiyama" },
   { id: "gyeongbokgung", name: "Gyeongbokgung Palace", lat: 37.5796, lng: 126.9770, city: "Seoul", country: "South Korea" },
   { id: "n-seoul-tower", name: "N Seoul Tower", lat: 37.5512, lng: 126.9882, city: "Seoul", country: "South Korea" },
   { id: "seoraksan", name: "Seoraksan National Park", lat: 38.1195, lng: 128.4650, city: "Gangwon-do", country: "South Korea" },
@@ -165,7 +167,7 @@ const landmarks: Landmark[] = [
   { id: "batu-caves", name: "Batu Caves", lat: 3.2372, lng: 101.6840, city: "Selangor", country: "Malaysia" },
   { id: "kinabalu", name: "Mount Kinabalu", lat: 6.0750, lng: 116.5587, city: "Sabah", country: "Malaysia" },
   { id: "phi-phi-islands", name: "Phi Phi Islands", lat: 7.7407, lng: 98.7784, city: "Krabi", country: "Thailand" },
-  { id: "wat-phra-kaew", name: "Wat Phra Kaew (Temple of the Emerald Buddha)", lat: 13.7516, lng: 100.4927, city: "Bangkok", country: "Thailand" },
+  { id: "wat-phra-kaew", name: "Wat Phra Kaew (Temple of the Emerald Buddha)", lat: 13.7516, lng: 100.4927, city: "Bangkok", country: "Thailand", wikiTitle: "Wat Phra Kaew" },
   { id: "wat-arun", name: "Wat Arun", lat: 13.7438, lng: 100.4885, city: "Bangkok", country: "Thailand" },
   { id: "chiang-mai-temples", name: "Doi Suthep Temple", lat: 18.8047, lng: 98.9216, city: "Chiang Mai", country: "Thailand" },
   { id: "shwedagon-pagoda", name: "Shwedagon Pagoda", lat: 16.7985, lng: 96.1495, city: "Yangon", country: "Myanmar" },

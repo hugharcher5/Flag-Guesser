@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import landmarks, { type Landmark } from '@/data/landmarks';
 import { haversineKm } from '@/lib/geo/haversine';
@@ -58,8 +58,25 @@ export default function LandmarkMode() {
   const [focusCentroid, setFocusCentroid] = useState<{ lat: number; lng: number } | null>(null);
   const [results, setResults] = useState<RoundResult[]>([]);
   const [currentDist, setCurrentDist] = useState<number | null>(null);
+  const [currentImage, setCurrentImage] = useState<string | null>(null);
 
   const current = queue[index] ?? null;
+
+  useEffect(() => {
+    if (!current) return;
+    setCurrentImage(null);
+    const title = (current.wikiTitle ?? current.name).replace(/ /g, '_');
+    const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
+    const ctrl = new AbortController();
+    fetch(url, { signal: ctrl.signal })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        const src = d?.thumbnail?.source as string | undefined;
+        if (src) setCurrentImage(src.replace(/\/\d+px-/, '/800px-'));
+      })
+      .catch(() => {});
+    return () => ctrl.abort();
+  }, [current]);
 
   const startGame = useCallback(() => {
     const picked = shuffle(landmarks).slice(0, LANDMARKS_PER_SESSION);
@@ -216,9 +233,21 @@ export default function LandmarkMode() {
       </div>
 
       {/* Landmark name card */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
-        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Where is this?</span>
-        <h2 className="text-2xl font-bold text-gray-800">{current?.name}</h2>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col gap-1">
+        {currentImage && (
+          <img
+            src={currentImage}
+            alt={current?.name ?? ''}
+            className="w-full h-48 object-cover"
+          />
+        )}
+        {!currentImage && (
+          <div className="w-full h-48 bg-gray-100 animate-pulse" />
+        )}
+        <div className="px-5 py-4 flex flex-col gap-1">
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Where is this?</span>
+          <h2 className="text-2xl font-bold text-gray-800">{current?.name}</h2>
+        </div>
       </div>
 
       {/* Globe */}
