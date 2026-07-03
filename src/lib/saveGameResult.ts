@@ -9,6 +9,7 @@ interface SaveGamePayload {
   country_guessed?: string;
   continent_breakdown?: Record<string, { correct: number; seen: number }>;
   avg_distance_km?: number;
+  best_single_km?: number;
 }
 
 /**

@@ -36,6 +36,7 @@ export interface LandmarkStats {
   gamesPlayed: number;
   bestAvgKm: number | null;
   avgKm: number | null;
+  bestSingleKm: number | null;
 }
 
 interface Props {
@@ -261,6 +262,11 @@ function LandmarkTab({ stats }: { stats: LandmarkStats }) {
           label="Best Avg Distance"
           value={formatKm(stats.bestAvgKm)}
           sub="lower is better"
+        />
+        <StatCard
+          label="Closest Single Guess"
+          value={formatKm(stats.bestSingleKm)}
+          sub="best single pin"
         />
         <StatCard
           label="Overall Avg"

@@ -19,6 +19,7 @@ interface SaveGameBody {
   country_guessed?: string;
   continent_breakdown?: Record<string, { correct: number; seen: number }>;
   avg_distance_km?: number;
+  best_single_km?: number;
 }
 
 interface ModeStats {
@@ -40,6 +41,7 @@ interface LandmarkModeStats {
   games_played: number;
   total_distance_km: number;
   best_avg_km: number | null;
+  best_single_km: number | null;
 }
 
 // ── Username helpers ──────────────────────────────────────────────────────────
@@ -92,7 +94,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { game_mode, score, guesses_count, correct, completion_time, country_guessed, continent_breakdown, avg_distance_km } = body;
+  const { game_mode, score, guesses_count, correct, completion_time, country_guessed, continent_breakdown, avg_distance_km, best_single_km } = body;
 
   // Validate required fields
   if (!VALID_MODES.includes(game_mode)) {
@@ -187,16 +189,21 @@ export async function POST(request: Request) {
 
   if (game_mode === 'landmark_guesser') {
     const prev = (games_by_mode['landmark_guesser'] as LandmarkModeStats | undefined) ?? {
-      games_played: 0, total_distance_km: 0, best_avg_km: null,
+      games_played: 0, total_distance_km: 0, best_avg_km: null, best_single_km: null,
     };
     const sessionAvg = typeof avg_distance_km === 'number' ? avg_distance_km : null;
+    const sessionBest = typeof best_single_km === 'number' ? best_single_km : null;
     const newBestAvg = sessionAvg !== null
       ? (prev.best_avg_km === null ? sessionAvg : Math.min(prev.best_avg_km, sessionAvg))
       : prev.best_avg_km;
+    const newBestSingle = sessionBest !== null
+      ? (prev.best_single_km === null ? sessionBest : Math.min(prev.best_single_km, sessionBest))
+      : prev.best_single_km;
     games_by_mode['landmark_guesser'] = {
       games_played: prev.games_played + 1,
       total_distance_km: prev.total_distance_km + (sessionAvg ?? 0),
       best_avg_km: newBestAvg,
+      best_single_km: newBestSingle,
     };
   } else if (game_mode === 'flag_guesser' || game_mode === 'capital_guesser') {
     // Upgrade legacy number format to rich stats object on first write

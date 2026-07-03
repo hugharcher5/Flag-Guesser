@@ -58,13 +58,14 @@ export default function LandmarkMode() {
   const [focusCentroid, setFocusCentroid] = useState<{ lat: number; lng: number } | null>(null);
   const [results, setResults] = useState<RoundResult[]>([]);
   const [currentDist, setCurrentDist] = useState<number | null>(null);
-  const [currentImage, setCurrentImage] = useState<string | null>(null);
+  // undefined = loading, null = no image available, string = url
+  const [currentImage, setCurrentImage] = useState<string | null | undefined>(undefined);
 
   const current = queue[index] ?? null;
 
   useEffect(() => {
     if (!current) return;
-    setCurrentImage(null);
+    setCurrentImage(undefined);
     const title = (current.wikiTitle ?? current.name).replace(/ /g, '_');
     const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
     const ctrl = new AbortController();
@@ -72,9 +73,9 @@ export default function LandmarkMode() {
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         const src = d?.thumbnail?.source as string | undefined;
-        if (src) setCurrentImage(src.replace(/\/\d+px-/, '/800px-'));
+        setCurrentImage(src ? src.replace(/\/\d+px-/, '/800px-') : null);
       })
-      .catch(() => {});
+      .catch(() => setCurrentImage(null));
     return () => ctrl.abort();
   }, [current]);
 
@@ -117,12 +118,14 @@ export default function LandmarkMode() {
       const allResults = [...results];
       const totalDist = allResults.reduce((s, r) => s + r.distanceKm, 0);
       const avgDist = allResults.length > 0 ? totalDist / allResults.length : 0;
+      const bestSingle = allResults.length > 0 ? Math.min(...allResults.map(r => r.distanceKm)) : undefined;
       saveGameResult({
         game_mode: 'landmark_guesser',
         score: 0,
         guesses_count: allResults.length,
         correct: false,
         avg_distance_km: avgDist,
+        best_single_km: bestSingle,
       });
     } else {
       setIndex(nextIndex);
@@ -219,7 +222,12 @@ export default function LandmarkMode() {
     <div className="w-full max-w-md flex flex-col gap-4">
       {/* Progress */}
       <div className="flex items-center justify-between text-xs text-gray-400 font-medium">
-        <span>Landmark {index + 1} of {queue.length}</span>
+        <div className="flex flex-col gap-0.5">
+          <span>Landmark {index + 1} of {queue.length}</span>
+          {avgKm !== null && (
+            <span className="text-gray-400">Avg so far: <span className="text-gray-600 font-semibold tabular-nums">{formatKm(avgKm)}</span></span>
+          )}
+        </div>
         <div className="flex gap-1">
           {queue.map((_, i) => (
             <div
@@ -233,21 +241,9 @@ export default function LandmarkMode() {
       </div>
 
       {/* Landmark name card */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col gap-1">
-        {currentImage && (
-          <img
-            src={currentImage}
-            alt={current?.name ?? ''}
-            className="w-full h-48 object-cover"
-          />
-        )}
-        {!currentImage && (
-          <div className="w-full h-48 bg-gray-100 animate-pulse" />
-        )}
-        <div className="px-5 py-4 flex flex-col gap-1">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Where is this?</span>
-          <h2 className="text-2xl font-bold text-gray-800">{current?.name}</h2>
-        </div>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
+        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Where is this?</span>
+        <h2 className="text-2xl font-bold text-gray-800">{current?.name}</h2>
       </div>
 
       {/* Globe */}

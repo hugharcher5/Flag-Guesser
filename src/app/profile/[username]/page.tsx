@@ -27,6 +27,7 @@ interface RawLandmarkStats {
   games_played?: number;
   total_distance_km?: number;
   best_avg_km?: number | null;
+  best_single_km?: number | null;
 }
 
 type GamesbyMode = Record<string, unknown>;
@@ -59,6 +60,7 @@ function parseLandmarkStats(raw: unknown): LandmarkModeStats | null {
     avgKm: s.games_played > 0 && s.total_distance_km != null
       ? +(s.total_distance_km / s.games_played).toFixed(1)
       : null,
+    bestSingleKm: s.best_single_km ?? null,
   };
 }
 

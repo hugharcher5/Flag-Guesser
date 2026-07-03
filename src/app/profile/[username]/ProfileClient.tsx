@@ -24,6 +24,7 @@ export interface LandmarkModeStats {
   gamesPlayed: number;
   bestAvgKm: number | null;
   avgKm: number | null;
+  bestSingleKm: number | null;
 }
 
 export interface ProfileClientProps {
@@ -359,6 +360,11 @@ export default function ProfileClient({
                 label="Best Avg Distance"
                 value={formatKm(landmarkStats.bestAvgKm)}
                 sub="lower is better"
+              />
+              <StatCard
+                label="Closest Single Guess"
+                value={formatKm(landmarkStats.bestSingleKm)}
+                sub="best single pin"
               />
               <StatCard
                 label="Overall Avg"
