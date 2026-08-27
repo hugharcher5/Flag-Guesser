@@ -41,7 +41,7 @@ export default function NavBar({ mode, onModeChange, isSignedIn }: NavBarProps) 
           className="hidden md:flex items-center gap-2 pr-4 mr-2 border-r border-gray-100 shrink-0"
         >
           <img src="/favicon.svg" alt="" className="w-6 h-6" />
-          <span className="font-bold text-gray-900 tracking-tight whitespace-nowrap">Flag Guesser</span>
+          <span className="font-bold text-gray-900 tracking-tight whitespace-nowrap">GeoGrail</span>
         </a>
 
         <div className="flex flex-1 overflow-x-auto md:overflow-visible md:flex-none md:gap-1">
