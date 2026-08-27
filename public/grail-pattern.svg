@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <g fill="#000000" fill-opacity="0.06">
+    <g transform="translate(20,15) scale(0.55) rotate(-8)">
+      <polygon points="9,7 23,7 19,16 13,16"/>
+      <rect x="15" y="16" width="2" height="4"/>
+      <rect x="11" y="21" width="10" height="2.5" rx="1.25"/>
+    </g>
+    <g transform="translate(150,40) scale(0.8) rotate(12)">
+      <polygon points="9,7 23,7 19,16 13,16"/>
+      <rect x="15" y="16" width="2" height="4"/>
+      <rect x="11" y="21" width="10" height="2.5" rx="1.25"/>
+    </g>
+    <g transform="translate(70,110) scale(0.65) rotate(5)">
+      <polygon points="9,7 23,7 19,16 13,16"/>
+      <rect x="15" y="16" width="2" height="4"/>
+      <rect x="11" y="21" width="10" height="2.5" rx="1.25"/>
+    </g>
+    <g transform="translate(190,150) scale(0.5) rotate(-15)">
+      <polygon points="9,7 23,7 19,16 13,16"/>
+      <rect x="15" y="16" width="2" height="4"/>
+      <rect x="11" y="21" width="10" height="2.5" rx="1.25"/>
+    </g>
+    <g transform="translate(30,180) scale(0.7) rotate(18)">
+      <polygon points="9,7 23,7 19,16 13,16"/>
+      <rect x="15" y="16" width="2" height="4"/>
+      <rect x="11" y="21" width="10" height="2.5" rx="1.25"/>
+    </g>
+  </g>
+</svg>

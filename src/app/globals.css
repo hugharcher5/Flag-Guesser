@@ -7,6 +7,21 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Scattered grail watermark, subtle enough not to compete with content.
+   Every page wraps its content in its own opaque full-height div, which
+   hides a body background regardless of z-index — so instead this sits
+   as a fixed, click-through overlay ABOVE everything at very low opacity,
+   which reads identically to the eye as a background texture. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-image: url("/grail-pattern.svg");
+  background-repeat: repeat;
+  pointer-events: none;
+}
+
 /* Prevent pull-to-refresh and overscroll bounce interfering with gameplay */
 html,
 body {
