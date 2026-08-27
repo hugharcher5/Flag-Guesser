@@ -9,11 +9,11 @@ interface NavBarProps {
 }
 
 const TABS: { key: AppMode; label: string }[] = [
-  { key: "flag", label: "Flags" },
-  { key: "silhouette", label: "Shapes" },
-  { key: "globe", label: "Globe" },
-  { key: "capital", label: "Capitals" },
-  { key: "landmark", label: "Landmarks" },
+  { key: "flag", label: "Flag Quiz" },
+  { key: "silhouette", label: "Guess the Border" },
+  { key: "globe", label: "Globe Guesser" },
+  { key: "capital", label: "Capital Quiz" },
+  { key: "landmark", label: "Landmark Guesser" },
 ];
 
 function NavIcon({ href, title, children }: { href: string; title: string; children: React.ReactNode }) {
@@ -44,12 +44,12 @@ export default function NavBar({ mode, onModeChange, isSignedIn }: NavBarProps) 
           <span className="font-bold text-gray-900 tracking-tight whitespace-nowrap">Flag Guesser</span>
         </a>
 
-        <div className="flex flex-1 md:flex-none md:gap-1">
+        <div className="flex flex-1 overflow-x-auto md:overflow-visible md:flex-none md:gap-1">
           {TABS.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => onModeChange(key)}
-              className={`flex-1 md:flex-none py-3 md:py-2 md:px-4 text-xs sm:text-sm font-semibold transition-colors touch-manipulation md:rounded-lg ${
+              className={`flex-none whitespace-nowrap px-3 md:px-4 py-3 md:py-2 text-xs sm:text-sm font-semibold transition-colors touch-manipulation md:rounded-lg ${
                 mode === key
                   ? "border-b-2 border-blue-600 text-blue-600 md:border-b-0 md:bg-blue-50"
                   : "text-gray-500 hover:text-gray-700 md:hover:bg-gray-50"
