@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "GeoGrail",
   description: "Test your geography knowledge across flags, borders, capitals, the globe, and landmarks",
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: "/favicon.svg?v=grail1" },
 };
 
 export const viewport: Viewport = {
