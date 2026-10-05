@@ -13,9 +13,10 @@ import SilhouetteMode from "@/components/worldle/SilhouetteMode";
 import GlobeMode from "@/components/globe/GlobeMode";
 import CapitalGuesserMode from "@/components/CapitalGuesserMode";
 import LandmarkMode from "@/components/landmark/LandmarkMode";
+import TitleScreen from "@/components/TitleScreen";
 
 export default function Page() {
-  const [mode, setMode] = useState<AppMode>("flag");
+  const [mode, setMode] = useState<AppMode | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -25,6 +26,8 @@ export default function Page() {
     );
     return () => subscription.unsubscribe();
   }, []);
+
+  if (!mode) return <TitleScreen onSelect={setMode} isSignedIn={!!user} />;
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-gray-50">

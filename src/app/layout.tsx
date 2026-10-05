@@ -4,14 +4,13 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "GeoGrail",
   description: "Test your geography knowledge across flags, borders, capitals, the globe, and landmarks",
-  icons: { icon: "/favicon.svg" },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#6B1024",
+  themeColor: "#16153F",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

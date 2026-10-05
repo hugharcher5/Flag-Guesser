@@ -40,7 +40,7 @@ export default function NavBar({ mode, onModeChange, isSignedIn }: NavBarProps) 
           href="/"
           className="hidden md:flex items-center gap-2 pr-4 mr-2 border-r border-gray-100 shrink-0"
         >
-          <img src="/favicon.svg" alt="" className="w-6 h-6" />
+          <img src="/icon.png" alt="" className="w-7 h-7 rounded-md" />
           <span className="font-bold text-gray-900 tracking-tight whitespace-nowrap">GeoGrail</span>
         </a>
 
