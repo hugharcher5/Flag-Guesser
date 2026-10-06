@@ -1,5 +1,6 @@
 import ModeIcon from "@/components/ModeIcon";
 import type { AppMode } from "@/components/NavBar";
+import Icon from "@/components/Icon";
 /**
  * Leaderboard hub — links to each game mode's leaderboard.
  * Add new entries to LEADERBOARDS to make them appear in the grid.
@@ -86,8 +87,9 @@ export default function LeaderboardHub() {
                   </span>
                   <span className="text-sm text-gray-500">{board.description}</span>
                 </div>
-                <span className="mt-auto text-xs font-semibold text-blue-600 group-hover:underline">
-                  View leaderboard →
+                <span className="inline-flex items-center gap-1.5 mt-auto text-xs font-semibold text-blue-600 group-hover:underline">
+                  View leaderboard
+                  <Icon name="arrow-right" />
                 </span>
               </a>
             ) : (
@@ -114,9 +116,10 @@ export default function LeaderboardHub() {
         {/* Back link */}
         <a
           href="/"
-          className="self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
         >
-          ← Back to games
+          <Icon name="arrow-left" />
+          Back to games
         </a>
 
       </div>

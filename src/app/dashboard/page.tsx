@@ -11,6 +11,7 @@ import { redirect } from 'next/navigation';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import SignOutButton from '@/components/auth/SignOutButton';
 
+import Icon from "@/components/Icon";
 export default async function Dashboard() {
   const supabase = await createSupabaseServer();
   const {
@@ -22,8 +23,8 @@ export default async function Dashboard() {
   return (
     <div className="min-h-[100dvh] bg-gray-50 flex flex-col items-center justify-center gap-6 px-4">
       <div className="w-full max-w-sm bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-8 flex flex-col items-center gap-4 text-center">
-        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-2xl">
-          ✓
+        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700">
+          <Icon name="check" className="h-6 w-6" />
         </div>
         <div>
           <h1 className="text-xl font-bold text-gray-800">Signed in</h1>

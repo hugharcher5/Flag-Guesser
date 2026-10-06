@@ -7,6 +7,7 @@ import countries from "@/data/countries";
 import UserMenu from "@/components/UserMenu";
 import { useFriendStatuses } from "@/lib/useFriendStatuses";
 
+import Icon from "@/components/Icon";
 interface LeaderboardEntry {
   id: string;
   rank: number;
@@ -181,9 +182,10 @@ export default function CapitalGuesserLeaderboard() {
         {/* Back link */}
         <a
           href="/"
-          className="self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
         >
-          ← Back to games
+          <Icon name="arrow-left" />
+          Back to games
         </a>
 
       </div>

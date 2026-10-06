@@ -6,6 +6,7 @@ import landmarks, { type Landmark } from '@/data/landmarks';
 import { haversineKm } from '@/lib/geo/haversine';
 import { saveGameResult } from '@/lib/saveGameResult';
 
+import Icon from "@/components/Icon";
 const LandmarkGlobeDisplay = dynamic(
   () => import('./LandmarkGlobeDisplay'),
   { ssr: false },
@@ -165,7 +166,7 @@ export default function LandmarkMode() {
         </div>
         <button
           onClick={startGame}
-          className="w-full py-3 rounded-2xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition-colors"
         >
           Start Game
         </button>
@@ -203,15 +204,16 @@ export default function LandmarkMode() {
 
         <button
           onClick={startGame}
-          className="w-full py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
         >
           Play Again
         </button>
         <a
           href="/leaderboard/landmark-guesser"
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium text-center transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium text-center transition-colors"
         >
-          View Leaderboard →
+          View Leaderboard
+          <Icon name="arrow-right" />
         </a>
       </div>
     );
@@ -276,16 +278,17 @@ export default function LandmarkMode() {
         <button
           onClick={handleConfirm}
           disabled={!guessPin}
-          className="w-full py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {guessPin ? 'Confirm Guess' : 'Click the globe to place your pin'}
         </button>
       ) : (
         <button
           onClick={handleNext}
-          className="w-full py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
         >
-          {index + 1 >= queue.length ? 'See Results' : 'Next Landmark →'}
+          {index + 1 >= queue.length ? 'See Results' : 'Next Landmark'}
+          {index + 1 < queue.length && <Icon name="arrow-right" />}
         </button>
       )}
     </div>

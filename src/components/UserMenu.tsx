@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import Icon from "@/components/Icon";
 export type FriendStatus = 'none' | 'pending_sent' | 'pending_received' | 'accepted' | 'self';
 
 interface UserMenuProps {
@@ -88,7 +89,7 @@ export default function UserMenu({ username, friendStatus, onFriendAdded }: User
             <div className="px-4 py-2 text-sm text-gray-400 cursor-default">Received Request</div>
           )}
           {effectiveStatus === 'accepted' && (
-            <div className="px-4 py-2 text-sm text-gray-400 cursor-default">Friends ✓</div>
+            <div className="px-4 py-2 text-sm text-gray-400 cursor-default inline-flex items-center gap-1.5">Friends <Icon name="check" /></div>
           )}
 
           <div className="border-t border-gray-100" />

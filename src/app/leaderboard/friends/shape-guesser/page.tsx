@@ -7,6 +7,7 @@ import UserMenu from "@/components/UserMenu";
 import { supabase } from "@/lib/supabase/client";
 import type { UserResponse } from "@supabase/supabase-js";
 
+import Icon from "@/components/Icon";
 type SortKey = "total_points" | "avg_guesses" | "games_won" | "games_played";
 
 interface LeaderboardEntry {
@@ -201,15 +202,17 @@ export default function FriendsShapeGuesserLeaderboard() {
         <div className="flex items-center justify-between">
           <a
             href="/leaderboard"
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
           >
-            ← All leaderboards
+            <Icon name="arrow-left" />
+            All leaderboards
           </a>
           <a
             href="/leaderboard/shape-guesser"
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
           >
-            View global leaderboard →
+            View global leaderboard
+            <Icon name="arrow-right" />
           </a>
         </div>
 

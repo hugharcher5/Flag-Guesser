@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import Icon from "@/components/Icon";
 type TabKey = "flag_guesser" | "capital_guesser" | "shape_guesser" | "globe_guesser" | "landmark_guesser";
 
 export interface ContinentRow {
@@ -230,9 +231,10 @@ function BasicModeTab({
       <div>
         <a
           href={leaderboardHref}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
         >
-          View leaderboard →
+          View leaderboard
+          <Icon name="arrow-right" />
         </a>
       </div>
     </section>
@@ -277,9 +279,10 @@ function LandmarkTab({ stats }: { stats: LandmarkStats }) {
       <div>
         <a
           href="/leaderboard/landmark-guesser"
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
         >
-          View leaderboard →
+          View leaderboard
+          <Icon name="arrow-right" />
         </a>
       </div>
     </section>
@@ -341,17 +344,20 @@ export default function StatsClient({ username, flagStats, capitalStats, shapeSt
 
         {/* Nav */}
         <div className="flex gap-4">
-          <a href="/" className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
-            ← Back to games
+          <a href="/" className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+            <Icon name="arrow-left" />
+            Back to games
           </a>
           {activeTab === "flag_guesser" && (
-            <a href="/leaderboard/flag-guesser" className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
-              Leaderboard →
+            <a href="/leaderboard/flag-guesser" className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+              Leaderboard
+              <Icon name="arrow-right" />
             </a>
           )}
           {activeTab === "capital_guesser" && (
-            <a href="/leaderboard/capital-guesser" className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
-              Leaderboard →
+            <a href="/leaderboard/capital-guesser" className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+              Leaderboard
+              <Icon name="arrow-right" />
             </a>
           )}
         </div>

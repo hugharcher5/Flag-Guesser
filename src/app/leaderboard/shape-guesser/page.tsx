@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import UserMenu from "@/components/UserMenu";
 import { useFriendStatuses } from "@/lib/useFriendStatuses";
 
+import Icon from "@/components/Icon";
 type SortKey = "total_points" | "avg_guesses" | "games_won" | "games_played";
 
 interface LeaderboardEntry {
@@ -196,9 +197,10 @@ export default function ShapeGuesserLeaderboard() {
         {/* Back link */}
         <a
           href="/leaderboard"
-          className="self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
         >
-          ← All leaderboards
+          <Icon name="arrow-left" />
+          All leaderboards
         </a>
 
       </div>

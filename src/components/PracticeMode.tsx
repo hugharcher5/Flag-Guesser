@@ -6,6 +6,7 @@ import type { Country, Continent } from "@/data/countries";
 import { isCorrect } from "@/lib/fuzzy";
 import { saveGameResult } from "@/lib/saveGameResult";
 
+import Icon from "@/components/Icon";
 type Filter = Continent | "All";
 
 const CONTINENTS: Filter[] = [
@@ -196,8 +197,9 @@ export default function PracticeMode() {
               : "bg-red-50 border border-red-200 text-red-800"
             }`}
         >
-          <p className="text-xl font-bold">
-            {result === "correct" ? "✓ Correct!" : "✗ Incorrect"}
+          <p className="text-xl font-bold inline-flex items-center gap-2">
+            <Icon name={result === "correct" ? "check" : "x"} className="h-5 w-5" />
+            {result === "correct" ? "Correct!" : "Incorrect"}
           </p>
           {result === "incorrect" && (
             <p className="text-sm">
@@ -212,10 +214,11 @@ export default function PracticeMode() {
       {answered && (
         <button
           onClick={handleNext}
-          className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
+          className="inline-flex items-center justify-center gap-1.5 w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
                      hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
         >
-          Next Flag →
+          Next Flag
+          <Icon name="arrow-right" />
         </button>
       )}
     </div>

@@ -1,5 +1,6 @@
 import type { Country } from '@/data/countries';
 
+import Icon from "@/components/Icon";
 export interface GlobeGuessEntry {
   country: Country;
   distanceKm: number;
@@ -59,7 +60,7 @@ export default function GuessList({ guesses }: Props) {
 
           {/* Distance / tick */}
           {g.correct ? (
-            <span className="text-green-700 font-bold text-base shrink-0">✓</span>
+            <span className="text-green-700 shrink-0" aria-label="Correct"><Icon name="check" className="h-5 w-5" /></span>
           ) : (
             <span className="font-mono text-sm text-gray-600 tabular-nums whitespace-nowrap shrink-0">
               {g.distanceKm === 0 ? '< 1' : g.distanceKm.toLocaleString()} km

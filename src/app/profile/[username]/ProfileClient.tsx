@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import countries from '@/data/countries';
 
+import Icon from "@/components/Icon";
 type FriendStatus = 'none' | 'pending_sent' | 'pending_received' | 'accepted' | 'self';
 
 export interface FlagModeStats {
@@ -144,8 +145,8 @@ function FriendButton({
   }
   if (status === 'accepted') {
     return (
-      <span className="px-4 py-1.5 rounded-lg border border-green-300 text-sm text-green-700 font-medium cursor-default">
-        Friends ✓
+      <span className="px-4 py-1.5 rounded-lg border border-green-300 text-sm text-green-700 font-medium cursor-default inline-flex items-center gap-1.5">
+        Friends <Icon name="check" />
       </span>
     );
   }
@@ -183,9 +184,10 @@ export default function ProfileClient({
         {/* Back */}
         <a
           href="/leaderboard"
-          className="self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
         >
-          ← Back to leaderboard
+          <Icon name="arrow-left" />
+          Back to leaderboard
         </a>
 
         {/* Profile header card */}

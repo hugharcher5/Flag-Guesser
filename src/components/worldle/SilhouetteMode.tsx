@@ -11,6 +11,7 @@ import SilhouetteDisplay, { IMAGE_SILHOUETTES } from './SilhouetteDisplay';
 import GuessInput from './GuessInput';
 import GuessTable, { type GuessEntry } from './GuessTable';
 
+import Icon from "@/components/Icon";
 const MAX_GUESSES = 6;
 
 type Phase = 'loading' | 'playing' | 'won' | 'lost';
@@ -285,7 +286,7 @@ export default function SilhouetteMode() {
         >
           {phase === 'won' ? (
             <>
-              <p className="text-xl font-bold">✓ Correct!</p>
+              <p className="text-xl font-bold inline-flex items-center gap-2"><Icon name="check" className="h-5 w-5" />Correct!</p>
               <p className="text-sm">
                 You identified{' '}
                 <span className="font-semibold">{answer?.name}</span>{' '}
@@ -297,7 +298,7 @@ export default function SilhouetteMode() {
             </>
           ) : (
             <>
-              <p className="text-xl font-bold">✗ Out of guesses</p>
+              <p className="text-xl font-bold inline-flex items-center gap-2"><Icon name="x" className="h-5 w-5" />Out of guesses</p>
               <p className="text-sm">
                 The answer was{' '}
                 <span className="font-semibold">{answer?.name}</span>.

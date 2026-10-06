@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase/client';
 import type { UserResponse } from '@supabase/supabase-js';
 import countries from '@/data/countries';
 
+import Icon from "@/components/Icon";
 // ── Country list ──────────────────────────────────────────────────────────────
 
 const COUNTRY_OPTIONS = [...countries].sort((a, b) => a.name.localeCompare(b.name));
@@ -197,9 +198,10 @@ export default function SettingsPage() {
         {/* Back link */}
         <a
           href="/"
-          className="self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
         >
-          ← Back to games
+          <Icon name="arrow-left" />
+          Back to games
         </a>
 
         <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-8 flex flex-col gap-7">

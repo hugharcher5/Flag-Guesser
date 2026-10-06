@@ -9,6 +9,7 @@ import type { UserResponse } from '@supabase/supabase-js';
 import countries from '@/data/countries';
 import UserMenu from '@/components/UserMenu';
 
+import Icon from "@/components/Icon";
 type Tab = 'friends' | 'received' | 'sent';
 
 interface Friend {
@@ -229,9 +230,10 @@ export default function FriendsPage() {
         {/* Back link */}
         <a
           href="/"
-          className="self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          className="inline-flex items-center gap-1.5 self-start text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
         >
-          ← Back to games
+          <Icon name="arrow-left" />
+          Back to games
         </a>
 
         <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-8 flex flex-col gap-6">

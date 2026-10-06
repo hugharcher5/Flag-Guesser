@@ -2,6 +2,7 @@ import type { CompassDir } from '@/lib/geo/haversine';
 import type { Country } from '@/data/countries';
 import CompassIcon from './CompassIcon';
 
+import Icon from "@/components/Icon";
 export interface GuessEntry {
   country: Country;
   distanceKm: number;
@@ -37,7 +38,7 @@ export default function GuessTable({ guesses }: Props) {
           </span>
 
           {g.correct ? (
-            <span className="text-green-700 font-bold text-base">✓</span>
+            <span className="text-green-700" aria-label="Correct"><Icon name="check" className="h-5 w-5" /></span>
           ) : (
             <div className="flex items-center gap-3 shrink-0 text-gray-500">
               {/* Distance */}
