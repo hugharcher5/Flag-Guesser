@@ -34,7 +34,7 @@ export default function SignInButton() {
       <button
         onClick={handleSignIn}
         className="flex items-center gap-2.5 px-4 py-2 rounded-lg border border-gray-300
-                   bg-white text-gray-700 text-sm font-medium shadow-sm
+                   bg-surface text-gray-700 text-sm font-medium shadow-sm
                    hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
       >
         {/* Google G logo */}
@@ -48,10 +48,9 @@ export default function SignInButton() {
       </button>
 
       {showInAppWarning && (
-        <div className="mt-1 w-72 rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3">
+        <div className="mt-1 w-72 rounded-xl border border-gray-200 bg-surface shadow-sm px-4 py-3">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-start gap-2.5">
-              <span className="text-lg leading-none mt-0.5">🌐</span>
               <div>
                 <p className="text-sm font-semibold text-gray-800">Open in your browser to sign in</p>
                 <p className="mt-0.5 text-xs text-gray-500 leading-relaxed">

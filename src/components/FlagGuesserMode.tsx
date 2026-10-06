@@ -68,7 +68,7 @@ function MissedAnswersSection({ items }: { items: MissedItem[] }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="w-full rounded-2xl border border-gray-200 bg-white overflow-hidden">
+    <div className="w-full rounded-2xl border border-gray-200 bg-surface overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
@@ -284,7 +284,7 @@ export default function FlagGuesserMode() {
         </p>
 
         {/* Personal bests */}
-        <div className="w-full rounded-2xl border border-gray-200 bg-white p-5 flex flex-col gap-3 text-left">
+        <div className="w-full rounded-2xl border border-gray-200 bg-surface p-5 flex flex-col gap-3 text-left">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
             Personal Bests
           </p>
@@ -335,7 +335,7 @@ export default function FlagGuesserMode() {
         </h1>
 
         {/* Score card */}
-        <div className="w-full rounded-2xl border border-gray-200 bg-white p-6 flex flex-col gap-4">
+        <div className="w-full rounded-2xl border border-gray-200 bg-surface p-6 flex flex-col gap-4">
           <div>
             <span className="text-5xl font-bold text-gray-800">
               {finished.correctCount}
@@ -415,7 +415,7 @@ export default function FlagGuesserMode() {
       </div>
 
       {/* Flag */}
-      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-white flex items-center justify-center min-h-32 sm:min-h-40 p-3">
+      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-surface flex items-center justify-center min-h-32 sm:min-h-40 p-3">
         {!current ? (
           <div className="w-full aspect-[3/2] bg-gray-100 animate-pulse rounded-xl" />
         ) : imgError ? (

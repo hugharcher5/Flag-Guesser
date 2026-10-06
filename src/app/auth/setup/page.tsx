@@ -156,7 +156,7 @@ export default function SetupPage() {
   if (pageLoading) {
     return (
       <div className="min-h-[100dvh] bg-gray-50 flex items-center justify-center px-4">
-        <div className="w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-8 flex flex-col gap-5 animate-pulse">
+        <div className="w-full max-w-md bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-8 flex flex-col gap-5 animate-pulse">
           <div className="h-7 w-40 bg-gray-100 rounded" />
           <div className="h-4 w-56 bg-gray-100 rounded" />
           <div className="h-10 bg-gray-100 rounded-lg" />
@@ -173,7 +173,7 @@ export default function SetupPage() {
   // ── Form ──────────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-[100dvh] bg-gray-50 flex flex-col items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-8 flex flex-col gap-7">
+      <div className="w-full max-w-md bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-8 flex flex-col gap-7">
 
         {/* Header */}
         <div className="flex flex-col gap-1">
@@ -203,7 +203,7 @@ export default function SetupPage() {
               className={`px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
                 hasError
                   ? 'border-red-400 bg-red-50 focus:ring-red-400'
-                  : 'border-gray-300 bg-white'
+                  : 'border-gray-300 bg-surface'
               }`}
             />
             <p className="text-xs text-gray-400">
@@ -234,7 +234,7 @@ export default function SetupPage() {
                 id="country"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full appearance-none px-3 py-2 pr-8 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                className="w-full appearance-none px-3 py-2 pr-8 rounded-lg border border-gray-300 bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
                 <option value="">Select your country…</option>
                 {COUNTRY_OPTIONS.map((c) => (
@@ -261,8 +261,8 @@ export default function SetupPage() {
           <button
             type="submit"
             disabled={!canSubmit}
-            className="w-full py-2.5 rounded-xl bg-gray-800 text-white font-semibold text-sm
-                       hover:bg-gray-900 active:bg-black transition-colors
+            className="w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm
+                       hover:bg-blue-700 active:bg-blue-800 transition-colors
                        disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {submitting ? 'Saving…' : 'Continue'}

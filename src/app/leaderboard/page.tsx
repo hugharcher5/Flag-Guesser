@@ -1,3 +1,5 @@
+import ModeIcon from "@/components/ModeIcon";
+import type { AppMode } from "@/components/NavBar";
 /**
  * Leaderboard hub — links to each game mode's leaderboard.
  * Add new entries to LEADERBOARDS to make them appear in the grid.
@@ -10,7 +12,7 @@ interface LeaderboardEntry {
   description: string;
   href: string;
   available: boolean;
-  emoji: string;
+  mode: AppMode;
 }
 
 const LEADERBOARDS: LeaderboardEntry[] = [
@@ -19,35 +21,35 @@ const LEADERBOARDS: LeaderboardEntry[] = [
     description: "Top players by score and fastest completion time.",
     href: "/leaderboard/flag-guesser",
     available: true,
-    emoji: "🚩",
+    mode: "flag",
   },
   {
     title: "Country Shape Guesser",
     description: "Guess the country from its silhouette in 6 tries.",
     href: "/leaderboard/shape-guesser",
     available: true,
-    emoji: "🗺️",
+    mode: "silhouette",
   },
   {
     title: "Globe Guesser",
     description: "Find countries on the 3D globe with fewest guesses.",
     href: "/leaderboard/globe-guesser",
     available: true,
-    emoji: "🌍",
+    mode: "globe",
   },
   {
     title: "Capital Guesser",
     description: "Name all world capitals as fast as you can.",
     href: "/leaderboard/capital-guesser",
     available: true,
-    emoji: "🏛️",
+    mode: "capital",
   },
   {
     title: "Landmark Guesser",
     description: "Pin 500 famous landmarks on the globe. Ranked by average distance.",
     href: "/leaderboard/landmark-guesser",
     available: true,
-    emoji: "📍",
+    mode: "landmark",
   },
 ];
 
@@ -73,11 +75,11 @@ export default function LeaderboardHub() {
               <a
                 key={board.href}
                 href={board.href}
-                className="group bg-white rounded-2xl border border-gray-200 shadow-sm p-6
+                className="group bg-surface rounded-2xl border border-gray-200 shadow-sm p-6
                            flex flex-col gap-3 hover:border-blue-300 hover:shadow-md
                            transition-all duration-150"
               >
-                <span className="text-3xl">{board.emoji}</span>
+                <ModeIcon mode={board.mode} />
                 <div className="flex flex-col gap-1">
                   <span className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
                     {board.title}
@@ -91,10 +93,10 @@ export default function LeaderboardHub() {
             ) : (
               <div
                 key={board.href}
-                className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6
+                className="bg-surface rounded-2xl border border-gray-200 shadow-sm p-6
                            flex flex-col gap-3 opacity-60 cursor-default"
               >
-                <span className="text-3xl">{board.emoji}</span>
+                <ModeIcon mode={board.mode} />
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-gray-800">{board.title}</span>

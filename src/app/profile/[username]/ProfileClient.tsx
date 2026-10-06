@@ -67,7 +67,7 @@ function formatTime(seconds: number): string {
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
+    <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
       <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</span>
       <span className="text-2xl font-bold text-gray-800 tabular-nums">{value}</span>
       {sub && <span className="text-xs text-gray-400">{sub}</span>}
@@ -118,7 +118,7 @@ function FriendButton({
       <button
         onClick={addFriend}
         disabled={loading}
-        className="px-4 py-1.5 rounded-lg bg-gray-800 text-white text-sm font-semibold hover:bg-gray-900 transition-colors disabled:opacity-50"
+        className="px-4 py-1.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
       >
         {loading ? 'Sending…' : 'Add Friend'}
       </button>
@@ -189,7 +189,7 @@ export default function ProfileClient({
         </a>
 
         {/* Profile header card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-6 flex flex-col gap-4">
+        <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-6 flex flex-col gap-4">
           <div className="flex items-center gap-4">
             {/* Flag */}
             {countryCode ? (
@@ -250,7 +250,7 @@ export default function ProfileClient({
               onClick={() => setActiveTab(tab.key)}
               className={`flex-1 py-2 px-2 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === tab.key
-                  ? 'bg-white text-gray-800 shadow-sm'
+                  ? 'bg-surface text-gray-800 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -277,7 +277,7 @@ export default function ProfileClient({
               <StatCard label="Total Points" value={flagStats.totalPoints.toLocaleString()} />
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
+            <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
               No Flag Guesser games yet.
             </div>
           )
@@ -300,7 +300,7 @@ export default function ProfileClient({
               <StatCard label="Total Points" value={capitalStats.totalPoints.toLocaleString()} />
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
+            <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
               No Capital Guesser games yet.
             </div>
           )
@@ -323,7 +323,7 @@ export default function ProfileClient({
               <StatCard label="Best Score" value={String(shapeStats.bestScore)} />
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
+            <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
               No Shape Guesser games yet.
             </div>
           )
@@ -346,7 +346,7 @@ export default function ProfileClient({
               <StatCard label="Best Score" value={String(globeStats.bestScore)} />
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
+            <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
               No Globe Guesser games yet.
             </div>
           )
@@ -372,7 +372,7 @@ export default function ProfileClient({
               />
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
+            <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center text-sm text-gray-400">
               No Landmark Guesser games yet.
             </div>
           )

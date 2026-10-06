@@ -213,7 +213,7 @@ export default function FriendsPage() {
   if (loading) {
     return (
       <div className="min-h-[100dvh] bg-gray-50 flex items-center justify-center px-4">
-        <div className="w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-8 flex flex-col gap-5 animate-pulse">
+        <div className="w-full max-w-md bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-8 flex flex-col gap-5 animate-pulse">
           <div className="h-7 w-32 bg-gray-100 rounded" />
           <div className="h-10 bg-gray-100 rounded-xl" />
           <div className="h-40 bg-gray-100 rounded-xl" />
@@ -234,7 +234,7 @@ export default function FriendsPage() {
           ← Back to games
         </a>
 
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-8 flex flex-col gap-6">
+        <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-8 flex flex-col gap-6">
 
           {/* Header */}
           <div className="flex flex-col gap-1">
@@ -259,10 +259,10 @@ export default function FriendsPage() {
                   autoCapitalize="none"
                   spellCheck={false}
                   maxLength={20}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                 />
                 {showSuggestions && (
-                  <div className="absolute top-full left-0 right-0 mt-1 z-10 bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
+                  <div className="absolute top-full left-0 right-0 mt-1 z-10 bg-surface border border-gray-200 rounded-lg shadow-md overflow-hidden">
                     {suggestions.length > 0 ? (
                       suggestions.map((s) => {
                         const code = getCountryCode(s.country);
@@ -295,7 +295,7 @@ export default function FriendsPage() {
               <button
                 type="submit"
                 disabled={!addUsername.trim() || addLoading}
-                className="px-4 py-2 rounded-lg bg-gray-800 text-white text-sm font-semibold hover:bg-gray-900 active:bg-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {addLoading ? '…' : 'Add'}
               </button>

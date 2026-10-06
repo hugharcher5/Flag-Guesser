@@ -22,7 +22,7 @@ export default function GuessList({ guesses }: Props) {
   const sorted = [...guesses].sort((a, b) => a.distanceKm - b.distanceKm);
 
   return (
-    <div className="w-full divide-y divide-gray-100 rounded-xl overflow-hidden border border-gray-200 bg-white">
+    <div className="w-full divide-y divide-gray-100 rounded-xl overflow-hidden border border-gray-200 bg-surface">
       {sorted.map((g, rank) => (
         <div
           key={g.country.code}

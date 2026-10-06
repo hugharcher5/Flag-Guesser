@@ -30,24 +30,24 @@ export default function CompassIcon({ dir, size = 32, className = '' }: Props) {
       className={`inline-block shrink-0 ${className}`}
     >
       {/* Compass face */}
-      <circle cx="16" cy="16" r="15" fill="#f9fafb" stroke="#d1d5db" strokeWidth="1" />
+      <circle cx="16" cy="16" r="15" fill="#1B1846" stroke="#3D3880" strokeWidth="1" />
 
       {/* Cardinal tick marks — fixed, do not rotate */}
-      <line x1="16" y1="2"  x2="16" y2="5"  stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="16" y1="27" x2="16" y2="30" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="27" y1="16" x2="30" y2="16" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="2"  y1="16" x2="5"  y2="16" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="16" y1="2"  x2="16" y2="5"  stroke="#8C87C2" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="16" y1="27" x2="16" y2="30" stroke="#8C87C2" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="27" y1="16" x2="30" y2="16" stroke="#8C87C2" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="2"  y1="16" x2="5"  y2="16" stroke="#8C87C2" strokeWidth="1.5" strokeLinecap="round" />
 
       {/* Rotating diamond needle */}
       <g transform={`rotate(${deg}, 16, 16)`}>
         {/* Red top half — points toward the answer country */}
         <polygon points="16,6 13,16 19,16" fill="#ef4444" />
         {/* Light-grey bottom half */}
-        <polygon points="16,26 13,16 19,16" fill="#d1d5db" />
+        <polygon points="16,26 13,16 19,16" fill="#8C87C2" />
       </g>
 
       {/* Centre anchor pin — rendered above needle so it always shows */}
-      <circle cx="16" cy="16" r="2.5" fill="#374151" />
+      <circle cx="16" cy="16" r="2.5" fill="#E6E4F9" />
 
       {/* "N" label — fixed, rendered last so it appears above the needle */}
       <text
@@ -57,7 +57,7 @@ export default function CompassIcon({ dir, size = 32, className = '' }: Props) {
         fontSize="5"
         fontFamily="sans-serif"
         fontWeight="bold"
-        fill="#374151"
+        fill="#E6E4F9"
       >
         N
       </text>

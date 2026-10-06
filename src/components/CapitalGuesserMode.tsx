@@ -103,7 +103,7 @@ function CapitalDisplay({
 
   return (
     <div className="w-full flex flex-col items-center gap-2">
-      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-white flex items-center justify-center min-h-32 sm:min-h-40 p-3">
+      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-surface flex items-center justify-center min-h-32 sm:min-h-40 p-3">
         {useImage ? (
           <div className="relative w-full flex items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -123,7 +123,7 @@ function CapitalDisplay({
             className="w-full max-h-48 sm:max-h-64"
             aria-label="Country silhouette"
           >
-            <path d={pathData} fill="#1e293b" fillRule="evenodd" />
+            <path d={pathData} fill="#E6E4F9" fillRule="evenodd" />
             {capitalPoint && (
               <circle
                 cx={capitalPoint.x}
@@ -155,7 +155,7 @@ function MissedAnswersSection({ items }: { items: MissedItem[] }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="w-full rounded-2xl border border-gray-200 bg-white overflow-hidden">
+    <div className="w-full rounded-2xl border border-gray-200 bg-surface overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
@@ -395,7 +395,7 @@ export default function CapitalGuesserMode() {
           Answers are checked as you type. Skip to come back later.
         </p>
 
-        <div className="w-full rounded-2xl border border-gray-200 bg-white p-5 flex flex-col gap-3 text-left">
+        <div className="w-full rounded-2xl border border-gray-200 bg-surface p-5 flex flex-col gap-3 text-left">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
             Personal Bests
           </p>
@@ -443,7 +443,7 @@ export default function CapitalGuesserMode() {
           {finished.completedAll ? "Quiz Complete!" : "Time’s Up!"}
         </h1>
 
-        <div className="w-full rounded-2xl border border-gray-200 bg-white p-6 flex flex-col gap-4">
+        <div className="w-full rounded-2xl border border-gray-200 bg-surface p-6 flex flex-col gap-4">
           <div>
             <span className="text-5xl font-bold text-gray-800">
               {finished.correctCount}

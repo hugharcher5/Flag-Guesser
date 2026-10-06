@@ -128,7 +128,7 @@ export default function GlobeInput({ usedCodes, onGuess, disabled = false }: Pro
       </div>
 
       {suggestions.length > 0 && !disabled && (
-        <ul className="absolute z-10 top-full mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+        <ul className="absolute z-10 top-full mt-1 w-full bg-surface border border-gray-200 rounded-xl shadow-lg overflow-hidden max-h-60 overflow-y-auto">
           {suggestions.map((c, i) => (
             <li key={c.code}>
               <button

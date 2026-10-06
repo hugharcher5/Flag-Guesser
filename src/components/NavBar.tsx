@@ -30,7 +30,7 @@ function NavIcon({ href, title, children }: { href: string; title: string; child
 
 export default function NavBar({ mode, onModeChange, isSignedIn }: NavBarProps) {
   return (
-    <nav className="w-full bg-white border-b border-gray-200 md:shadow-sm">
+    <nav className="w-full bg-surface border-b border-gray-200 md:shadow-sm">
       <div
         className="max-w-md md:max-w-3xl lg:max-w-4xl mx-auto flex items-stretch md:items-center md:h-16 md:px-3 md:gap-1"
         suppressHydrationWarning

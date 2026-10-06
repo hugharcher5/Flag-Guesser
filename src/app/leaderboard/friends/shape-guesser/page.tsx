@@ -99,11 +99,11 @@ export default function FriendsShapeGuesserLeaderboard() {
         <div className="flex gap-2">
           <a
             href="/leaderboard/shape-guesser"
-            className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-gray-300 transition-colors"
+            className="px-3 py-1.5 rounded-lg text-sm font-medium bg-surface border border-gray-200 text-gray-600 hover:border-gray-300 transition-colors"
           >
             Global
           </a>
-          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-800 text-white cursor-default">
+          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-white cursor-default">
             Friends
           </span>
         </div>
@@ -116,8 +116,8 @@ export default function FriendsShapeGuesserLeaderboard() {
               onClick={() => setSort(opt.key)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 sort === opt.key
-                  ? "bg-gray-800 text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300"
+                  ? "bg-blue-600 text-white"
+                  : "bg-surface border border-gray-200 text-gray-600 hover:border-gray-300"
               }`}
             >
               {opt.label}
@@ -126,7 +126,7 @@ export default function FriendsShapeGuesserLeaderboard() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-visible">
+        <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm overflow-visible">
 
           {loading && (
             <div className="flex flex-col divide-y divide-gray-100">

@@ -57,7 +57,7 @@ export default function UserMenu({ username, friendStatus, onFriendAdded }: User
     <div ref={menuRef} className="relative inline-flex">
       <button
         onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
-        className="p-1.5 rounded text-gray-300 hover:text-gray-500 hover:bg-gray-100 transition-colors"
+        className="p-1.5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
         aria-label="User options"
       >
         {/* Three vertical dots */}
@@ -69,7 +69,7 @@ export default function UserMenu({ username, friendStatus, onFriendAdded }: User
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-lg shadow-lg min-w-[160px] overflow-hidden">
+        <div className="absolute right-0 top-full mt-1 z-50 bg-surface border border-gray-200 rounded-lg shadow-lg min-w-[160px] overflow-hidden">
 
           {/* Friend action row */}
           {effectiveStatus === 'none' && (

@@ -153,12 +153,11 @@ export default function LandmarkMode() {
         </div>
         <div className="grid grid-cols-3 gap-3 w-full text-left">
           {[
-            { emoji: '🏛️', label: '10 landmarks', sub: 'per session' },
-            { emoji: '📍', label: 'Click to pin', sub: 'then confirm' },
-            { emoji: '📏', label: 'Ranked by', sub: 'avg distance' },
-          ].map(({ emoji, label, sub }) => (
-            <div key={label} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col gap-1">
-              <span className="text-2xl">{emoji}</span>
+            { label: '10 landmarks', sub: 'per session' },
+            { label: 'Click to pin', sub: 'then confirm' },
+            { label: 'Ranked by', sub: 'avg distance' },
+          ].map(({ label, sub }) => (
+            <div key={label} className="bg-surface rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col gap-1">
               <span className="text-sm font-semibold text-gray-800">{label}</span>
               <span className="text-xs text-gray-400">{sub}</span>
             </div>
@@ -166,7 +165,7 @@ export default function LandmarkMode() {
         </div>
         <button
           onClick={startGame}
-          className="w-full py-3 rounded-2xl bg-gray-800 text-white font-semibold text-lg hover:bg-gray-900 transition-colors"
+          className="w-full py-3 rounded-2xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition-colors"
         >
           Start Game
         </button>
@@ -177,7 +176,7 @@ export default function LandmarkMode() {
   if (phase === 'finished') {
     return (
       <div className="w-full max-w-md flex flex-col gap-6">
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-6 flex flex-col gap-4">
+        <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-6 flex flex-col gap-4">
           <h2 className="text-2xl font-bold text-gray-800">Results</h2>
           {avgKm !== null && (
             <div className="flex flex-col gap-1">
@@ -187,7 +186,7 @@ export default function LandmarkMode() {
           )}
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="divide-y divide-gray-50">
             {results.map((r, i) => (
               <div key={i} className="flex items-center gap-3 px-5 py-3.5">
@@ -204,7 +203,7 @@ export default function LandmarkMode() {
 
         <button
           onClick={startGame}
-          className="w-full py-3 rounded-2xl bg-gray-800 text-white font-semibold hover:bg-gray-900 transition-colors"
+          className="w-full py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
         >
           Play Again
         </button>
@@ -233,7 +232,7 @@ export default function LandmarkMode() {
             <div
               key={i}
               className={`w-2 h-2 rounded-full transition-colors ${
-                i < index ? 'bg-gray-400' : i === index ? 'bg-gray-800' : 'bg-gray-200'
+                i < index ? 'bg-gray-400' : i === index ? 'bg-blue-600' : 'bg-gray-200'
               }`}
             />
           ))}
@@ -241,7 +240,7 @@ export default function LandmarkMode() {
       </div>
 
       {/* Landmark name card */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
+      <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
         <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Where is this?</span>
         <h2 className="text-2xl font-bold text-gray-800">{current?.name}</h2>
       </div>
@@ -257,7 +256,7 @@ export default function LandmarkMode() {
 
       {/* Result reveal */}
       {phase === 'revealed' && current && currentDist !== null && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-2">
+        <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Your distance</p>
@@ -277,14 +276,14 @@ export default function LandmarkMode() {
         <button
           onClick={handleConfirm}
           disabled={!guessPin}
-          className="w-full py-3 rounded-2xl bg-gray-800 text-white font-semibold hover:bg-gray-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {guessPin ? 'Confirm Guess' : 'Click the globe to place your pin'}
         </button>
       ) : (
         <button
           onClick={handleNext}
-          className="w-full py-3 rounded-2xl bg-gray-800 text-white font-semibold hover:bg-gray-900 transition-colors"
+          className="w-full py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
         >
           {index + 1 >= queue.length ? 'See Results' : 'Next Landmark →'}
         </button>

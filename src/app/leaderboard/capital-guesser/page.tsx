@@ -72,19 +72,19 @@ export default function CapitalGuesserLeaderboard() {
 
         {/* Global / Friends toggle */}
         <div className="flex gap-2">
-          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-800 text-white cursor-default">
+          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-white cursor-default">
             Global
           </span>
           <a
             href="/leaderboard/friends/capital-guesser"
-            className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-gray-300 transition-colors"
+            className="px-3 py-1.5 rounded-lg text-sm font-medium bg-surface border border-gray-200 text-gray-600 hover:border-gray-300 transition-colors"
           >
             Friends
           </a>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-visible">
+        <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm overflow-visible">
 
           {/* Loading skeleton */}
           {loading && (

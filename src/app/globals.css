@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Dark theme: native form controls, scrollbars and autofill follow it */
+:root {
+  color-scheme: dark;
+}
+
+input,
+select,
+textarea {
+  background-color: #1c1946;
+  color: #f5f4ff;
+}
+
+::placeholder {
+  color: #8c87c2;
+}
+
 /* Remove tap highlight flash on iOS/Android */
 * {
   -webkit-tap-highlight-color: transparent;

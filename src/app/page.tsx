@@ -19,6 +19,21 @@ export default function Page() {
   const [mode, setMode] = useState<AppMode | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
+  // Deep link: /?play=flag opens a mode directly; selecting a mode updates the URL
+  useEffect(() => {
+    const play = new URLSearchParams(window.location.search).get("play");
+    if (play && ["flag", "silhouette", "globe", "capital", "landmark"].includes(play)) {
+      setMode(play as AppMode);
+    }
+  }, []);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (mode) url.searchParams.set("play", mode);
+    else url.searchParams.delete("play");
+    window.history.replaceState(null, "", url);
+  }, [mode]);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }: UserResponse) => setUser(data.user));
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -33,7 +48,7 @@ export default function Page() {
     <div className="min-h-[100dvh] flex flex-col bg-gray-50">
       <NavBar mode={mode} onModeChange={setMode} isSignedIn={!!user} />
       {/* Auth strip — sign-in prompt or signed-in indicator */}
-      <div className="flex justify-end items-center px-4 py-2 bg-white border-b border-gray-100">
+      <div className="flex justify-end items-center px-4 py-2 bg-surface border-b border-gray-100">
         {user ? (
           <div className="flex items-center gap-3">
             <a href="/stats" className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">

@@ -122,7 +122,7 @@ export default function PracticeMode() {
           setFilter(e.target.value as Filter);
           setScore({ correct: 0, total: 0 });
         }}
-        className="w-full px-4 py-2 rounded-xl border border-gray-300 text-gray-700 text-sm bg-white
+        className="w-full px-4 py-2 rounded-xl border border-gray-300 text-gray-700 text-sm bg-surface
                    focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
       >
         {CONTINENTS.map((c) => (
@@ -141,7 +141,7 @@ export default function PracticeMode() {
       </p>
 
       {/* Flag */}
-      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-white flex items-center justify-center min-h-32 sm:min-h-40 p-3">
+      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-surface flex items-center justify-center min-h-32 sm:min-h-40 p-3">
         {!current ? (
           <div className="w-full aspect-[3/2] bg-gray-100 animate-pulse rounded-xl" />
         ) : imgError ? (
@@ -212,8 +212,8 @@ export default function PracticeMode() {
       {answered && (
         <button
           onClick={handleNext}
-          className="w-full py-3 rounded-xl bg-gray-800 text-white font-semibold text-base
-                     hover:bg-gray-900 active:bg-black transition-colors touch-manipulation"
+          className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
+                     hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
         >
           Next Flag →
         </button>

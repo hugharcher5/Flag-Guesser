@@ -1,55 +1,15 @@
 "use client";
 
 import type { AppMode } from "@/components/NavBar";
+import ModeIcon from "@/components/ModeIcon";
 import SignInButton from "@/components/auth/SignInButton";
 
-const MODES: { key: AppMode; title: string; blurb: string; icon: React.ReactNode }[] = [
-  {
-    key: "flag",
-    title: "Flag Quiz",
-    blurb: "Name as many of the world's flags as you can",
-    icon: (
-      <path d="M5 21V4m0 0h11l-2 4 2 4H5" strokeLinecap="round" strokeLinejoin="round" />
-    ),
-  },
-  {
-    key: "silhouette",
-    title: "Guess the Border",
-    blurb: "Identify countries from their outline",
-    icon: (
-      <path d="M4 7l5-3 6 3 5-2v12l-5 2-6-3-5 3V7z M9 4v13 M15 7v12" strokeLinecap="round" strokeLinejoin="round" />
-    ),
-  },
-  {
-    key: "globe",
-    title: "Globe Guesser",
-    blurb: "Find the country on a spinning globe",
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z" />
-      </>
-    ),
-  },
-  {
-    key: "capital",
-    title: "Capital Quiz",
-    blurb: "Match every country to its capital city",
-    icon: (
-      <path d="M3 21h18M5 21V10m14 11V10M9 21v-7m6 7v-7M3 10l9-6 9 6H3z" strokeLinecap="round" strokeLinejoin="round" />
-    ),
-  },
-  {
-    key: "landmark",
-    title: "Landmark Guesser",
-    blurb: "Place famous landmarks on the map",
-    icon: (
-      <>
-        <path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" />
-        <circle cx="12" cy="9.5" r="2.5" />
-      </>
-    ),
-  },
+const MODES: { key: AppMode; title: string; blurb: string }[] = [
+  { key: "flag", title: "Flag Quiz", blurb: "Name the world's flags" },
+  { key: "silhouette", title: "Guess the Border", blurb: "Countries from their outline" },
+  { key: "globe", title: "Globe Guesser", blurb: "Find it on the globe" },
+  { key: "capital", title: "Capital Quiz", blurb: "Every capital city" },
+  { key: "landmark", title: "Landmark Guesser", blurb: "Pin famous landmarks" },
 ];
 
 export default function TitleScreen({
@@ -60,51 +20,60 @@ export default function TitleScreen({
   isSignedIn: boolean;
 }) {
   return (
-    <div className="min-h-[100dvh] bg-[radial-gradient(ellipse_at_top,#2B1F66_0%,#16153F_55%,#0E0F2B_100%)] text-white">
-      <div className="mx-auto flex max-w-4xl flex-col items-center px-4 pt-10 pb-16 sm:pt-14">
-        <img
-          src="/geograil-logo.webp"
-          alt="GeoGrail"
-          width={460}
-          height={475}
-          className="w-56 sm:w-72 h-auto drop-shadow-[0_10px_40px_rgba(245,211,122,0.25)]"
-        />
-        <p className="mt-4 text-center text-base sm:text-lg text-indigo-100/80">
-          Test your geography across flags, borders, the globe, capitals and landmarks.
-        </p>
+    <div className="relative min-h-[100dvh] overflow-hidden bg-[radial-gradient(ellipse_at_50%_30%,#2E2170_0%,#17154A_45%,#0D0C29_100%)] text-white">
+      {/* Top bar */}
+      <div className="relative z-10 mx-auto flex max-w-6xl items-center justify-end gap-2 px-4 pt-4 text-sm">
+        <a
+          href="/leaderboard"
+          className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-800 backdrop-blur-sm transition-colors hover:border-gold-400/60 hover:text-white"
+        >
+          Leaderboards
+        </a>
+        {isSignedIn ? (
+          <a
+            href="/stats"
+            className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-gray-800 backdrop-blur-sm transition-colors hover:border-gold-400/60 hover:text-white"
+          >
+            My Stats
+          </a>
+        ) : (
+          <SignInButton />
+        )}
+      </div>
 
-        <div className="mt-10 flex w-full flex-wrap justify-center gap-3">
-          {MODES.map((m) => (
+      {/* Logo as the backdrop */}
+      <div className="relative -mt-6 flex justify-center sm:-mt-10">
+        <img
+          src="/geograil-hero.webp"
+          alt="GeoGrail"
+          width={1040}
+          height={980}
+          className="pointer-events-none w-[min(1000px,100vw,78vh)] max-w-none select-none"
+        />
+      </div>
+
+      {/* Mode cards laid over the bottom of the logo */}
+      <div className="relative z-10 mx-auto -mt-[min(40px,4vw,4vh)] max-w-6xl px-4 pb-14">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {MODES.map((m, i) => (
             <button
               key={m.key}
               onClick={() => onSelect(m.key)}
-              className="group flex w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)] items-start gap-4 rounded-2xl border border-white/10 bg-white/5 p-5 text-left backdrop-blur-sm transition-colors hover:border-[#F5D37A]/60 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#F5D37A] touch-manipulation"
+              className={`group flex flex-col items-start gap-3 rounded-2xl border border-white/10 bg-[#1C1946]/70 p-4 text-left shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-400/70 hover:bg-[#241F5C]/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400 motion-reduce:transition-none motion-reduce:hover:translate-y-0 touch-manipulation ${
+                i === MODES.length - 1 ? "col-span-2 sm:col-span-1" : ""
+              }`}
             >
-              <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-gradient-to-b from-[#F5D37A] to-[#D4A63A] text-[#1B1745]">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-6 w-6" aria-hidden>
-                  {m.icon}
-                </svg>
-              </span>
+              <ModeIcon mode={m.key} />
               <span>
-                <span className="block font-semibold text-white group-hover:text-[#F5D37A] transition-colors">{m.title}</span>
-                <span className="mt-0.5 block text-sm text-indigo-100/70">{m.blurb}</span>
+                <span className="block font-semibold text-white transition-colors group-hover:text-gold-400">{m.title}</span>
+                <span className="mt-0.5 block text-sm text-gray-500">{m.blurb}</span>
               </span>
             </button>
           ))}
         </div>
-
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm">
-          <a href="/leaderboard" className="rounded-full border border-white/15 px-4 py-2 text-indigo-100 hover:border-[#F5D37A]/60 hover:text-white transition-colors">
-            Leaderboards
-          </a>
-          {isSignedIn ? (
-            <a href="/stats" className="rounded-full border border-white/15 px-4 py-2 text-indigo-100 hover:border-[#F5D37A]/60 hover:text-white transition-colors">
-              My Stats
-            </a>
-          ) : (
-            <SignInButton />
-          )}
-        </div>
+        <p className="mt-8 text-center text-sm text-gray-500">
+          Flags, borders, the globe, capitals and landmarks. How well do you know the world?
+        </p>
       </div>
     </div>
   );

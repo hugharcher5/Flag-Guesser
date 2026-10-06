@@ -43,9 +43,9 @@ export default function SilhouetteDisplay({
     return geometry ? toSvgPath(geometry, SVG_W, SVG_H, 16, code) : '';
   }, [geometry, code, useImage]);
 
-  const fillColor = revealed ? '#3b82f6' : '#1e293b';
+  const fillColor = revealed ? '#F5D37A' : '#E6E4F9';
   const wrapper =
-    'w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-white flex items-center justify-center min-h-48 sm:min-h-56';
+    'w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-surface flex items-center justify-center min-h-48 sm:min-h-56';
 
   // ── High-detail SVG image files ──────────────────────────────────────────
   if (useImage) {

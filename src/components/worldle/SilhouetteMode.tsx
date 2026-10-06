@@ -65,7 +65,7 @@ function SilhouetteGrid({ polygons }: { polygons: Map<string, CountryGeometry> }
               <button
                 key={v}
                 onClick={() => setHighlight(v)}
-                className={`px-3 py-1.5 capitalize ${highlight === v ? 'bg-gray-800 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                className={`px-3 py-1.5 capitalize ${highlight === v ? 'bg-blue-600 text-white' : 'bg-surface text-gray-600 hover:bg-gray-50'}`}
               >
                 {v === 'dot' ? 'dot-only' : v}
               </button>
@@ -86,7 +86,7 @@ function SilhouetteGrid({ polygons }: { polygons: Map<string, CountryGeometry> }
           return (
             <div
               key={country.code}
-              className={`rounded-xl border bg-white flex flex-col overflow-hidden ${
+              className={`rounded-xl border bg-surface flex flex-col overflow-hidden ${
                 isDot ? 'border-red-300' : 'border-gray-200'
               }`}
             >
@@ -110,7 +110,7 @@ function SilhouetteGrid({ polygons }: { polygons: Map<string, CountryGeometry> }
                     height={TILE_H}
                     aria-label={country.name}
                   >
-                    <path d={path} fill="#1e293b" fillRule="evenodd" />
+                    <path d={path} fill="#E6E4F9" fillRule="evenodd" />
                   </svg>
                 )}
               </div>
@@ -310,8 +310,8 @@ export default function SilhouetteMode() {
 
         <button
           onClick={handlePlayAgain}
-          className="w-full py-3 rounded-xl bg-gray-800 text-white font-semibold text-base
-                     hover:bg-gray-900 active:bg-black transition-colors touch-manipulation"
+          className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
+                     hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
         >
           Play Again
         </button>
@@ -337,7 +337,7 @@ export default function SilhouetteMode() {
                   key={i}
                   className={`w-3 h-3 rounded-full border ${
                     !g
-                      ? 'bg-white border-gray-300'
+                      ? 'bg-surface border-gray-300'
                       : g.correct
                       ? 'bg-green-500 border-green-500'
                       : 'bg-gray-400 border-gray-400'

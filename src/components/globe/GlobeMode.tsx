@@ -305,8 +305,8 @@ export default function GlobeMode() {
           </p>
           <button
             onClick={handlePlayAgain}
-            className="mt-1 w-full py-3 rounded-xl bg-gray-800 text-white font-semibold text-base
-                       hover:bg-gray-900 active:bg-black transition-colors touch-manipulation"
+            className="mt-1 w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
+                       hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
           >
             Play Again
           </button>

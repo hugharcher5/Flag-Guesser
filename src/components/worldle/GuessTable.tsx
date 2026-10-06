@@ -25,7 +25,7 @@ export default function GuessTable({ guesses }: Props) {
           className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm
             ${g.correct
               ? 'bg-green-50 border border-green-200'
-              : 'bg-white border border-gray-200'
+              : 'bg-surface border border-gray-200'
             }`}
         >
           {/* Country name */}

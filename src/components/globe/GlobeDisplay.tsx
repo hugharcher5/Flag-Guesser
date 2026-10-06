@@ -280,7 +280,7 @@ export default function GlobeDisplay({
     <div
       ref={containerRef}
       className="w-full rounded-2xl overflow-hidden"
-      style={{ height, background: '#e8f4f8' }}
+      style={{ height, background: '#110F2E' }}
     />
   );
 }
