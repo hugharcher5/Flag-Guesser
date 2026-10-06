@@ -83,7 +83,7 @@ const config: Config = {
         float: "float 6s ease-in-out infinite",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "Georgia", "Times New Roman", "serif"],
       },
     },
   },

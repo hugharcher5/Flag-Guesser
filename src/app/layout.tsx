@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Fraunces } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+// Fraunces: a soft, slightly quirky serif that matches the GeoGrail wordmark
+const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-body", axes: ["SOFT", "WONK", "opsz"] });
 
 export const metadata: Metadata = {
   title: "GeoGrail",
@@ -18,7 +19,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html lang="en" className={fraunces.variable} suppressHydrationWarning>
       <body suppressHydrationWarning={true} className="bg-gray-50 font-sans text-gray-900 antialiased">{children}</body>
     </html>
   );

@@ -47,3 +47,8 @@ main {
     linear-gradient(to bottom, transparent, #000 6%, #000 94%, transparent);
   mask-composite: intersect;
 }
+
+/* Fraunces character: rounded terminals and its playful "wonky" letterforms */
+body {
+  font-variation-settings: "SOFT" 50, "WONK" 1;
+}
