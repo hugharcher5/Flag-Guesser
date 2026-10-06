@@ -6,6 +6,9 @@ import Icon from "@/components/Icon";
 import SignInButton from "@/components/auth/SignInButton";
 
 type Mode = { key: AppMode; title: string; blurb: string };
+/** Viewport point the transition grows from. */
+export type Origin = { x: number; y: number };
+type OnSelect = (mode: AppMode, origin: Origin) => void;
 
 const MODES: Record<AppMode, Mode> = {
   flag: { key: "flag", title: "Flag Quiz", blurb: "Name the world's flags" },
@@ -19,10 +22,17 @@ const LEFT: AppMode[] = ["flag", "silhouette"];
 const RIGHT: AppMode[] = ["globe", "capital"];
 const ALL: AppMode[] = ["flag", "silhouette", "globe", "capital", "landmark"];
 
-function ModeCard({ mode, onSelect, className = "" }: { mode: Mode; onSelect: (m: AppMode) => void; className?: string }) {
+function ModeCard({ mode, onSelect, className = "" }: { mode: Mode; onSelect: OnSelect; className?: string }) {
   return (
     <button
-      onClick={() => onSelect(mode.key)}
+      onClick={(e) => {
+        // Keyboard activation has no pointer position, so grow from the card's centre
+        const r = e.currentTarget.getBoundingClientRect();
+        onSelect(
+          mode.key,
+          e.detail === 0 ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: e.clientX, y: e.clientY },
+        );
+      }}
       className={`group relative flex w-full cursor-pointer items-center gap-4 rounded-2xl border border-white/10 bg-[#1C1946]/75 p-4 text-left shadow-[0_12px_32px_rgba(5,3,30,0.45)] backdrop-blur-md transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-gold-400/70 hover:bg-[#262062]/85 hover:shadow-[0_16px_40px_rgba(5,3,30,0.55),0_0_0_1px_rgba(245,211,122,0.15)] active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-400 motion-reduce:transition-none motion-reduce:hover:translate-y-0 touch-manipulation lg:p-5 ${className}`}
     >
       <ModeIcon mode={mode.key} />
@@ -46,7 +56,7 @@ export default function TitleScreen({
   onSelect,
   isSignedIn,
 }: {
-  onSelect: (mode: AppMode) => void;
+  onSelect: OnSelect;
   isSignedIn: boolean;
 }) {
   const logo = (sizing: string) => (

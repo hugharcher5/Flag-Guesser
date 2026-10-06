@@ -52,3 +52,13 @@ main {
 body {
   font-variation-settings: "SOFT" 50, "WONK" 1;
 }
+
+/* Title screen -> game: the new view is revealed by a clip-path circle set in JS */
+.vt-reveal::view-transition-old(root),
+.vt-reveal::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+.vt-reveal::view-transition-new(root) {
+  z-index: 1;
+}
