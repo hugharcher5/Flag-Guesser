@@ -1,0 +1,30 @@
+name: Keep Supabase Awake
+
+# Supabase pauses free projects after a week without database activity,
+# which takes GeoGrail's sign-in, leaderboards and stats down with it.
+# A small daily read keeps the project active.
+on:
+  schedule:
+    - cron: '23 6 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      # Same public values the browser bundle ships (NEXT_PUBLIC_*); the
+      # publishable key is safe to expose and is limited by row-level security
+      SUPABASE_URL: https://yhdmtezqqwdhnspqkukr.supabase.co
+      SUPABASE_PUBLISHABLE_KEY: sb_publishable_4FUFx8l1b3qjS1_r-NcM3w_AC_lnzzZ
+    steps:
+      - name: Read one leaderboard row
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            "$SUPABASE_URL/rest/v1/game_results?select=*&limit=1" \
+            -H "apikey: $SUPABASE_PUBLISHABLE_KEY")
+          echo "Supabase responded $code"
+          test "$code" = 200
