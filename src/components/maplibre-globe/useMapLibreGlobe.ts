@@ -76,6 +76,10 @@ export function useMapLibreGlobe(
         callbacksRef.current.onInteractionStart?.();
       }
     };
+    // Stop on press, not just dragstart: the per-frame jumpTo above calls
+    // map.stop(), which resets a pending drag before dragstart can fire.
+    map.on('mousedown', stopAutoRotate);
+    map.on('touchstart', stopAutoRotate);
     map.on('dragstart', stopAutoRotate);
     map.on('zoomstart', stopAutoRotate);
     map.on('rotatestart', stopAutoRotate);
