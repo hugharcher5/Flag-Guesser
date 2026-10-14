@@ -2,10 +2,14 @@ name: Keep Supabase Awake
 
 # Supabase pauses free projects after a week without database activity,
 # which takes GeoGrail's sign-in, leaderboards and stats down with it.
-# A small daily read keeps the project active.
+# A daily read of game_results still got the project flagged: anonymous
+# requests are filtered out by row-level security, so it returned no rows.
+# Read the publicly readable profiles table instead, and hit the auth
+# service too, twice a day.
 on:
   schedule:
     - cron: '23 6 * * *'
+    - cron: '47 18 * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -21,10 +25,18 @@ jobs:
       SUPABASE_URL: https://yhdmtezqqwdhnspqkukr.supabase.co
       SUPABASE_PUBLISHABLE_KEY: sb_publishable_4FUFx8l1b3qjS1_r-NcM3w_AC_lnzzZ
     steps:
-      - name: Read one leaderboard row
+      - name: Read profile rows
+        run: |
+          body=$(curl -sf "$SUPABASE_URL/rest/v1/profiles?select=id&limit=5" \
+            -H "apikey: $SUPABASE_PUBLISHABLE_KEY")
+          echo "Supabase returned: $body"
+          # An empty array means the query never touched real rows
+          test "$body" != "[]"
+
+      - name: Check auth service
         run: |
           code=$(curl -s -o /dev/null -w '%{http_code}' \
-            "$SUPABASE_URL/rest/v1/game_results?select=*&limit=1" \
+            "$SUPABASE_URL/auth/v1/health" \
             -H "apikey: $SUPABASE_PUBLISHABLE_KEY")
-          echo "Supabase responded $code"
+          echo "Auth responded $code"
           test "$code" = 200
