@@ -64,16 +64,17 @@ export default function TitleScreen({
   onSelect: OnSelect;
   isSignedIn: boolean;
 }) {
-  // The grail artwork is the screen's one bright moment. Its square backdrop is faded
-  // into the page by .hero-mask, so the page colour matches the art's night sky.
+  // The grail artwork is the screen's one bright moment. It is a transparent cutout,
+  // so it sits straight on the page with no box, lifted by a soft ink contact shadow.
   const logo = (sizing: string) => (
     <div className="flex justify-center">
       <img
-        src="/geograil-hero.webp"
+        src="/geograil-hero-cutout.webp"
         alt="GeoGrail"
-        width={1040}
-        height={980}
-        className={`hero-mask max-w-none select-none ${sizing}`}
+        width={834}
+        height={909}
+        fetchPriority="high"
+        className={`max-w-none select-none drop-shadow-[0_28px_40px_rgba(4,5,20,0.7)] ${sizing}`}
       />
     </div>
   );
@@ -96,7 +97,7 @@ export default function TitleScreen({
 
       {/* Mobile and tablet: logo on top, cards below */}
       <div className="lg:hidden">
-        <div className="-mt-2">{logo("w-[min(560px,96vw,58vh)]")}</div>
+        <div className="pt-2 pb-4">{logo("w-[min(460px,82vw,50vh)]")}</div>
         <div className="mx-auto grid max-w-2xl gap-3 px-4 pb-12 pt-2 sm:grid-cols-2">
           {ALL.map((k, i) => (
             <ModeCard
@@ -117,14 +118,14 @@ export default function TitleScreen({
               <ModeCard key={k} mode={MODES[k]} onSelect={onSelect} />
             ))}
           </div>
-          {logo("w-[min(680px,46vw,74vh)]")}
+          {logo("w-[min(620px,42vw,70vh)]")}
           <div className="flex w-full max-w-[360px] flex-col gap-4 justify-self-start">
             {RIGHT.map((k) => (
               <ModeCard key={k} mode={MODES[k]} onSelect={onSelect} />
             ))}
           </div>
         </div>
-        <div className="mx-auto -mt-2 w-full max-w-[360px]">
+        <div className="mx-auto mt-4 w-full max-w-[360px]">
           <ModeCard mode={MODES.landmark} onSelect={onSelect} />
         </div>
         <div className="mt-8 flex flex-col items-center gap-3">
