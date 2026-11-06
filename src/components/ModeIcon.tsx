@@ -23,7 +23,14 @@ const PATHS: Record<AppMode, React.ReactNode> = {
 };
 
 /** Quiet raised tile with a line icon for a game mode. The icon turns gold on card hover. */
-export default function ModeIcon({ mode, size = "md" }: { mode: AppMode; size?: "sm" | "md" }) {
+export default function ModeIcon({ mode, size = "md", bare = false }: { mode: AppMode; size?: "sm" | "md"; bare?: boolean }) {
+  // Bare: just the line icon in the current text colour, for use on the water buttons
+  if (bare)
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5 flex-none" aria-hidden>
+        {PATHS[mode]}
+      </svg>
+    );
   const box = size === "sm" ? "h-9 w-9 rounded-lg" : "h-11 w-11 rounded-[10px]";
   const icon = "h-[18px] w-[18px]";
   return (

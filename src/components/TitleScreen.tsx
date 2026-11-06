@@ -32,8 +32,23 @@ const SPOTS: { key: AppMode; x: number; y: number }[] = [
   { key: "landmark", x: 49.6, y: 90 },
 ];
 
-/** A compact mode button that sits on the puddle at the end of a splash. */
-function SplashChip({ mode, onSelect, x, y }: { mode: Mode; onSelect: OnSelect; x: number; y: number }) {
+// Puddle outlines, drawn in a 240×100 box and stretched to each label. Three variants
+// so neighbouring puddles never look stamped from one mould.
+const PUDDLES = [
+  "M18,54 C6,36 26,16 54,20 C72,8 100,14 118,12 C144,6 172,14 192,20 C218,16 238,34 230,54 C240,72 220,88 194,84 C174,96 144,90 122,92 C96,97 68,92 50,86 C24,92 8,72 18,54 Z",
+  "M14,48 C10,28 34,14 60,18 C84,10 108,18 130,12 C156,8 186,12 204,22 C228,26 236,44 228,58 C232,78 210,90 184,86 C160,94 134,88 112,92 C86,96 60,94 40,84 C18,82 6,64 14,48 Z",
+  "M22,50 C12,30 36,18 58,22 C80,12 104,10 126,16 C150,10 178,16 198,24 C224,26 236,46 226,60 C230,80 204,90 180,84 C156,92 128,94 104,90 C80,94 52,90 36,80 C14,76 10,62 22,50 Z",
+];
+// Stray droplets around each puddle, as % of the button box: [x, y, size px]
+const DROPS: [number, number, number][][] = [
+  [[-4, 70, 7], [103, 30, 5], [96, 96, 4]],
+  [[104, 64, 7], [-3, 26, 5], [8, 100, 4]],
+  [[-5, 44, 6], [102, 82, 6], [90, -6, 4]],
+];
+
+/** A mode button shaped as the puddle at the end of a splash: glossy water, light text on it. */
+function WaterButton({ mode, onSelect, x, y, variant }: { mode: Mode; onSelect: OnSelect; x: number; y: number; variant: number }) {
+  const id = `water-${mode.key}`;
   return (
     <button
       onClick={(e) => {
@@ -44,12 +59,60 @@ function SplashChip({ mode, onSelect, x, y }: { mode: Mode; onSelect: OnSelect; 
         );
       }}
       style={{ left: `${x}%`, top: `${y}%` }}
-      className="group absolute flex min-h-[56px] -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center gap-3 whitespace-nowrap rounded-xl border border-white/[0.1] bg-gray-50 py-2 pl-2 pr-4 text-left shadow-[0_8px_24px_rgba(4,5,20,0.55)] transition-colors duration-150 ease-out hover:border-gold-500/50 hover:bg-gray-100 active:scale-[0.98]"
+      className="group absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-[40%] focus-visible:outline-offset-4"
     >
-      <ModeIcon mode={mode.key} size="sm" />
-      <span className="flex flex-col">
-        <span className="text-sm font-medium text-gray-900">{mode.title}</span>
-        <span className="plate">{mode.plate}</span>
+      <span className="relative flex min-h-[64px] items-center gap-3 whitespace-nowrap px-9 py-4 text-left transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.05] group-active:scale-[0.97]">
+        <svg
+          viewBox="0 0 240 100"
+          preserveAspectRatio="none"
+          aria-hidden
+          className="absolute inset-0 h-full w-full overflow-visible drop-shadow-[0_10px_18px_rgba(4,5,20,0.6)] transition-[filter] duration-300 group-hover:brightness-110"
+        >
+          <defs>
+            <linearGradient id={`${id}-body`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#2E8FE0" />
+              <stop offset="0.45" stopColor="#1763B8" />
+              <stop offset="1" stopColor="#0E3F8A" />
+            </linearGradient>
+            <linearGradient id={`${id}-shine`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#E6F6FF" stopOpacity="0.45" />
+              <stop offset="1" stopColor="#E6F6FF" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {/* Body, with the dark ink outline the painted splashes have */}
+          <path d={PUDDLES[variant]} fill={`url(#${id}-body)`} stroke="#0A1B4D" strokeWidth="3" vectorEffect="non-scaling-stroke" />
+          {/* Rim light along the top edge and a wet glint on the left */}
+          <path d={PUDDLES[variant]} fill="none" stroke="#6CC8FF" strokeOpacity="0.55" strokeWidth="1.5" vectorEffect="non-scaling-stroke" transform="translate(0 2) scale(1 0.97)" />
+          <ellipse cx="120" cy="24" rx="80" ry="7" fill={`url(#${id}-shine)`} />
+          <ellipse cx="208" cy="34" rx="6" ry="3.5" fill="#E6F6FF" fillOpacity="0.6" />
+          {/* Ripple ring that spreads on hover */}
+          <ellipse
+            cx="120"
+            cy="54"
+            rx="96"
+            ry="30"
+            fill="none"
+            stroke="#BFE7FF"
+            strokeOpacity="0"
+            vectorEffect="non-scaling-stroke"
+            className="origin-center transition-[stroke-opacity,transform] duration-500 ease-out [transform-box:fill-box] [transform:scale(0.7)] group-hover:[stroke-opacity:0.35] group-hover:[transform:scale(1)]"
+          />
+        </svg>
+        {DROPS[variant].map(([dx, dy, s], i) => (
+          <span
+            key={i}
+            aria-hidden
+            style={{ left: `${dx}%`, top: `${dy}%`, width: s, height: s * 0.8 }}
+            className="absolute rounded-full border border-[#0A1B4D] bg-[#2A86D8]"
+          />
+        ))}
+        <span className="relative text-[#F4F9FF]">
+          <ModeIcon mode={mode.key} bare />
+        </span>
+        <span className="relative flex flex-col [text-shadow:0_1px_2px_rgba(6,20,60,0.6)]">
+          <span className="text-[15px] font-medium leading-5 text-[#F4F9FF]">{mode.title}</span>
+          <span className="font-mono text-xs leading-4 text-[#CDE8FF]">{mode.plate}</span>
+        </span>
       </span>
     </button>
   );
@@ -162,8 +225,8 @@ export default function TitleScreen({
             fetchPriority="high"
             className="pointer-events-none absolute left-[30.24%] top-[4.43%] w-[40.16%] select-none drop-shadow-[0_28px_40px_rgba(4,5,20,0.7)]"
           />
-          {SPOTS.map(({ key, x, y }) => (
-            <SplashChip key={key} mode={MODES[key]} onSelect={onSelect} x={x} y={y} />
+          {SPOTS.map(({ key, x, y }, i) => (
+            <WaterButton key={key} mode={MODES[key]} onSelect={onSelect} x={x} y={y} variant={i % PUDDLES.length} />
           ))}
         </div>
         <div className="mt-6 flex flex-col items-center gap-3">
