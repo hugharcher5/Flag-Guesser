@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { AppMode } from "@/components/NavBar";
 import ModeIcon from "@/components/ModeIcon";
 import Icon from "@/components/Icon";
@@ -32,36 +33,87 @@ const SPOTS: { key: AppMode; x: number; y: number }[] = [
   { key: "landmark", x: 49.6, y: 90 },
 ];
 
-// Puddle outlines, drawn in a 240×100 box and stretched to each label. Three variants
-// so neighbouring puddles never look stamped from one mould.
-const PUDDLES = [
-  "M18,54 C6,36 26,16 54,20 C72,8 100,14 118,12 C144,6 172,14 192,20 C218,16 238,34 230,54 C240,72 220,88 194,84 C174,96 144,90 122,92 C96,97 68,92 50,86 C24,92 8,72 18,54 Z",
-  "M14,48 C10,28 34,14 60,18 C84,10 108,18 130,12 C156,8 186,12 204,22 C228,26 236,44 228,58 C232,78 210,90 184,86 C160,94 134,88 112,92 C86,96 60,94 40,84 C18,82 6,64 14,48 Z",
-  "M22,50 C12,30 36,18 58,22 C80,12 104,10 126,16 C150,10 178,16 198,24 C224,26 236,46 226,60 C230,80 204,90 180,84 C156,92 128,94 104,90 C80,94 52,90 36,80 C14,76 10,62 22,50 Z",
-];
-// Stray droplets around each puddle, as % of the button box: [x, y, size px]
-const DROPS: [number, number, number][][] = [
-  [[-4, 70, 7], [103, 30, 5], [96, 96, 4]],
-  [[104, 64, 7], [-3, 26, 5], [8, 100, 4]],
-  [[-5, 44, 6], [102, 82, 6], [90, -6, 4]],
-];
+// Each puddle is drawn from its own seed, so no two share an outline. Points sit round an
+// ellipse in a 240×100 box with jittered radii, one or two lobes pushed out where the water
+// ran, then smoothed into one closed curve. Deterministic, so server and client agree.
+function rng(seed: number) {
+  return () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+type Puddle = { d: string; drops: [number, number, number][]; tilt: number; pad: string };
+
+function puddle(seed: number, lobes: number[], tilt: number, pad: string): Puddle {
+  const rand = rng(seed);
+  const n = 16;
+  const pts: [number, number][] = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + (rand() - 0.5) * 0.18;
+    let r = 0.95 + rand() * 0.14;
+    for (const l of lobes) {
+      const d = Math.atan2(Math.sin(a - l), Math.cos(a - l));
+      r += 0.3 * Math.exp(-(d * d) / 0.1);
+    }
+    // A squarish ellipse (superellipse) so the label's corners stay on the water
+    const c = Math.cos(a), sn = Math.sin(a);
+    const sx = Math.sign(c) * Math.abs(c) ** 0.78, sy = Math.sign(sn) * Math.abs(sn) ** 0.78;
+    pts.push([120 + 112 * r * sx, 50 + 46 * r * sy]);
+  }
+  const f = (v: number) => v.toFixed(1);
+  let d = `M${f(pts[0][0])},${f(pts[0][1])}`;
+  for (let i = 0; i < n; i++) {
+    const [p0, p1, p2, p3] = [pts[(i - 1 + n) % n], pts[i], pts[(i + 1) % n], pts[(i + 2) % n]];
+    d += ` C${f(p1[0] + (p2[0] - p0[0]) / 6)},${f(p1[1] + (p2[1] - p0[1]) / 6)} ${f(p2[0] - (p3[0] - p1[0]) / 6)},${f(p2[1] - (p3[1] - p1[1]) / 6)} ${f(p2[0])},${f(p2[1])}`;
+  }
+  const drops: [number, number, number][] = [];
+  const count = 3 + Math.floor(rand() * 3);
+  for (let i = 0; i < count; i++) {
+    const a = rand() * Math.PI * 2;
+    const r = 1.16 + rand() * 0.16;
+    drops.push([((120 + 104 * r * Math.cos(a)) / 240) * 100, ((50 + 40 * r * Math.sin(a)) / 100) * 100, 3 + Math.round(rand() * 5)]);
+  }
+  return { d: d + " Z", drops, tilt, pad };
+}
+
+const PUDDLES: Record<AppMode, Puddle> = {
+  flag: puddle(11, [3.3, 0.5], -3, "px-12 py-5"),
+  silhouette: puddle(27, [4.4], 2.5, "px-11 py-6"),
+  globe: puddle(43, [5.2, 1.9], -2, "px-11 py-5"),
+  capital: puddle(58, [0.2], 3.5, "px-12 py-6"),
+  landmark: puddle(76, [1.6, 3.9], -1.5, "px-14 py-5"),
+};
+
+// Droplets thrown out by a click: direction in degrees and distance in px
+const BURST = Array.from({ length: 12 }, (_, i) => {
+  const r = rng(900 + i);
+  return { a: i * 30 + (r() - 0.5) * 20, d: 34 + r() * 40, s: 4 + Math.round(r() * 5), t: 380 + Math.round(r() * 160) };
+});
+
+type Splash = { x: number; y: number; id: number };
 
 /** A mode button shaped as the puddle at the end of a splash: glossy water, light text on it. */
-function WaterButton({ mode, onSelect, x, y, variant }: { mode: Mode; onSelect: OnSelect; x: number; y: number; variant: number }) {
+function WaterButton({ mode, onSelect, x, y }: { mode: Mode; onSelect: OnSelect; x: number; y: number }) {
   const id = `water-${mode.key}`;
+  const shape = PUDDLES[mode.key];
+  const [splash, setSplash] = useState<Splash | null>(null);
   return (
     <button
       onClick={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
-        onSelect(
-          mode.key,
-          e.detail === 0 ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: e.clientX, y: e.clientY },
-        );
+        const origin = e.detail === 0 ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: e.clientX, y: e.clientY };
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return onSelect(mode.key, origin);
+        // Splash first, then the game grows out of the same point
+        setSplash({ x: origin.x - r.left, y: origin.y - r.top, id: Date.now() });
+        window.setTimeout(() => onSelect(mode.key, origin), 260);
       }}
-      style={{ left: `${x}%`, top: `${y}%` }}
+      style={{ left: `${x}%`, top: `${y}%`, rotate: `${shape.tilt}deg` }}
       className="group absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-[40%] focus-visible:outline-offset-4"
     >
-      <span className="relative flex min-h-[64px] items-center gap-3 whitespace-nowrap px-9 py-4 text-left transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.05] group-active:scale-[0.97]">
+      <span className={`relative flex min-h-[64px] items-center gap-3 whitespace-nowrap text-left transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.05] group-active:scale-[0.97] ${shape.pad}`}>
         <svg
           viewBox="0 0 240 100"
           preserveAspectRatio="none"
@@ -80,16 +132,15 @@ function WaterButton({ mode, onSelect, x, y, variant }: { mode: Mode; onSelect: 
             </linearGradient>
           </defs>
           {/* Body, with the dark ink outline the painted splashes have */}
-          <path d={PUDDLES[variant]} fill={`url(#${id}-body)`} stroke="#0A1B4D" strokeWidth="3" vectorEffect="non-scaling-stroke" />
-          {/* Rim light along the top edge and a wet glint on the left */}
-          <path d={PUDDLES[variant]} fill="none" stroke="#6CC8FF" strokeOpacity="0.55" strokeWidth="1.5" vectorEffect="non-scaling-stroke" transform="translate(0 2) scale(1 0.97)" />
-          <ellipse cx="120" cy="24" rx="80" ry="7" fill={`url(#${id}-shine)`} />
-          <ellipse cx="208" cy="34" rx="6" ry="3.5" fill="#E6F6FF" fillOpacity="0.6" />
+          <path d={shape.d} fill={`url(#${id}-body)`} stroke="#0A1B4D" strokeWidth="3" vectorEffect="non-scaling-stroke" />
+          {/* Rim light along the top edge and a wet glint */}
+          <path d={shape.d} fill="none" stroke="#6CC8FF" strokeOpacity="0.55" strokeWidth="1.5" vectorEffect="non-scaling-stroke" transform="translate(6 3) scale(0.95 0.94)" />
+          <ellipse cx="120" cy="24" rx="78" ry="7" fill={`url(#${id}-shine)`} />
           {/* Ripple ring that spreads on hover */}
           <ellipse
             cx="120"
             cy="54"
-            rx="96"
+            rx="92"
             ry="30"
             fill="none"
             stroke="#BFE7FF"
@@ -98,12 +149,12 @@ function WaterButton({ mode, onSelect, x, y, variant }: { mode: Mode; onSelect: 
             className="origin-center transition-[stroke-opacity,transform] duration-500 ease-out [transform-box:fill-box] [transform:scale(0.7)] group-hover:[stroke-opacity:0.35] group-hover:[transform:scale(1)]"
           />
         </svg>
-        {DROPS[variant].map(([dx, dy, s], i) => (
+        {shape.drops.map(([dx, dy, s], i) => (
           <span
             key={i}
             aria-hidden
             style={{ left: `${dx}%`, top: `${dy}%`, width: s, height: s * 0.8 }}
-            className="absolute rounded-full border border-[#0A1B4D] bg-[#2A86D8]"
+            className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#0A1B4D] bg-[#2A86D8]"
           />
         ))}
         <span className="relative text-[#F4F9FF]">
@@ -114,6 +165,27 @@ function WaterButton({ mode, onSelect, x, y, variant }: { mode: Mode; onSelect: 
           <span className="font-mono text-xs leading-4 text-[#CDE8FF]">{mode.plate}</span>
         </span>
       </span>
+      {/* Click splash: a ring spreads and droplets fly out from where the water was hit */}
+      {splash && (
+        <span key={splash.id} aria-hidden className="pointer-events-none absolute" style={{ left: splash.x, top: splash.y }}>
+          <span className="splash-ring absolute h-24 w-24 rounded-full border-2 border-[#BFE7FF]" />
+          {BURST.map((b, i) => (
+            <span
+              key={i}
+              className="splash-drop absolute rounded-full border border-[#0A1B4D] bg-[#3A9BEA]"
+              style={
+                {
+                  width: b.s,
+                  height: b.s,
+                  "--dx": `${Math.cos((b.a * Math.PI) / 180) * b.d}px`,
+                  "--dy": `${Math.sin((b.a * Math.PI) / 180) * b.d}px`,
+                  animationDuration: `${b.t}ms`,
+                } as React.CSSProperties
+              }
+            />
+          ))}
+        </span>
+      )}
     </button>
   );
 }
@@ -225,8 +297,8 @@ export default function TitleScreen({
             fetchPriority="high"
             className="pointer-events-none absolute left-[30.24%] top-[4.43%] w-[40.16%] select-none drop-shadow-[0_28px_40px_rgba(4,5,20,0.7)]"
           />
-          {SPOTS.map(({ key, x, y }, i) => (
-            <WaterButton key={key} mode={MODES[key]} onSelect={onSelect} x={x} y={y} variant={i % PUDDLES.length} />
+          {SPOTS.map(({ key, x, y }) => (
+            <WaterButton key={key} mode={MODES[key]} onSelect={onSelect} x={x} y={y} />
           ))}
         </div>
         <div className="mt-6 flex flex-col items-center gap-3">
