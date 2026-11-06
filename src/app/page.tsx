@@ -74,13 +74,13 @@ export default function Page() {
     <div className="min-h-[100dvh] flex flex-col bg-gray-50">
       <NavBar mode={mode} onModeChange={setMode} isSignedIn={!!user} />
       {/* Auth strip — sign-in prompt or signed-in indicator */}
-      <div className="flex justify-end items-center px-4 py-2 bg-surface border-b border-gray-100">
+      <div className="flex justify-end items-center px-4 h-10 bg-gray-50 border-b border-white/[0.06]">
         {user ? (
           <div className="flex items-center gap-3">
-            <a href="/stats" className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">
-              My Stats
+            <a href="/stats" className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-150">
+              My stats
             </a>
-            <span className="text-xs text-gray-500">
+            <span className="plate">
               {user.email}
             </span>
           </div>

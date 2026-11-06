@@ -45,7 +45,7 @@ export default function SilhouetteDisplay({
 
   const fillColor = revealed ? '#F5D37A' : '#E6E4F9';
   const wrapper =
-    'w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-surface flex items-center justify-center min-h-48 sm:min-h-56';
+    'w-full rounded-2xl overflow-hidden border border-white/[0.08] bg-surface flex items-center justify-center min-h-48 sm:min-h-56';
 
   // ── High-detail SVG image files ──────────────────────────────────────────
   if (useImage) {

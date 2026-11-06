@@ -69,8 +69,8 @@ function formatTime(seconds: number): string {
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
-      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</span>
-      <span className="text-2xl font-bold text-gray-800 tabular-nums">{value}</span>
+      <span className="text-xs font-medium text-gray-400">{label}</span>
+      <span className="text-2xl font-medium text-gray-800 tabular-nums">{value}</span>
       {sub && <span className="text-xs text-gray-400">{sub}</span>}
     </div>
   );
@@ -119,7 +119,7 @@ function FriendButton({
       <button
         onClick={addFriend}
         disabled={loading}
-        className="px-4 py-1.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+        className="px-4 py-1.5 rounded-lg bg-blue-600 text-gray-50 text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
       >
         {loading ? 'Sending…' : 'Add Friend'}
       </button>
@@ -137,7 +137,7 @@ function FriendButton({
       <button
         onClick={acceptFriend}
         disabled={loading}
-        className="px-4 py-1.5 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition-colors disabled:opacity-50"
+        className="px-4 py-1.5 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
       >
         {loading ? 'Accepting…' : 'Accept Request'}
       </button>
@@ -206,7 +206,7 @@ export default function ProfileClient({
 
             {/* Username + country */}
             <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-gray-800 truncate">{username}</h1>
+              <h1 className="text-2xl font-medium text-gray-800 truncate">{username}</h1>
               {country && (
                 <p className="text-sm text-gray-500 truncate">{country}</p>
               )}
@@ -228,18 +228,18 @@ export default function ProfileClient({
           {/* Overall stats row */}
           <div className="flex gap-4 pt-2 border-t border-gray-100">
             <div className="flex flex-col items-center flex-1">
-              <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">Games</span>
-              <span className="text-lg font-bold text-gray-800 tabular-nums">{(totalGames ?? 0).toLocaleString()}</span>
+              <span className="text-xs text-gray-400 font-medium">Games</span>
+              <span className="text-lg font-medium text-gray-800 tabular-nums">{(totalGames ?? 0).toLocaleString()}</span>
             </div>
             <div className="w-px bg-gray-100" />
             <div className="flex flex-col items-center flex-1">
-              <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">Points</span>
-              <span className="text-lg font-bold text-gray-800 tabular-nums">{(totalPoints ?? 0).toLocaleString()}</span>
+              <span className="text-xs text-gray-400 font-medium">Points</span>
+              <span className="text-lg font-medium text-gray-800 tabular-nums">{(totalPoints ?? 0).toLocaleString()}</span>
             </div>
             <div className="w-px bg-gray-100" />
             <div className="flex flex-col items-center flex-1">
-              <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">Best Score</span>
-              <span className="text-lg font-bold text-gray-800 tabular-nums">{bestScore ?? 0} / {TOTAL_FLAGS}</span>
+              <span className="text-xs text-gray-400 font-medium">Best Score</span>
+              <span className="text-lg font-medium text-gray-800 tabular-nums">{bestScore ?? 0} / {TOTAL_FLAGS}</span>
             </div>
           </div>
         </div>
@@ -269,7 +269,7 @@ export default function ProfileClient({
               <StatCard
                 label="Best Score"
                 value={`${flagStats.bestScore} / ${TOTAL_FLAGS}`}
-                sub={flagStats.bestScore === TOTAL_FLAGS ? 'Perfect!' : undefined}
+                sub={flagStats.bestScore === TOTAL_FLAGS ? 'Perfect score' : undefined}
               />
               <StatCard
                 label="Best Time"
@@ -292,7 +292,7 @@ export default function ProfileClient({
               <StatCard
                 label="Best Score"
                 value={`${capitalStats.bestScore} / ${TOTAL_FLAGS}`}
-                sub={capitalStats.bestScore === TOTAL_FLAGS ? 'Perfect!' : undefined}
+                sub={capitalStats.bestScore === TOTAL_FLAGS ? 'Perfect score' : undefined}
               />
               <StatCard
                 label="Best Time"

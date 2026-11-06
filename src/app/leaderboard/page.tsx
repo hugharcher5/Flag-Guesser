@@ -61,7 +61,7 @@ export default function LeaderboardHub() {
 
         {/* Header */}
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-800">
+          <h1 className="text-3xl font-medium tracking-tight text-gray-800">
             Leaderboards
           </h1>
           <p className="text-sm text-gray-500">
@@ -77,17 +77,17 @@ export default function LeaderboardHub() {
                 key={board.href}
                 href={board.href}
                 className="group bg-surface rounded-2xl border border-gray-200 shadow-sm p-6
-                           flex flex-col gap-3 hover:border-blue-300 hover:shadow-md
-                           transition-all duration-150"
+                           flex flex-col gap-3 hover:border-gold-500/40
+                           transition-colors duration-150"
               >
                 <ModeIcon mode={board.mode} />
                 <div className="flex flex-col gap-1">
-                  <span className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+                  <span className="font-medium text-gray-800 group-hover:text-blue-600 transition-colors">
                     {board.title}
                   </span>
                   <span className="text-sm text-gray-500">{board.description}</span>
                 </div>
-                <span className="inline-flex items-center gap-1.5 mt-auto text-xs font-semibold text-blue-600 group-hover:underline">
+                <span className="inline-flex items-center gap-1.5 mt-auto text-xs font-medium text-blue-600 group-hover:underline">
                   View leaderboard
                   <Icon name="arrow-right" />
                 </span>
@@ -101,8 +101,8 @@ export default function LeaderboardHub() {
                 <ModeIcon mode={board.mode} />
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-gray-800">{board.title}</span>
-                    <span className="text-xs font-semibold text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
+                    <span className="font-medium text-gray-800">{board.title}</span>
+                    <span className="text-xs font-medium text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
                       Coming soon
                     </span>
                   </div>

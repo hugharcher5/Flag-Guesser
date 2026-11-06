@@ -129,7 +129,7 @@ export default function MagnifyOverlay({
         {/* Country name + distance label below the circle */}
         <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 whitespace-nowrap text-center">
           <span
-            className="block text-xs font-semibold px-2 py-0.5 rounded-full shadow"
+            className="block text-xs font-medium px-2 py-0.5 rounded-full shadow"
             style={{ background: 'rgba(17,15,46,0.85)', color: '#fff' }}
           >
             {name}

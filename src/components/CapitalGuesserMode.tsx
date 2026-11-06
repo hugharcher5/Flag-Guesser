@@ -103,7 +103,7 @@ function CapitalDisplay({
 
   return (
     <div className="w-full flex flex-col items-center gap-2">
-      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-surface flex items-center justify-center min-h-32 sm:min-h-40 p-3">
+      <div className="w-full rounded-2xl overflow-hidden border border-white/[0.08] bg-surface flex items-center justify-center min-h-32 sm:min-h-40 p-3">
         {useImage ? (
           <div className="relative w-full flex items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -137,7 +137,7 @@ function CapitalDisplay({
           </svg>
         )}
       </div>
-      <p className="text-lg font-bold text-gray-800 text-center">
+      <p className="text-lg font-medium text-gray-800 text-center">
         {entry.country.name}
       </p>
     </div>
@@ -160,7 +160,7 @@ function MissedAnswersSection({ items }: { items: MissedItem[] }) {
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
       >
-        <span className="text-sm font-semibold text-gray-700">
+        <span className="text-sm font-medium text-gray-700">
           Missed Answers ({items.length})
         </span>
         <svg
@@ -365,7 +365,7 @@ export default function CapitalGuesserMode() {
   if (phase === "loading") {
     return (
       <div className="w-full max-w-md flex flex-col items-center gap-6 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-800">
+        <h1 className="text-3xl font-medium tracking-tight text-gray-800">
           Capital Guesser
         </h1>
         <p className="text-gray-500 text-sm">Loading country shapes...</p>
@@ -380,28 +380,28 @@ export default function CapitalGuesserMode() {
   if (phase === "idle") {
     return (
       <div className="w-full max-w-md flex flex-col items-center gap-6 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-800">
+        <h1 className="text-3xl font-medium tracking-tight text-gray-800">
           Capital Guesser
         </h1>
 
         <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
           Name the capital of all{" "}
-          <span className="font-semibold text-gray-700">
+          <span className="font-medium text-gray-700">
             {total} countries
           </span>{" "}
           as fast as you can. You have{" "}
-          <span className="font-semibold text-gray-700">15 minutes</span>.
+          <span className="font-medium text-gray-700">15 minutes</span>.
           You&apos;ll see the country shape with a red dot marking the capital.
           Answers are checked as you type. Skip to come back later.
         </p>
 
         <div className="w-full rounded-2xl border border-gray-200 bg-surface p-5 flex flex-col gap-3 text-left">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-            Personal Bests
+          <p className="text-xs font-medium text-gray-400">
+            Personal bests
           </p>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Best score</span>
-            <span className="font-semibold text-gray-800">
+            <span className="font-medium text-gray-800">
               {records.bestScore > 0
                 ? `${records.bestScore} / ${total}`
                 : "—"}
@@ -409,7 +409,7 @@ export default function CapitalGuesserMode() {
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Fastest completion</span>
-            <span className="font-semibold text-gray-800">
+            <span className="font-medium text-gray-800">
               {records.fastestCompletion !== null
                 ? formatMs(records.fastestCompletion)
                 : "—"}
@@ -419,10 +419,10 @@ export default function CapitalGuesserMode() {
 
         <button
           onClick={startQuiz}
-          className="w-full py-4 rounded-2xl bg-blue-600 text-white font-bold text-lg
+          className="w-full py-4 rounded-2xl bg-blue-600 text-gray-50 font-medium text-lg
                      hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
         >
-          Start Quiz
+          Start quiz
         </button>
       </div>
     );
@@ -439,13 +439,13 @@ export default function CapitalGuesserMode() {
 
     return (
       <div className="w-full max-w-md flex flex-col items-center gap-6 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-800">
-          {finished.completedAll ? "Quiz Complete!" : "Time’s Up!"}
+        <h1 className="text-3xl font-medium tracking-tight text-gray-800">
+          {finished.completedAll ? "Quiz complete" : "Time’s up"}
         </h1>
 
         <div className="w-full rounded-2xl border border-gray-200 bg-surface p-6 flex flex-col gap-4">
           <div>
-            <span className="text-5xl font-bold text-gray-800">
+            <span className="text-5xl font-medium text-gray-800">
               {finished.correctCount}
             </span>
             <span className="text-2xl text-gray-400 font-normal">
@@ -458,21 +458,21 @@ export default function CapitalGuesserMode() {
           <div className="border-t border-gray-100 pt-4 flex flex-col gap-2 text-left">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Time used</span>
-              <span className="font-semibold text-gray-800">
+              <span className="font-medium text-gray-800">
                 {formatMs(finished.elapsedMs)}
               </span>
             </div>
             {remaining > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Not answered</span>
-                <span className="font-semibold text-gray-800">{remaining}</span>
+                <span className="font-medium text-gray-800">{remaining}</span>
               </div>
             )}
           </div>
         </div>
 
         {(finished.isNewBestScore || finished.isNewFastestCompletion) && (
-          <div className="w-full rounded-xl bg-green-50 border border-green-200 text-green-800 px-5 py-3 text-sm font-semibold">
+          <div className="w-full rounded-xl bg-green-50 border border-green-200 text-green-800 px-5 py-3 text-sm font-medium">
             {finished.isNewFastestCompletion
               ? `New fastest completion — ${formatMs(finished.elapsedMs)}`
               : `New best score — ${finished.correctCount} / ${total}`}
@@ -493,10 +493,10 @@ export default function CapitalGuesserMode() {
 
         <button
           onClick={startQuiz}
-          className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
+          className="w-full py-3 rounded-xl bg-blue-600 text-gray-50 font-medium text-base
                      hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
         >
-          Play Again
+          Play again
         </button>
       </div>
     );
@@ -509,14 +509,14 @@ export default function CapitalGuesserMode() {
     <div className="w-full max-w-md flex flex-col items-center gap-3 sm:gap-5">
       <div className="w-full flex items-center justify-between">
         <span
-          className={`text-2xl font-bold font-mono tabular-nums ${timerColour}`}
+          className={`text-2xl font-medium font-mono tabular-nums ${timerColour}`}
         >
           {formatSeconds(timeRemaining)}
         </span>
         <div className="text-sm text-right text-gray-500">
-          <span className="font-semibold text-gray-800">{correctCount}</span>
+          <span className="font-medium text-gray-800">{correctCount}</span>
           {" correct · "}
-          <span className="font-semibold text-gray-800">
+          <span className="font-medium text-gray-800">
             {total - correctCount}
           </span>
           {" left"}
@@ -543,14 +543,14 @@ export default function CapitalGuesserMode() {
       <div className="w-full flex gap-3">
         <button
           onClick={handleSkip}
-          className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold text-sm
+          className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium text-sm
                      hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
         >
           Skip
         </button>
         <button
           onClick={() => finishQuiz(false)}
-          className="flex-1 py-3 rounded-xl border border-red-200 text-red-600 font-semibold text-sm
+          className="flex-1 py-3 rounded-xl border border-red-200 text-red-600 font-medium text-sm
                      hover:bg-red-50 active:bg-red-100 transition-colors touch-manipulation"
         >
           Finish Quiz

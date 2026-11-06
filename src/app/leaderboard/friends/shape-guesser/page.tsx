@@ -21,9 +21,9 @@ interface LeaderboardEntry {
 }
 
 function RankBadge({ rank }: { rank: number }) {
-  if (rank === 1) return <span className="text-amber-500 font-bold">1</span>;
-  if (rank === 2) return <span className="text-gray-400 font-bold">2</span>;
-  if (rank === 3) return <span className="text-amber-700 font-bold">3</span>;
+  if (rank === 1) return <span className="text-amber-500 font-medium">1</span>;
+  if (rank === 2) return <span className="text-gray-400 font-medium">2</span>;
+  if (rank === 3) return <span className="text-amber-700 font-medium">3</span>;
   return <span className="text-gray-500">{rank}</span>;
 }
 
@@ -88,7 +88,7 @@ export default function FriendsShapeGuesserLeaderboard() {
 
         {/* Header */}
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-800">
+          <h1 className="text-3xl font-medium tracking-tight text-gray-800">
             Friends Leaderboard — Shape Guesser
           </h1>
           <p className="text-sm text-gray-500">
@@ -104,7 +104,7 @@ export default function FriendsShapeGuesserLeaderboard() {
           >
             Global
           </a>
-          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-white cursor-default">
+          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-gray-50 cursor-default">
             Friends
           </span>
         </div>
@@ -117,7 +117,7 @@ export default function FriendsShapeGuesserLeaderboard() {
               onClick={() => setSort(opt.key)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 sort === opt.key
-                  ? "bg-blue-600 text-white"
+                  ? "bg-blue-600 text-gray-50"
                   : "bg-surface border border-gray-200 text-gray-600 hover:border-gray-300"
               }`}
             >
@@ -150,14 +150,14 @@ export default function FriendsShapeGuesserLeaderboard() {
 
           {!loading && !error && entries.length === 0 && (
             <div className="px-5 py-10 text-center">
-              <p className="text-sm text-gray-400">No games played yet. Challenge your friends!</p>
+              <p className="text-sm text-gray-400">No games played yet. Challenge a friend to the first round</p>
             </div>
           )}
 
           {!loading && !error && entries.length > 0 && (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <tr className="border-b border-gray-100 text-xs font-medium text-gray-400">
                   <th className="px-5 py-3 text-left w-12">#</th>
                   <th className="px-5 py-3 text-left">Username</th>
                   <th className="px-5 py-3 text-right">{metricHeader}</th>
@@ -179,7 +179,7 @@ export default function FriendsShapeGuesserLeaderboard() {
                         <RankBadge rank={entry.rank} />
                       </td>
                       <td className="px-5 py-3.5 font-medium text-gray-800">{entry.username}</td>
-                      <td className="px-5 py-3.5 text-right tabular-nums font-semibold text-gray-800">
+                      <td className="px-5 py-3.5 text-right tabular-nums font-medium text-gray-800">
                         {metricValue(entry)}
                       </td>
                       {showGamesPlayedCol && (

@@ -32,9 +32,9 @@ function formatTime(seconds: number): string {
 }
 
 function RankBadge({ rank }: { rank: number }) {
-  if (rank === 1) return <span className="text-amber-500 font-bold">1</span>;
-  if (rank === 2) return <span className="text-gray-400 font-bold">2</span>;
-  if (rank === 3) return <span className="text-amber-700 font-bold">3</span>;
+  if (rank === 1) return <span className="text-amber-500 font-medium">1</span>;
+  if (rank === 2) return <span className="text-gray-400 font-medium">2</span>;
+  if (rank === 3) return <span className="text-amber-700 font-medium">3</span>;
   return <span className="text-gray-500">{rank}</span>;
 }
 
@@ -63,7 +63,7 @@ export default function FlagGuesserLeaderboard() {
 
         {/* Header */}
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-800">
+          <h1 className="text-3xl font-medium tracking-tight text-gray-800">
             Flag Guesser Leaderboard
           </h1>
           <p className="text-sm text-gray-500">
@@ -73,7 +73,7 @@ export default function FlagGuesserLeaderboard() {
 
         {/* Global / Friends toggle */}
         <div className="flex gap-2">
-          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-white cursor-default">
+          <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-gray-50 cursor-default">
             Global
           </span>
           <a
@@ -112,7 +112,7 @@ export default function FlagGuesserLeaderboard() {
           {/* Empty state */}
           {!loading && !error && entries.length === 0 && (
             <div className="px-5 py-10 text-center">
-              <p className="text-sm text-gray-400">No games played yet. Be the first!</p>
+              <p className="text-sm text-gray-400">No games played yet</p>
             </div>
           )}
 
@@ -120,7 +120,7 @@ export default function FlagGuesserLeaderboard() {
           {!loading && !error && entries.length > 0 && (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <tr className="border-b border-gray-100 text-xs font-medium text-gray-400">
                   <th className="px-5 py-3 text-left w-12">#</th>
                   <th className="px-5 py-3 text-left">Username</th>
                   <th className="px-5 py-3 text-right">Best Time</th>
@@ -161,7 +161,7 @@ export default function FlagGuesserLeaderboard() {
                           ? formatTime(entry.best_completion_time)
                           : <span className="text-gray-300">—</span>}
                       </td>
-                      <td className="px-5 py-3.5 text-right tabular-nums font-semibold text-gray-800">
+                      <td className="px-5 py-3.5 text-right tabular-nums font-medium text-gray-800">
                         {entry.best_score.toLocaleString()}
                       </td>
                       <td className="px-5 py-3.5 text-right tabular-nums text-gray-500">

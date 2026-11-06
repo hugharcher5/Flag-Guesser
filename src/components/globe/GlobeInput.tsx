@@ -119,7 +119,7 @@ export default function GlobeInput({ usedCodes, onGuess, disabled = false }: Pro
           type="button"
           onClick={handleSubmitClick}
           disabled={disabled || !value.trim()}
-          className="px-5 py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
+          className="px-5 py-3 rounded-xl bg-blue-600 text-gray-50 font-medium text-base
                      hover:bg-blue-700 active:bg-blue-800 transition-colors
                      disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation"
         >

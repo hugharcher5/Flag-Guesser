@@ -31,7 +31,7 @@ export default function GuessList({ guesses }: Props) {
             ${g.correct ? 'bg-green-50' : ''}`}
         >
           {/* Rank */}
-          <span className="w-6 text-sm font-bold text-gray-400 shrink-0 text-right">
+          <span className="w-6 text-sm font-medium text-gray-400 shrink-0 text-right">
             {rank + 1}
           </span>
 
@@ -47,7 +47,7 @@ export default function GuessList({ guesses }: Props) {
 
           {/* Country name */}
           <span
-            className={`flex-1 text-sm font-semibold truncate
+            className={`flex-1 text-sm font-medium truncate
               ${g.correct ? 'text-green-800' : 'text-gray-800'}`}
           >
             {g.country.name}

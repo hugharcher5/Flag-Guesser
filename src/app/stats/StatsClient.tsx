@@ -73,8 +73,8 @@ function pct(n: number, d: number): string {
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
-      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</span>
-      <span className="text-2xl font-bold text-gray-800 tabular-nums">{value}</span>
+      <span className="text-xs font-medium text-gray-400">{label}</span>
+      <span className="text-2xl font-medium text-gray-800 tabular-nums">{value}</span>
       {sub && <span className="text-xs text-gray-400">{sub}</span>}
     </div>
   );
@@ -92,7 +92,7 @@ function FlagGuesserTab({ stats }: { stats: FlagStats }) {
   return (
     <>
       <section className="flex flex-col gap-4">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Overview</h2>
+        <h2 className="text-xs font-medium text-gray-400">Overview</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <StatCard label="Games Played" value={String(stats.gamesPlayed)} />
           <StatCard
@@ -103,7 +103,7 @@ function FlagGuesserTab({ stats }: { stats: FlagStats }) {
           <StatCard
             label="Best Score"
             value={`${stats.bestScore} / ${TOTAL_FLAGS}`}
-            sub={stats.bestScore === TOTAL_FLAGS ? "Perfect!" : undefined}
+            sub={stats.bestScore === TOTAL_FLAGS ? "Perfect score" : undefined}
           />
           <StatCard
             label="Best Time"
@@ -119,7 +119,7 @@ function FlagGuesserTab({ stats }: { stats: FlagStats }) {
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+        <h2 className="text-xs font-medium text-gray-400">
           Continent Breakdown
         </h2>
         {!stats.hasContinentData ? (
@@ -130,7 +130,7 @@ function FlagGuesserTab({ stats }: { stats: FlagStats }) {
           <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <tr className="border-b border-gray-100 text-xs font-medium text-gray-400">
                   <th className="px-5 py-3 text-left">Continent</th>
                   <th className="px-5 py-3 text-right">Seen</th>
                   <th className="px-5 py-3 text-right">Correct</th>
@@ -149,7 +149,7 @@ function FlagGuesserTab({ stats }: { stats: FlagStats }) {
                     </td>
                     <td className="px-5 py-3.5 text-right">
                       <span
-                        className={`font-semibold tabular-nums ${
+                        className={`font-medium tabular-nums ${
                           row.accuracy >= 80
                             ? "text-green-600"
                             : row.accuracy >= 60
@@ -164,7 +164,7 @@ function FlagGuesserTab({ stats }: { stats: FlagStats }) {
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t border-gray-200 bg-gray-50 text-sm font-semibold text-gray-700">
+                <tr className="border-t border-gray-200 bg-gray-50 text-sm font-medium text-gray-700">
                   <td className="px-5 py-3">All continents</td>
                   <td className="px-5 py-3 text-right tabular-nums">
                     {stats.continentRows.reduce((s, r) => s + r.seen, 0).toLocaleString()}
@@ -207,7 +207,7 @@ function BasicModeTab({
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Overview</h2>
+      <h2 className="text-xs font-medium text-gray-400">Overview</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <StatCard label="Games Played" value={String(stats.gamesPlayed)} />
         <StatCard
@@ -218,7 +218,7 @@ function BasicModeTab({
         <StatCard
           label="Best Score"
           value={String(stats.bestScore)}
-          sub={stats.bestScore === 100 ? "Won in 1 guess!" : undefined}
+          sub={stats.bestScore === 100 ? "Won in 1 guess" : undefined}
         />
         <StatCard label="Total Points" value={stats.totalPoints.toLocaleString()} />
         <StatCard
@@ -257,7 +257,7 @@ function LandmarkTab({ stats }: { stats: LandmarkStats }) {
   }
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Overview</h2>
+      <h2 className="text-xs font-medium text-gray-400">Overview</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <StatCard label="Games Played" value={String(stats.gamesPlayed)} />
         <StatCard
@@ -298,7 +298,7 @@ export default function StatsClient({ username, flagStats, capitalStats, shapeSt
 
         {/* Header */}
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-800">Your Stats</h1>
+          <h1 className="text-3xl font-medium tracking-tight text-gray-800">Your Stats</h1>
           <p className="text-sm text-gray-500">{username}</p>
         </div>
 

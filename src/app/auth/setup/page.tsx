@@ -177,7 +177,7 @@ export default function SetupPage() {
 
         {/* Header */}
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-gray-800">Welcome!</h1>
+          <h1 className="text-2xl font-medium text-gray-800">Set up your profile</h1>
           <p className="text-sm text-gray-500">
             Choose a username and country to complete your profile.
           </p>
@@ -261,7 +261,7 @@ export default function SetupPage() {
           <button
             type="submit"
             disabled={!canSubmit}
-            className="w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm
+            className="w-full py-2.5 rounded-xl bg-blue-600 text-gray-50 font-medium text-sm
                        hover:bg-blue-700 active:bg-blue-800 transition-colors
                        disabled:opacity-40 disabled:cursor-not-allowed"
           >

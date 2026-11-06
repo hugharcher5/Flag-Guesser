@@ -112,7 +112,7 @@ export default function PracticeMode() {
   return (
     <div className="w-full max-w-md flex flex-col items-center gap-6">
 
-      <h1 className="text-3xl font-bold tracking-tight text-gray-800">
+      <h1 className="text-3xl font-medium tracking-tight text-gray-800">
         Flag Guesser
       </h1>
 
@@ -136,13 +136,13 @@ export default function PracticeMode() {
       {/* Score */}
       <p className="text-sm text-gray-500 font-medium">
         Score:{" "}
-        <span className="text-gray-800 font-semibold">
+        <span className="text-gray-800 font-medium">
           {score.correct} / {score.total}
         </span>
       </p>
 
       {/* Flag */}
-      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 bg-surface flex items-center justify-center min-h-32 sm:min-h-40 p-3">
+      <div className="w-full rounded-2xl overflow-hidden border border-white/[0.08] bg-surface flex items-center justify-center min-h-32 sm:min-h-40 p-3">
         {!current ? (
           <div className="w-full aspect-[3/2] bg-gray-100 animate-pulse rounded-xl" />
         ) : imgError ? (
@@ -180,7 +180,7 @@ export default function PracticeMode() {
         <button
           type="submit"
           disabled={answered || !current || guess.trim() === ""}
-          className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
+          className="w-full py-3 rounded-xl bg-blue-600 text-gray-50 font-medium text-base
                      hover:bg-blue-700 active:bg-blue-800 transition-colors
                      disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation"
         >
@@ -197,14 +197,14 @@ export default function PracticeMode() {
               : "bg-red-50 border border-red-200 text-red-800"
             }`}
         >
-          <p className="text-xl font-bold inline-flex items-center gap-2">
+          <p className="text-xl font-medium inline-flex items-center gap-2">
             <Icon name={result === "correct" ? "check" : "x"} className="h-5 w-5" />
-            {result === "correct" ? "Correct!" : "Incorrect"}
+            {result === "correct" ? "Correct" : "Incorrect"}
           </p>
           {result === "incorrect" && (
             <p className="text-sm">
               The answer was{" "}
-              <span className="font-semibold">{current.name}</span>
+              <span className="font-medium">{current.name}</span>
             </p>
           )}
         </div>
@@ -214,7 +214,7 @@ export default function PracticeMode() {
       {answered && (
         <button
           onClick={handleNext}
-          className="inline-flex items-center justify-center gap-1.5 w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
+          className="inline-flex items-center justify-center gap-1.5 w-full py-3 rounded-xl bg-blue-600 text-gray-50 font-medium text-base
                      hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
         >
           Next Flag

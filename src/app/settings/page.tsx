@@ -208,18 +208,18 @@ export default function SettingsPage() {
 
           {/* Header */}
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-gray-800">Account Settings</h1>
+            <h1 className="text-2xl font-medium text-gray-800">Account Settings</h1>
             <p className="text-sm text-gray-500">Update your username and country.</p>
           </div>
 
           {/* Current profile summary */}
           <div className="rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider w-20">Username</span>
-              <span className="text-sm font-semibold text-gray-800">{savedUsername || '—'}</span>
+              <span className="text-xs font-medium text-gray-400 w-20">Username</span>
+              <span className="text-sm font-medium text-gray-800">{savedUsername || '—'}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider w-20">Country</span>
+              <span className="text-xs font-medium text-gray-400 w-20">Country</span>
               <span className="text-sm text-gray-800 flex items-center gap-1.5">
                 {savedCountry ? (
                   <>
@@ -321,7 +321,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm
+              className="w-full py-2.5 rounded-xl bg-blue-600 text-gray-50 font-medium text-sm
                          hover:bg-blue-700 active:bg-blue-800 transition-colors
                          disabled:opacity-40 disabled:cursor-not-allowed"
             >

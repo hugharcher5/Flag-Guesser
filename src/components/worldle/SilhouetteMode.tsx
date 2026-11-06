@@ -45,7 +45,7 @@ function SilhouetteGrid({ polygons }: { polygons: Map<string, CountryGeometry> }
     <div className="w-full flex flex-col gap-4">
       <div className="sticky top-0 z-10 bg-gray-50 pb-3 pt-1 flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-800">
+          <h1 className="text-xl font-medium text-gray-800">
             Shape Test Mode
             <span className="ml-2 text-sm font-normal text-gray-400">({tiles.length} shown)</span>
           </h1>
@@ -66,7 +66,7 @@ function SilhouetteGrid({ polygons }: { polygons: Map<string, CountryGeometry> }
               <button
                 key={v}
                 onClick={() => setHighlight(v)}
-                className={`px-3 py-1.5 capitalize ${highlight === v ? 'bg-blue-600 text-white' : 'bg-surface text-gray-600 hover:bg-gray-50'}`}
+                className={`px-3 py-1.5 capitalize ${highlight === v ? 'bg-blue-600 text-gray-50' : 'bg-surface text-gray-600 hover:bg-gray-50'}`}
               >
                 {v === 'dot' ? 'dot-only' : v}
               </button>
@@ -116,7 +116,7 @@ function SilhouetteGrid({ polygons }: { polygons: Map<string, CountryGeometry> }
                 )}
               </div>
               <div className="px-2 py-1.5 border-t border-gray-100">
-                <p className="text-xs font-semibold text-gray-800 truncate">{country.name}</p>
+                <p className="text-xs font-medium text-gray-800 truncate">{country.name}</p>
                 <p className="text-xs text-gray-400 font-mono">{country.code.toUpperCase()}</p>
               </div>
             </div>
@@ -234,7 +234,7 @@ export default function SilhouetteMode() {
     if (!polygons) {
       return (
         <div className="w-full max-w-md flex flex-col items-center gap-6">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-800">Shape Test Mode</h1>
+          <h1 className="text-2xl font-medium tracking-tight text-gray-800">Shape Test Mode</h1>
           {loadError
             ? <p className="text-red-600 text-sm text-center">{loadError}</p>
             : <p className="text-sm text-gray-400">Loading polygon data…</p>
@@ -249,7 +249,7 @@ export default function SilhouetteMode() {
   if (phase === 'loading') {
     return (
       <div className="w-full max-w-md flex flex-col items-center gap-6">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Country Shape Guesser</h1>
+        <h1 className="text-2xl font-medium tracking-tight text-gray-800">Country Shape Guesser</h1>
         {loadError ? (
           <p className="text-red-600 text-sm text-center">{loadError}</p>
         ) : (
@@ -266,7 +266,7 @@ export default function SilhouetteMode() {
   if (phase === 'won' || phase === 'lost') {
     return (
       <div className="w-full max-w-md flex flex-col items-center gap-5">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Country Shape Guesser</h1>
+        <h1 className="text-2xl font-medium tracking-tight text-gray-800">Country Shape Guesser</h1>
 
         {/* Reveal the silhouette in blue */}
         <SilhouetteDisplay
@@ -286,22 +286,22 @@ export default function SilhouetteMode() {
         >
           {phase === 'won' ? (
             <>
-              <p className="text-xl font-bold inline-flex items-center gap-2"><Icon name="check" className="h-5 w-5" />Correct!</p>
+              <p className="text-xl font-medium inline-flex items-center gap-2"><Icon name="check" className="h-5 w-5" />Correct</p>
               <p className="text-sm">
                 You identified{' '}
-                <span className="font-semibold">{answer?.name}</span>{' '}
+                <span className="font-medium">{answer?.name}</span>{' '}
                 in{' '}
-                <span className="font-semibold">
+                <span className="font-medium">
                   {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}
                 </span>.
               </p>
             </>
           ) : (
             <>
-              <p className="text-xl font-bold inline-flex items-center gap-2"><Icon name="x" className="h-5 w-5" />Out of guesses</p>
+              <p className="text-xl font-medium inline-flex items-center gap-2"><Icon name="x" className="h-5 w-5" />Out of guesses</p>
               <p className="text-sm">
                 The answer was{' '}
-                <span className="font-semibold">{answer?.name}</span>.
+                <span className="font-medium">{answer?.name}</span>.
               </p>
             </>
           )}
@@ -311,10 +311,10 @@ export default function SilhouetteMode() {
 
         <button
           onClick={handlePlayAgain}
-          className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
+          className="w-full py-3 rounded-xl bg-blue-600 text-gray-50 font-medium text-base
                      hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
         >
-          Play Again
+          Play again
         </button>
       </div>
     );
@@ -327,7 +327,7 @@ export default function SilhouetteMode() {
     <div className="w-full max-w-md flex flex-col items-center gap-5">
       {/* Header: title + pip indicators */}
       <div className="w-full flex flex-col gap-1.5">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Country Shape Guesser</h1>
+        <h1 className="text-2xl font-medium tracking-tight text-gray-800">Country Shape Guesser</h1>
         <div className="flex items-center gap-2">
           {/* 6 pip circles: green = correct, grey = wrong, white = unused */}
           <div className="flex gap-1">

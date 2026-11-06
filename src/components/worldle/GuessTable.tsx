@@ -31,7 +31,7 @@ export default function GuessTable({ guesses }: Props) {
         >
           {/* Country name */}
           <span
-            className={`flex-1 font-semibold truncate
+            className={`flex-1 font-medium truncate
               ${g.correct ? 'text-green-800' : 'text-gray-800'}`}
           >
             {g.country.name}
@@ -47,7 +47,7 @@ export default function GuessTable({ guesses }: Props) {
               </span>
 
               {/* Direction */}
-              <div className="flex items-center gap-1.5 font-semibold text-xs text-gray-700">
+              <div className="flex items-center gap-1.5 font-medium text-xs text-gray-700">
                 <CompassIcon dir={g.compassDir} size={28} />
                 <span>{g.compassDir}</span>
               </div>

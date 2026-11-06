@@ -44,7 +44,7 @@ function ScoreBadge({ km }: { km: number }) {
   else if (km < 500) color = 'text-amber-700 bg-amber-50 border-amber-200';
   else if (km < 1500) color = 'text-orange-700 bg-orange-50 border-orange-200';
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${color}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${color}`}>
       {formatKm(km)}
     </span>
   );
@@ -147,7 +147,7 @@ export default function LandmarkMode() {
     return (
       <div className="w-full max-w-md flex flex-col items-center gap-6 text-center">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold text-gray-800">Landmark Guesser</h1>
+          <h1 className="text-3xl font-medium text-gray-800">Landmark Guesser</h1>
           <p className="text-sm text-gray-500">
             You&apos;ll see 10 famous landmarks. Place a pin on the globe as close as you can to each one.
           </p>
@@ -159,14 +159,14 @@ export default function LandmarkMode() {
             { label: 'Ranked by', sub: 'avg distance' },
           ].map(({ label, sub }) => (
             <div key={label} className="bg-surface rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col gap-1">
-              <span className="text-sm font-semibold text-gray-800">{label}</span>
+              <span className="text-sm font-medium text-gray-800">{label}</span>
               <span className="text-xs text-gray-400">{sub}</span>
             </div>
           ))}
         </div>
         <button
           onClick={startGame}
-          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-gray-50 font-medium text-lg hover:bg-blue-700 transition-colors"
         >
           Start Game
         </button>
@@ -178,11 +178,11 @@ export default function LandmarkMode() {
     return (
       <div className="w-full max-w-md flex flex-col gap-6">
         <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-6 py-6 flex flex-col gap-4">
-          <h2 className="text-2xl font-bold text-gray-800">Results</h2>
+          <h2 className="text-2xl font-medium text-gray-800">Results</h2>
           {avgKm !== null && (
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Average Distance</span>
-              <span className="text-3xl font-bold text-gray-800 tabular-nums">{formatKm(avgKm)}</span>
+              <span className="text-xs font-medium text-gray-400">Average distance</span>
+              <span className="text-3xl font-medium text-gray-800 tabular-nums">{formatKm(avgKm)}</span>
             </div>
           )}
         </div>
@@ -191,9 +191,9 @@ export default function LandmarkMode() {
           <div className="divide-y divide-gray-50">
             {results.map((r, i) => (
               <div key={i} className="flex items-center gap-3 px-5 py-3.5">
-                <span className="text-xs font-bold text-gray-400 w-5 text-right shrink-0">{i + 1}</span>
+                <span className="text-xs font-medium text-gray-400 w-5 text-right shrink-0">{i + 1}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-800 truncate">{r.landmark.name}</p>
+                  <p className="text-sm font-medium text-gray-800 truncate">{r.landmark.name}</p>
                   <p className="text-xs text-gray-400 truncate">{r.landmark.city}, {r.landmark.country}</p>
                 </div>
                 <ScoreBadge km={r.distanceKm} />
@@ -204,9 +204,9 @@ export default function LandmarkMode() {
 
         <button
           onClick={startGame}
-          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-gray-50 font-medium hover:bg-blue-700 transition-colors"
         >
-          Play Again
+          Play again
         </button>
         <a
           href="/leaderboard/landmark-guesser"
@@ -226,7 +226,7 @@ export default function LandmarkMode() {
         <div className="flex flex-col gap-0.5">
           <span>Landmark {index + 1} of {queue.length}</span>
           {avgKm !== null && (
-            <span className="text-gray-400">Avg so far: <span className="text-gray-600 font-semibold tabular-nums">{formatKm(avgKm)}</span></span>
+            <span className="text-gray-400">Avg so far: <span className="text-gray-600 font-medium tabular-nums">{formatKm(avgKm)}</span></span>
           )}
         </div>
         <div className="flex gap-1">
@@ -243,8 +243,8 @@ export default function LandmarkMode() {
 
       {/* Landmark name card */}
       <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
-        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Where is this?</span>
-        <h2 className="text-2xl font-bold text-gray-800">{current?.name}</h2>
+        <span className="text-xs font-medium text-gray-400">Where is this?</span>
+        <h2 className="text-2xl font-medium text-gray-800">{current?.name}</h2>
       </div>
 
       {/* Globe */}
@@ -261,14 +261,14 @@ export default function LandmarkMode() {
         <div className="bg-surface rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Your distance</p>
-              <p className="text-2xl font-bold text-gray-800">{formatKm(currentDist)}</p>
+              <p className="text-xs font-medium text-gray-400">Your distance</p>
+              <p className="text-2xl font-medium text-gray-800">{formatKm(currentDist)}</p>
             </div>
             <ScoreBadge km={currentDist} />
           </div>
           <div className="border-t border-gray-100 pt-2">
             <p className="text-xs text-gray-400">Actual location</p>
-            <p className="text-sm font-semibold text-gray-700">{current.city}, {current.country}</p>
+            <p className="text-sm font-medium text-gray-700">{current.city}, {current.country}</p>
           </div>
         </div>
       )}
@@ -278,14 +278,14 @@ export default function LandmarkMode() {
         <button
           onClick={handleConfirm}
           disabled={!guessPin}
-          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-gray-50 font-medium hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {guessPin ? 'Confirm Guess' : 'Click the globe to place your pin'}
         </button>
       ) : (
         <button
           onClick={handleNext}
-          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-gray-50 font-medium hover:bg-blue-700 transition-colors"
         >
           {index + 1 >= queue.length ? 'See Results' : 'Next Landmark'}
           {index + 1 < queue.length && <Icon name="arrow-right" />}

@@ -22,13 +22,13 @@ const PATHS: Record<AppMode, React.ReactNode> = {
   ),
 };
 
-/** Gold rounded tile with a line icon for a game mode. */
+/** Quiet raised tile with a line icon for a game mode. The icon turns gold on card hover. */
 export default function ModeIcon({ mode, size = "md" }: { mode: AppMode; size?: "sm" | "md" }) {
-  const box = size === "sm" ? "h-9 w-9 rounded-lg" : "h-11 w-11 rounded-xl";
-  const icon = size === "sm" ? "h-5 w-5" : "h-6 w-6";
+  const box = size === "sm" ? "h-9 w-9 rounded-lg" : "h-11 w-11 rounded-[10px]";
+  const icon = "h-[18px] w-[18px]";
   return (
-    <span className={`flex flex-none items-center justify-center bg-gradient-to-b from-gold-400 to-gold-600 text-[#1B1745] ${box}`}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={icon} aria-hidden>
+    <span className={`flex flex-none items-center justify-center border border-white/[0.08] bg-gray-200 text-gray-600 transition-colors duration-150 group-hover:text-gold-500 ${box}`}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={icon} aria-hidden>
         {PATHS[mode]}
       </svg>
     </span>

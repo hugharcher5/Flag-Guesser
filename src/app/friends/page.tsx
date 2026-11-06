@@ -240,7 +240,7 @@ export default function FriendsPage() {
 
           {/* Header */}
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-gray-800">Friends</h1>
+            <h1 className="text-2xl font-medium text-gray-800">Friends</h1>
             <p className="text-sm text-gray-500">
               {friends.length === 0 ? 'No friends yet' : `${friends.length} friend${friends.length === 1 ? '' : 's'}`}
             </p>
@@ -297,7 +297,7 @@ export default function FriendsPage() {
               <button
                 type="submit"
                 disabled={!addUsername.trim() || addLoading}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-lg bg-blue-600 text-gray-50 text-sm font-medium hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {addLoading ? '…' : 'Add'}
               </button>
@@ -344,7 +344,7 @@ export default function FriendsPage() {
                     className="flex items-center gap-3 px-1 py-2.5 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <FlagImg country={f.country} />
-                    <span className="flex-1 text-sm font-semibold text-gray-800 truncate">
+                    <span className="flex-1 text-sm font-medium text-gray-800 truncate">
                       {f.username}
                     </span>
                     <button
@@ -374,21 +374,21 @@ export default function FriendsPage() {
                   >
                     <FlagImg country={r.country} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-800 truncate">{r.username}</p>
+                      <p className="text-sm font-medium text-gray-800 truncate">{r.username}</p>
                       <p className="text-xs text-gray-400">{timeAgo(r.created_at)}</p>
                     </div>
                     <div className="flex gap-1.5 shrink-0">
                       <button
                         onClick={() => handleAccept(r.friendshipId)}
                         disabled={actionLoading === r.friendshipId}
-                        className="px-3 py-1 rounded-md bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors disabled:opacity-40"
+                        className="px-3 py-1 rounded-md bg-blue-600 text-gray-50 text-xs font-medium hover:bg-blue-700 transition-colors disabled:opacity-40"
                       >
                         {actionLoading === r.friendshipId ? '…' : 'Accept'}
                       </button>
                       <button
                         onClick={() => handleReject(r.friendshipId)}
                         disabled={actionLoading === r.friendshipId}
-                        className="px-3 py-1 rounded-md border border-gray-200 text-gray-600 text-xs font-semibold hover:border-gray-300 transition-colors disabled:opacity-40"
+                        className="px-3 py-1 rounded-md border border-gray-200 text-gray-600 text-xs font-medium hover:border-gray-300 transition-colors disabled:opacity-40"
                       >
                         Reject
                       </button>
@@ -413,7 +413,7 @@ export default function FriendsPage() {
                   >
                     <FlagImg country={r.country} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-800 truncate">{r.username}</p>
+                      <p className="text-sm font-medium text-gray-800 truncate">{r.username}</p>
                       <p className="text-xs text-gray-400">{timeAgo(r.created_at)}</p>
                     </div>
                     <button

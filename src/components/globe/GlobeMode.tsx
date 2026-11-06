@@ -248,7 +248,7 @@ export default function GlobeMode() {
   if (phase === 'loading') {
     return (
       <div className="w-full max-w-2xl flex flex-col items-center gap-6">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Globe Guesser</h1>
+        <h1 className="text-2xl font-medium tracking-tight text-gray-800">Globe Guesser</h1>
         {loadError ? (
           <p className="text-red-600 text-sm text-center">{loadError}</p>
         ) : (
@@ -266,7 +266,7 @@ export default function GlobeMode() {
     <div className="w-full max-w-2xl flex flex-col items-center gap-4">
       {/* Header */}
       <div className="w-full flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-800">Globe Guesser</h1>
+        <h1 className="text-2xl font-medium tracking-tight text-gray-800">Globe Guesser</h1>
         <span className="text-sm text-gray-500">
           {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}
         </span>
@@ -297,18 +297,18 @@ export default function GlobeMode() {
       {/* Win banner */}
       {phase === 'won' && (
         <div className="w-full rounded-xl px-5 py-5 text-center space-y-3 bg-green-50 border border-green-200">
-          <p className="text-xl font-bold text-green-800">
+          <p className="text-xl font-medium text-green-800">
             You got it in {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}!
           </p>
           <p className="text-sm text-green-700">
-            The answer was <span className="font-semibold">{answer?.name}</span>.
+            The answer was <span className="font-medium">{answer?.name}</span>.
           </p>
           <button
             onClick={handlePlayAgain}
-            className="mt-1 w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-base
+            className="mt-1 w-full py-3 rounded-xl bg-blue-600 text-gray-50 font-medium text-base
                        hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
           >
-            Play Again
+            Play again
           </button>
         </div>
       )}

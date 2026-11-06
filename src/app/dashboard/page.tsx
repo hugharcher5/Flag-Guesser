@@ -27,7 +27,7 @@ export default async function Dashboard() {
           <Icon name="check" className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Signed in</h1>
+          <h1 className="text-xl font-medium text-gray-800">Signed in</h1>
           <p className="mt-1 text-sm text-gray-500">{user.email}</p>
         </div>
         <SignOutButton />

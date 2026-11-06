@@ -52,9 +52,9 @@ export default function SignInButton() {
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-start gap-2.5">
               <div>
-                <p className="text-sm font-semibold text-gray-800">Open in your browser to sign in</p>
+                <p className="text-sm font-medium text-gray-800">Open in your browser to sign in</p>
                 <p className="mt-0.5 text-xs text-gray-500 leading-relaxed">
-                  Google doesn&apos;t allow sign-in from Snapchat or Instagram. Open this page in Chrome or Safari and you&apos;re good to go!
+                  Google doesn&apos;t allow sign-in from Snapchat or Instagram. Open this page in Chrome or Safari instead.
                 </p>
               </div>
             </div>
