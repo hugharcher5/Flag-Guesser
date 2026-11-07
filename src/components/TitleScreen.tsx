@@ -24,18 +24,17 @@ const MODES: Record<AppMode, Mode> = {
 
 const ALL: AppMode[] = ["flag", "silhouette", "globe", "capital", "landmark"];
 
-// Where each splash lands, as the centre of its button in % of the desktop stage
-const SPOTS: { key: AppMode; x: number; y: number }[] = [
-  { key: "flag", x: 17.2, y: 74 },
-  { key: "silhouette", x: 29.4, y: 55.5 },
-  { key: "globe", x: 67.4, y: 54.5 },
-  { key: "capital", x: 83, y: 69 },
-  { key: "landmark", x: 49.6, y: 90 },
+// The five puddles painted in /title/geograil-title.webp, measured from its pixels.
+// Each box is in % of the 1672×941 artwork; the mask is that puddle's exact outline.
+// cx: where the label centres across the puddle, clear of the wordmark and splash
+const PUDDLES: { key: AppMode; x: number; y: number; w: number; h: number; cx: number }[] = [
+  { key: "flag", x: 7.3, y: 61.74, w: 23.56, h: 9.35, cx: 50 },
+  { key: "silhouette", x: 24.1, y: 47.82, w: 18.3, h: 9.25, cx: 40 },
+  { key: "globe", x: 58.37, y: 46.65, w: 16.21, h: 9.14, cx: 53 },
+  { key: "capital", x: 69.08, y: 61.32, w: 25.9, h: 10.2, cx: 50 },
+  { key: "landmark", x: 37.2, y: 69.93, w: 26.2, h: 10.52, cx: 50 },
 ];
 
-// Each puddle is drawn from its own seed, so no two share an outline. Points sit round an
-// ellipse in a 240×100 box with jittered radii, one or two lobes pushed out where the water
-// ran, then smoothed into one closed curve. Deterministic, so server and client agree.
 function rng(seed: number) {
   return () => {
     seed = (seed + 0x6d2b79f5) | 0;
@@ -45,49 +44,7 @@ function rng(seed: number) {
   };
 }
 
-type Puddle = { d: string; drops: [number, number, number][]; tilt: number; pad: string };
-
-function puddle(seed: number, lobes: number[], tilt: number, pad: string): Puddle {
-  const rand = rng(seed);
-  const n = 16;
-  const pts: [number, number][] = [];
-  for (let i = 0; i < n; i++) {
-    const a = (i / n) * Math.PI * 2 + (rand() - 0.5) * 0.18;
-    let r = 0.95 + rand() * 0.14;
-    for (const l of lobes) {
-      const d = Math.atan2(Math.sin(a - l), Math.cos(a - l));
-      r += 0.3 * Math.exp(-(d * d) / 0.1);
-    }
-    // A squarish ellipse (superellipse) so the label's corners stay on the water
-    const c = Math.cos(a), sn = Math.sin(a);
-    const sx = Math.sign(c) * Math.abs(c) ** 0.78, sy = Math.sign(sn) * Math.abs(sn) ** 0.78;
-    pts.push([120 + 112 * r * sx, 50 + 46 * r * sy]);
-  }
-  const f = (v: number) => v.toFixed(1);
-  let d = `M${f(pts[0][0])},${f(pts[0][1])}`;
-  for (let i = 0; i < n; i++) {
-    const [p0, p1, p2, p3] = [pts[(i - 1 + n) % n], pts[i], pts[(i + 1) % n], pts[(i + 2) % n]];
-    d += ` C${f(p1[0] + (p2[0] - p0[0]) / 6)},${f(p1[1] + (p2[1] - p0[1]) / 6)} ${f(p2[0] - (p3[0] - p1[0]) / 6)},${f(p2[1] - (p3[1] - p1[1]) / 6)} ${f(p2[0])},${f(p2[1])}`;
-  }
-  const drops: [number, number, number][] = [];
-  const count = 3 + Math.floor(rand() * 3);
-  for (let i = 0; i < count; i++) {
-    const a = rand() * Math.PI * 2;
-    const r = 1.16 + rand() * 0.16;
-    drops.push([((120 + 104 * r * Math.cos(a)) / 240) * 100, ((50 + 40 * r * Math.sin(a)) / 100) * 100, 3 + Math.round(rand() * 5)]);
-  }
-  return { d: d + " Z", drops, tilt, pad };
-}
-
-const PUDDLES: Record<AppMode, Puddle> = {
-  flag: puddle(11, [3.3, 0.5], -3, "px-12 py-5"),
-  silhouette: puddle(27, [4.4], 2.5, "px-11 py-6"),
-  globe: puddle(43, [5.2, 1.9], -2, "px-11 py-5"),
-  capital: puddle(58, [0.2], 3.5, "px-12 py-6"),
-  landmark: puddle(76, [1.6, 3.9], -1.5, "px-14 py-5"),
-};
-
-// Droplets thrown out by a click: direction in degrees and distance in px
+// Droplets thrown out by a click: direction in degrees, distance in px, size, duration
 const BURST = Array.from({ length: 12 }, (_, i) => {
   const r = rng(900 + i);
   return { a: i * 30 + (r() - 0.5) * 20, d: 34 + r() * 40, s: 4 + Math.round(r() * 5), t: 380 + Math.round(r() * 160) };
@@ -95,77 +52,36 @@ const BURST = Array.from({ length: 12 }, (_, i) => {
 
 type Splash = { x: number; y: number; id: number };
 
-/** A mode button shaped as the puddle at the end of a splash: glossy water, light text on it. */
-function WaterButton({ mode, onSelect, x, y }: { mode: Mode; onSelect: OnSelect; x: number; y: number }) {
-  const id = `water-${mode.key}`;
-  const shape = PUDDLES[mode.key];
+/** An invisible button over one painted puddle. The label floats on the water; hover lights
+ *  the puddle's own outline, and a click throws up a splash before the game opens. */
+function PuddleButton({ mode, onSelect, x, y, w, h, cx }: { mode: Mode; onSelect: OnSelect; x: number; y: number; w: number; h: number; cx: number }) {
   const [splash, setSplash] = useState<Splash | null>(null);
+  const mask = `url(/title/puddle-${mode.key}.png) center / 100% 100% no-repeat`;
   return (
     <button
       onClick={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
         const origin = e.detail === 0 ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: e.clientX, y: e.clientY };
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return onSelect(mode.key, origin);
-        // Splash first, then the game grows out of the same point
         setSplash({ x: origin.x - r.left, y: origin.y - r.top, id: Date.now() });
         window.setTimeout(() => onSelect(mode.key, origin), 260);
       }}
-      style={{ left: `${x}%`, top: `${y}%`, rotate: `${shape.tilt}deg` }}
-      className="group absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-[40%] focus-visible:outline-offset-4"
+      style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, height: `${h}%` }}
+      className="group absolute cursor-pointer rounded-[50%] focus-visible:outline-offset-4"
     >
-      <span className={`relative flex min-h-[64px] items-center gap-3 whitespace-nowrap text-left transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.05] group-active:scale-[0.97] ${shape.pad}`}>
-        <svg
-          viewBox="0 0 240 100"
-          preserveAspectRatio="none"
-          aria-hidden
-          className="absolute inset-0 h-full w-full overflow-visible drop-shadow-[0_10px_18px_rgba(4,5,20,0.6)] transition-[filter] duration-300 group-hover:brightness-110"
-        >
-          <defs>
-            <linearGradient id={`${id}-body`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#2E8FE0" />
-              <stop offset="0.45" stopColor="#1763B8" />
-              <stop offset="1" stopColor="#0E3F8A" />
-            </linearGradient>
-            <linearGradient id={`${id}-shine`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#E6F6FF" stopOpacity="0.45" />
-              <stop offset="1" stopColor="#E6F6FF" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          {/* Body, with the dark ink outline the painted splashes have */}
-          <path d={shape.d} fill={`url(#${id}-body)`} stroke="#0A1B4D" strokeWidth="3" vectorEffect="non-scaling-stroke" />
-          {/* Rim light along the top edge and a wet glint */}
-          <path d={shape.d} fill="none" stroke="#6CC8FF" strokeOpacity="0.55" strokeWidth="1.5" vectorEffect="non-scaling-stroke" transform="translate(6 3) scale(0.95 0.94)" />
-          <ellipse cx="120" cy="24" rx="78" ry="7" fill={`url(#${id}-shine)`} />
-          {/* Ripple ring that spreads on hover */}
-          <ellipse
-            cx="120"
-            cy="54"
-            rx="92"
-            ry="30"
-            fill="none"
-            stroke="#BFE7FF"
-            strokeOpacity="0"
-            vectorEffect="non-scaling-stroke"
-            className="origin-center transition-[stroke-opacity,transform] duration-500 ease-out [transform-box:fill-box] [transform:scale(0.7)] group-hover:[stroke-opacity:0.35] group-hover:[transform:scale(1)]"
-          />
-        </svg>
-        {shape.drops.map(([dx, dy, s], i) => (
-          <span
-            key={i}
-            aria-hidden
-            style={{ left: `${dx}%`, top: `${dy}%`, width: s, height: s * 0.8 }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#0A1B4D] bg-[#2A86D8]"
-          />
-        ))}
-        <span className="relative text-[#F4F9FF]">
-          <ModeIcon mode={mode.key} bare />
-        </span>
-        <span className="relative flex flex-col [text-shadow:0_1px_2px_rgba(6,20,60,0.6)]">
-          <span className="text-[15px] font-medium leading-5 text-[#F4F9FF]">{mode.title}</span>
-          <span className="font-mono text-xs leading-4 text-[#CDE8FF]">{mode.plate}</span>
-        </span>
+      {/* Light on the water, clipped to the puddle's painted outline */}
+      <span
+        aria-hidden
+        style={{ WebkitMask: mask, mask }}
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(190,231,255,0.55),rgba(120,200,255,0.15)_60%,transparent_80%)] opacity-0 mix-blend-screen transition-opacity duration-300 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 group-active:opacity-60"
+      />
+      <span
+        style={{ left: `${cx}%` }}
+        className="absolute top-1/2 flex -translate-x-1/2 -translate-y-[42%] flex-col items-center whitespace-nowrap text-center [text-shadow:0_1px_3px_rgba(4,14,50,0.85)] transition-transform duration-300 ease-out motion-safe:group-hover:-translate-y-[52%]"
+      >
+        <span className="text-[max(12px,1.02cqw)] font-medium leading-tight text-[#F4F9FF]">{mode.title}</span>
+        <span className="font-mono text-[max(10px,0.74cqw)] leading-tight text-[#CDE8FF]">{mode.plate}</span>
       </span>
-      {/* Click splash: a ring spreads and droplets fly out from where the water was hit */}
       {splash && (
         <span key={splash.id} aria-hidden className="pointer-events-none absolute" style={{ left: splash.x, top: splash.y }}>
           <span className="splash-ring absolute h-24 w-24 rounded-full border-2 border-[#BFE7FF]" />
@@ -245,7 +161,7 @@ export default function TitleScreen({
   );
 
   return (
-    <div className="min-h-[100dvh] bg-ink text-gray-900">
+    <div className="min-h-[100dvh] bg-[#090C32] text-gray-900">
       {/* Top bar */}
       <div className="mx-auto flex max-w-[1600px] items-center justify-end gap-1 px-4 pt-4">
         <a href="/leaderboard" className={link}>
@@ -275,35 +191,22 @@ export default function TitleScreen({
         </div>
       </div>
 
-      {/* Desktop: water splashes out of the grail, each mode rides one to its puddle.
-          The stage keeps the artwork's proportions; every piece is placed in % of it. */}
-      <div className="mx-auto hidden flex-col items-center px-8 pb-8 lg:flex">
-        <div
-          className="relative aspect-[1392/812] w-[min(1392px,calc((100dvh-150px)*1.714),100%)]"
-        >
+      {/* Desktop: one painted scene, the grail pouring into five puddles. Each mode is the
+          puddle itself; the stage keeps the artwork's proportions and places buttons in %. */}
+      <div className="mx-auto hidden justify-center px-8 pb-6 lg:flex">
+        <div className="relative aspect-[1672/941] w-[min(1672px,calc((100dvh-72px)*1.777),100%)] [container-type:inline-size]">
           <img
-            src="/geograil-splashes.webp"
-            alt=""
-            aria-hidden
-            width={1392}
-            height={752}
-            className="pointer-events-none absolute left-0 top-[7.39%] w-full select-none"
-          />
-          <img
-            src="/geograil-hero-cutout.webp"
+            src="/title/geograil-title.webp"
             alt="GeoGrail"
-            width={834}
-            height={909}
+            width={1672}
+            height={941}
             fetchPriority="high"
-            className="pointer-events-none absolute left-[30.24%] top-[4.43%] w-[40.16%] select-none drop-shadow-[0_28px_40px_rgba(4,5,20,0.7)]"
+            className="pointer-events-none absolute inset-0 h-full w-full select-none"
           />
-          {SPOTS.map(({ key, x, y }) => (
-            <WaterButton key={key} mode={MODES[key]} onSelect={onSelect} x={x} y={y} />
+          {PUDDLES.map(({ key, ...box }) => (
+            <PuddleButton key={key} mode={MODES[key]} onSelect={onSelect} {...box} />
           ))}
-        </div>
-        <div className="mt-6 flex flex-col items-center gap-3">
-          <span className="plate-rule" aria-hidden />
-          <p className="text-center text-sm text-gray-500">
+          <p className="absolute inset-x-0 top-[88%] text-center text-[max(13px,0.85cqw)] text-gray-500">
             Flags, borders, the globe, capitals and landmarks. How well do you know the world?
           </p>
         </div>
