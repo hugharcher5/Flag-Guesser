@@ -30,7 +30,7 @@ const ALL: AppMode[] = ["flag", "silhouette", "globe", "capital", "landmark"];
 const PUDDLES: { key: AppMode; x: number; y: number; w: number; h: number; cx: number }[] = [
   { key: "flag", x: 7.3, y: 61.74, w: 23.56, h: 9.35, cx: 50 },
   { key: "silhouette", x: 24.1, y: 47.82, w: 18.3, h: 9.25, cx: 40 },
-  { key: "globe", x: 58.37, y: 46.65, w: 16.21, h: 9.14, cx: 53 },
+  { key: "globe", x: 58.37, y: 46.65, w: 16.21, h: 9.14, cx: 60 },
   { key: "capital", x: 69.08, y: 61.32, w: 25.9, h: 10.2, cx: 50 },
   { key: "landmark", x: 37.2, y: 69.93, w: 26.2, h: 10.52, cx: 50 },
 ];
@@ -79,8 +79,8 @@ function PuddleButton({ mode, onSelect, x, y, w, h, cx }: { mode: Mode; onSelect
         style={{ left: `${cx}%` }}
         className="absolute top-1/2 flex -translate-x-1/2 -translate-y-[42%] flex-col items-center whitespace-nowrap text-center [text-shadow:0_1px_3px_rgba(4,14,50,0.85)] transition-transform duration-300 ease-out motion-safe:group-hover:-translate-y-[52%]"
       >
-        <span className="text-[max(12px,1.02cqw)] font-medium leading-tight text-[#F4F9FF]">{mode.title}</span>
-        <span className="font-mono text-[max(10px,0.74cqw)] leading-tight text-[#CDE8FF]">{mode.plate}</span>
+        <span className="font-display text-[max(14px,1.25cqw)] font-semibold leading-tight text-[#FFF3D6] [font-variation-settings:'SOFT'_100,'WONK'_0] [text-shadow:0_1px_0_#B8862F,0_2px_4px_rgba(4,14,50,0.9)]">{mode.title}</span>
+        <span className="font-display text-[max(11px,0.82cqw)] font-normal leading-tight text-[#DCEBFF]/90 [font-variation-settings:'SOFT'_100,'WONK'_0]">{mode.plate}</span>
       </span>
       {splash && (
         <span key={splash.id} aria-hidden className="pointer-events-none absolute" style={{ left: splash.x, top: splash.y }}>
