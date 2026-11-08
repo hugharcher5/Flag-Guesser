@@ -115,3 +115,23 @@ main {
   top: 0;
   animation: splash-ring 420ms ease-out forwards;
 }
+
+/* Title wheel: cards fade in where they land, the front card floats in gold light */
+.wheel-card {
+  animation: wheel-in 380ms ease-out both;
+}
+@keyframes wheel-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.wheel-front {
+  animation: wheel-float 3.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 14px rgba(255, 196, 70, 0.55)) drop-shadow(0 10px 18px rgba(0, 8, 40, 0.6));
+}
+@keyframes wheel-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.6%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wheel-card, .wheel-front { animation: none; }
+}
