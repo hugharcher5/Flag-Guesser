@@ -30,7 +30,6 @@ const SLOTS: Record<number, { x: number; y: number; s: number }> = {
 /** Signed distance from the front slot, wrapped into -2..2. */
 const offsetOf = (i: number, active: number) => ((((i - active) % N) + N + 2) % N) - 2;
 
-const hit = "absolute cursor-pointer rounded-full focus-visible:outline-offset-2";
 
 export default function TitleWheel({
   onSelect,
@@ -117,16 +116,71 @@ export default function TitleWheel({
       />
       <h1 className="sr-only">GeoGrail</h1>
 
-      {/* The gold pill in the artwork: Leaderboard and My Stats */}
-      <a href="/leaderboard" aria-label="Leaderboard" className={`${hit} left-[76.4%] top-[5.2%] h-[6.6%] w-[11.8%]`} />
-      <button onClick={stats} aria-label={isSignedIn ? "My stats" : "Sign in to see my stats"} className={`${hit} left-[88.3%] top-[5.2%] h-[6.6%] w-[9.9%]`} />
+      {/* Leaderboard and My Stats: a gold-rimmed navy pill */}
+      <div className="title-pill absolute left-[76.05%] top-[5.05%] z-30 flex h-[6.65%] w-[22.15%] rounded-full p-[0.17cqw]">
+        <div className="flex h-full w-full items-center rounded-full bg-[radial-gradient(120%_160%_at_50%_0%,#123279_0%,#0A1D57_55%,#06123F_100%)] shadow-[inset_0_1px_0_rgba(255,226,150,0.25),inset_0_-6px_12px_rgba(0,0,0,0.35)]">
+          <a href="/leaderboard" className="pill-half group flex h-full flex-[1.12] items-center justify-center gap-[0.75cqw] rounded-l-full">
+            <svg viewBox="0 0 24 24" aria-hidden className="pill-icon h-[2.45cqw] w-[2.45cqw]">
+              <defs>
+                <linearGradient id="gold-t" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#FFE9A6" />
+                  <stop offset="0.5" stopColor="#F4B93A" />
+                  <stop offset="1" stopColor="#C9821C" />
+                </linearGradient>
+              </defs>
+              <path fill="url(#gold-t)" d="M6 3h12v2h3v3a5 5 0 0 1-4.6 5A5.5 5.5 0 0 1 13 15.9V18h3v2.5H8V18h3v-2.1A5.5 5.5 0 0 1 7.6 13 5 5 0 0 1 3 8V5h3V3Zm0 4H5v1a3 3 0 0 0 1.4 2.5A7 7 0 0 1 6 8V7Zm12 0v1c0 .9-.1 1.7-.4 2.5A3 3 0 0 0 19 8V7h-1Z" />
+              <rect x="7" y="20.5" width="10" height="1.8" rx=".6" fill="#B87618" />
+            </svg>
+            <span className="pill-text font-serif text-[1.42cqw] leading-none text-[#F6F1E4]">Leaderboard</span>
+          </a>
+          <span aria-hidden className="h-[46%] w-px bg-gradient-to-b from-transparent via-[#E9B949] to-transparent" />
+          <button
+            onClick={stats}
+            aria-label={isSignedIn ? "My stats" : "Sign in to see my stats"}
+            className="pill-half group flex h-full flex-1 cursor-pointer items-center justify-center gap-[0.75cqw] rounded-r-full"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden className="pill-icon h-[2.3cqw] w-[2.3cqw]">
+              <circle cx="12" cy="7.5" r="4.6" fill="url(#gold-t)" />
+              <path fill="url(#gold-t)" d="M3.5 21.5c0-4.6 3.8-8 8.5-8s8.5 3.4 8.5 8v.5h-17v-.5Z" />
+            </svg>
+            <span className="pill-text font-serif text-[1.42cqw] leading-none text-[#F6F1E4]">My Stats</span>
+          </button>
+        </div>
+      </div>
 
-      {/* The painted arrows either side of the wheel */}
-      <button onClick={() => step(-1)} aria-label="Previous game mode" className={`${hit} left-[3.2%] top-[60.2%] h-[8.4%] w-[4.3%]`} />
-      <button onClick={() => step(1)} aria-label="Next game mode" className={`${hit} left-[92.4%] top-[60.2%] h-[8.4%] w-[4.3%]`} />
+      {/* Gold arrows either side of the wheel */}
+      {([-1, 1] as const).map((d) => (
+        <button
+          key={d}
+          onClick={() => step(d)}
+          aria-label={d < 0 ? "Previous game mode" : "Next game mode"}
+          className={`title-arrow group absolute top-[60.75%] z-30 aspect-square w-[4.05%] cursor-pointer rounded-full p-[0.28cqw] ${
+            d < 0 ? "left-[3.37%]" : "left-[92.58%]"
+          }`}
+        >
+          <span className="flex h-full w-full items-center justify-center rounded-full bg-[radial-gradient(circle_at_40%_30%,#173A86_0%,#0B2160_60%,#071644_100%)] shadow-[inset_0_2px_4px_rgba(255,220,140,0.15),inset_0_-4px_8px_rgba(0,0,0,0.45)]">
+            <svg viewBox="0 0 100 100" aria-hidden className={`arrow-head h-[60%] w-[60%] ${d > 0 ? "-scale-x-100" : ""}`}>
+              <defs>
+                <linearGradient id={`gold-a${d}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#FFE7A0" />
+                  <stop offset="0.55" stopColor="#F2B53A" />
+                  <stop offset="1" stopColor="#D08A1E" />
+                </linearGradient>
+              </defs>
+              <path
+                fill={`url(#gold-a${d})`}
+                stroke="#B9781A"
+                strokeWidth="2"
+                strokeLinejoin="round"
+                d="M74 12c4-3 9 1 7 6L66 50l15 32c2 5-3 9-7 6L18 54c-3-2-3-6 0-8L74 12Z"
+              />
+            </svg>
+          </span>
+        </button>
+      ))}
 
       {/* The wheel */}
-      <div role="listbox" aria-label="Game modes" className="absolute inset-0">
+      <div role="listbox" aria-label="Game modes" className="pointer-events-none absolute inset-0">
         {CARDS.map((c, i) => {
           const o = offsets[i];
           const slot = SLOTS[o];
@@ -147,7 +201,7 @@ export default function TitleWheel({
                 zIndex: 10 - Math.abs(o) * 2,
                 transform: `translate(-50%, -50%) scale(${slot.s})`,
               }}
-              className="wheel-card group absolute block aspect-[1.3] w-[18.6%] cursor-pointer rounded-[1.7cqw] transition-[left,top,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+              className="wheel-card group pointer-events-auto absolute block aspect-[1.3] w-[18.6%] cursor-pointer rounded-[1.7cqw] transition-[left,top,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
             >
               {/* Gold frame around a painted picture, the mode's name on a navy banner */}
               <span

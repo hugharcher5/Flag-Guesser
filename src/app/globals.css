@@ -135,3 +135,31 @@ main {
 @media (prefers-reduced-motion: reduce) {
   .wheel-card, .wheel-front { animation: none; }
 }
+
+/* Title pill and arrows: gold rims that warm up on hover and give on press */
+.title-pill,
+.title-arrow {
+  background: linear-gradient(160deg, #fff2bf 0%, #f1c454 30%, #b97b1f 60%, #f6d273 85%, #c48a2a 100%);
+  box-shadow: 0 6px 16px rgba(0, 6, 35, 0.55);
+  transition: box-shadow 250ms ease, transform 200ms ease, filter 250ms ease;
+}
+.title-pill:hover,
+.title-arrow:hover {
+  box-shadow: 0 0 0 1px rgba(255, 233, 160, 0.5), 0 0 18px 3px rgba(255, 190, 60, 0.45), 0 8px 18px rgba(0, 6, 35, 0.6);
+  filter: brightness(1.08);
+}
+.title-arrow:hover { transform: scale(1.08); }
+.title-arrow:active { transform: scale(0.94); }
+.title-arrow .arrow-head { transition: transform 200ms ease; }
+.title-arrow:hover .arrow-head { transform: translateX(-6%); }
+.title-arrow:hover .arrow-head.-scale-x-100 { transform: scaleX(-1) translateX(-6%); }
+.pill-half { transition: background-color 200ms ease; }
+.pill-half:hover { background-color: rgba(255, 210, 110, 0.1); }
+.pill-half:active { background-color: rgba(255, 210, 110, 0.18); }
+.pill-icon { transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+.pill-half:hover .pill-icon { transform: translateY(-8%) scale(1.12) rotate(-6deg); }
+.pill-text { transition: color 200ms ease; }
+.pill-half:hover .pill-text { color: #ffe7a6; }
+@media (prefers-reduced-motion: reduce) {
+  .title-arrow:hover, .pill-half:hover .pill-icon, .title-arrow:hover .arrow-head { transform: none; }
+}
