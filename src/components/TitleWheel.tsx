@@ -19,12 +19,12 @@ const N = CARDS.length;
 
 // The five places a card can sit, measured from the artwork (1752×897). x/y are the
 // card's centre in % of the stage, s its scale against the front card, r its tilt.
-const SLOTS: Record<number, { x: number; y: number; s: number; r: number }> = {
-  [-2]: { x: 16.4, y: 64.2, s: 0.77, r: 6 },
-  [-1]: { x: 30.8, y: 66.6, s: 0.85, r: 4.4 },
-  0: { x: 50.3, y: 67.1, s: 1, r: 0 },
-  1: { x: 69.4, y: 66.4, s: 0.85, r: -5 },
-  2: { x: 83.8, y: 64.0, s: 0.77, r: -5.5 },
+const SLOTS: Record<number, { x: number; y: number; s: number }> = {
+  [-2]: { x: 16.4, y: 65.2, s: 0.66 },
+  [-1]: { x: 31.2, y: 66.8, s: 0.8 },
+  0: { x: 50.3, y: 67.1, s: 1 },
+  1: { x: 69.4, y: 66.8, s: 0.8 },
+  2: { x: 84.2, y: 65.2, s: 0.66 },
 };
 
 /** Signed distance from the front slot, wrapped into -2..2. */
@@ -145,21 +145,28 @@ export default function TitleWheel({
                 left: `${slot.x}%`,
                 top: `${slot.y}%`,
                 zIndex: 10 - Math.abs(o) * 2,
-                // The landmark card is wider than the rest, so it shrinks a little more off-centre
-                transform: `translate(-50%, -50%) rotate(${slot.r}deg) scale(${front || c.key !== "landmark" ? slot.s : slot.s * 0.8})`,
+                transform: `translate(-50%, -50%) scale(${slot.s})`,
               }}
-              className="wheel-card group absolute flex h-[27.4%] w-[21.4%] cursor-pointer items-center justify-center rounded-[13%] transition-[left,top,transform,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+              className="wheel-card group absolute block aspect-[1.3] w-[18.6%] cursor-pointer rounded-[1.7cqw] transition-[left,top,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
             >
-              <img
-                src={`/title2/card-${c.key}.webp`}
-                alt=""
-                draggable={false}
-                className={`max-h-full max-w-full object-contain transition-[filter] duration-300 ${
-                  front
-                    ? "wheel-front"
-                    : "brightness-[0.92] group-hover:brightness-110"
+              {/* Gold frame around a painted picture, the mode's name on a navy banner */}
+              <span
+                className={`absolute inset-0 rounded-[1.7cqw] bg-[linear-gradient(155deg,#FFF0B8_0%,#E9B949_28%,#A8721F_55%,#F5CF6A_80%,#B9802A_100%)] p-[3.2%] transition-[filter] duration-300 ${
+                  front ? "wheel-front" : "brightness-[0.9] shadow-[0_8px_18px_rgba(0,10,45,0.55)] group-hover:brightness-110"
                 }`}
-              />
+              >
+                <span className="relative block h-full w-full overflow-hidden rounded-[1.25cqw] bg-[#0A2468] shadow-[inset_0_0_0_1.5px_rgba(20,30,70,0.7)]">
+                  <img
+                    src={`/title2/art-${c.key}.webp`}
+                    alt=""
+                    draggable={false}
+                    className="absolute inset-x-0 top-0 h-[76%] w-full object-cover"
+                  />
+                  <span className="absolute inset-x-0 bottom-0 flex h-[38%] items-center justify-center bg-[linear-gradient(180deg,rgba(10,36,104,0)_0%,#0B2A74_30%,#081E5C_100%)] px-[6%] pt-[6%] text-center font-serif text-[1.8cqw] font-semibold leading-[1.05] text-white [text-shadow:0_2px_3px_rgba(0,8,40,0.8)]">
+                    {c.label}
+                  </span>
+                </span>
+              </span>
             </button>
           );
         })}
