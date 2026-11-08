@@ -31,7 +31,7 @@ function NavIcon({ href, title, children }: { href: string; title: string; child
 
 export default function NavBar({ mode, onModeChange, isSignedIn }: NavBarProps) {
   return (
-    <nav className="w-full bg-surface border-b border-white/[0.08]">
+    <nav className="site-nav w-full bg-surface border-b border-white/[0.08]">
       <div
         className="max-w-md md:max-w-3xl lg:max-w-5xl mx-auto flex items-stretch md:items-center md:h-14 md:px-4 md:gap-1"
         suppressHydrationWarning
@@ -50,9 +50,9 @@ export default function NavBar({ mode, onModeChange, isSignedIn }: NavBarProps) 
             <button
               key={key}
               onClick={() => onModeChange(key)}
-              className={`flex-none whitespace-nowrap px-3 md:px-3 py-3 md:py-0 md:h-9 text-sm font-medium transition-colors duration-150 touch-manipulation md:rounded-lg ${
+              className={`nav-tab flex-none whitespace-nowrap px-3 md:px-3 py-3 md:py-0 md:h-9 text-sm font-medium transition-colors duration-150 touch-manipulation md:rounded-lg ${
                 mode === key
-                  ? "border-b-2 border-gold-500 text-gray-900 md:border-b-0 md:bg-gray-200 md:shadow-[inset_0_-2px_0_#E2B85A]"
+                  ? "nav-tab-active border-b-2 border-gold-500 text-gray-900 md:border-b-0 md:bg-gray-200 md:shadow-[inset_0_-2px_0_#E2B85A]"
                   : "text-gray-500 hover:text-gray-900 md:hover:bg-gray-200/60"
               }`}
             >
