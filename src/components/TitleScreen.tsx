@@ -79,8 +79,8 @@ function PuddleButton({ mode, onSelect, x, y, w, h, cx }: { mode: Mode; onSelect
         style={{ left: `${cx}%` }}
         className="absolute top-1/2 flex -translate-x-1/2 -translate-y-[42%] flex-col items-center whitespace-nowrap text-center [text-shadow:0_1px_3px_rgba(4,14,50,0.85)] transition-transform duration-300 ease-out motion-safe:group-hover:-translate-y-[52%]"
       >
-        <span className="font-display text-[max(14px,1.25cqw)] font-semibold leading-tight text-[#FFF3D6] [font-variation-settings:'SOFT'_100,'WONK'_0] [text-shadow:0_1px_0_#B8862F,0_2px_4px_rgba(4,14,50,0.9)]">{mode.title}</span>
-        <span className="font-display text-[max(11px,0.82cqw)] font-normal leading-tight text-[#DCEBFF]/90 [font-variation-settings:'SOFT'_100,'WONK'_0]">{mode.plate}</span>
+        <span className="font-display text-[max(14px,1.25cqw)] font-semibold leading-tight text-[#FFF3D6] [text-shadow:0_1px_0_#B8862F,0_2px_4px_rgba(4,14,50,0.9)]">{mode.title}</span>
+        <span className="font-display text-[max(11px,0.82cqw)] font-normal leading-tight text-[#DCEBFF]/90">{mode.plate}</span>
       </span>
       {splash && (
         <span key={splash.id} aria-hidden className="pointer-events-none absolute" style={{ left: splash.x, top: splash.y }}>

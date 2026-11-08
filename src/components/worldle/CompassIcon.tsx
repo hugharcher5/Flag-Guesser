@@ -55,7 +55,7 @@ export default function CompassIcon({ dir, size = 32, className = '' }: Props) {
         y="11.5"
         textAnchor="middle"
         fontSize="5"
-        fontFamily="sans-serif"
+        fontFamily="'Times New Roman', Times, serif"
         fontWeight="bold"
         fill="#E6E4F9"
       >

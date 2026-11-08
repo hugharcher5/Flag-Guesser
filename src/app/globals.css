@@ -9,6 +9,13 @@
 
 input,
 select,
+textarea,
+button {
+  font-family: inherit;
+}
+
+input,
+select,
 textarea {
   background-color: #16172f;
   color: #f4f1ea;
@@ -18,13 +25,12 @@ textarea {
   color: #8e8fa8;
 }
 
-/* Headlines in Fraunces, the wordmark's serif. Everything else is the interface sans. */
+/* Every font on the site is Times New Roman. */
 @layer base {
   h1,
   h2 {
-    font-family: var(--font-display), Georgia, serif;
+    font-family: "Times New Roman", Times, serif;
     font-weight: 500;
-    font-variation-settings: "SOFT" 50, "WONK" 1;
   }
   /* Scores, timers and counts line up */
   body {
@@ -36,9 +42,9 @@ textarea {
   }
 }
 
-/* Signature: an atlas-plate caption, small mono text under a thin gold rule */
+/* Signature: an atlas-plate caption, small text under a thin gold rule */
 .plate {
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: "Times New Roman", Times, serif;
   font-size: 12px;
   line-height: 16px;
   color: #8e8fa8;
