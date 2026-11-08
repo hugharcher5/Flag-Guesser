@@ -123,7 +123,7 @@ function CapitalDisplay({
             className="w-full max-h-48 sm:max-h-64"
             aria-label="Country silhouette"
           >
-            <path d={pathData} fill="#E6E4F9" fillRule="evenodd" />
+            <path d={pathData} fill="#F6F1E4" fillRule="evenodd" />
             {capitalPoint && (
               <circle
                 cx={capitalPoint.x}

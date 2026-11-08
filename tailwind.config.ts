@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
-// GeoGrail theme: an old atlas read by lamplight.
-// Ink-indigo neutrals taken from the logo's night backdrop, gold leaf as the one accent.
+// GeoGrail theme: the title screen's royal navy and gold.
+// Navy neutrals taken from the title artwork, its warm gold as the one accent.
 // The neutral and status scales are inverted (50 = darkest, 900 = lightest),
 // so light-theme classes like `bg-gray-50 text-gray-900` render as parchment text on ink.
 // `blue` is the accent slot used across the app; it now holds gold, so `bg-blue-600`
@@ -11,32 +11,32 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        surface: "#16172F",
-        ink: "#0C0F38",
-        gold: { 300: "#F3DDA0", 400: "#EDCB78", 500: "#E2B85A", 600: "#C99E3E" },
+        surface: "#0A1F5C",
+        ink: "#04123D",
+        gold: { 300: "#FFE7A6", 400: "#F2C766", 500: "#E9B949", 600: "#C9902A" },
         gray: {
-          50: "#0F1029",
-          100: "#16172F",
-          200: "#22233D",
-          300: "#33344F",
-          400: "#8E8FA8",
-          500: "#A5A6BC",
-          600: "#BEBFD0",
-          700: "#D3D3DF",
-          800: "#E6E4E0",
-          900: "#F4F1EA",
+          50: "#04123D",
+          100: "#0A1F5C",
+          200: "#12307A",
+          300: "#1E428F",
+          400: "#8FA3D1",
+          500: "#A9BADF",
+          600: "#C3D0EC",
+          700: "#DAE2F4",
+          800: "#ECEFF8",
+          900: "#F6F1E4",
           950: "#FFFFFF",
         },
         blue: {
-          50: "#1C1D38",
-          100: "#25263F",
-          200: "#3A3426",
-          300: "#7A6230",
-          400: "#EDCB78",
-          500: "#E2B85A",
-          600: "#E2B85A",
-          700: "#EDCB78",
-          800: "#C99E3E",
+          50: "#0F2A6B",
+          100: "#163478",
+          200: "#4A3E1E",
+          300: "#8A6A26",
+          400: "#F2C766",
+          500: "#E9B949",
+          600: "#E9B949",
+          700: "#F2C766",
+          800: "#C9902A",
           900: "#8A6A26",
         },
         green: {
@@ -64,16 +64,16 @@ const config: Config = {
           900: "#FBDCE0",
         },
         amber: {
-          50: "#29210F",
-          100: "#372C14",
+          50: "#2A2412",
+          100: "#3A3016",
           200: "#4E3E1B",
           300: "#806328",
-          400: "#EDCB78",
-          500: "#E2B85A",
-          600: "#C99E3E",
-          700: "#EDCB78",
-          800: "#F3DDA0",
-          900: "#FAEFCF",
+          400: "#F2C766",
+          500: "#E9B949",
+          600: "#C9902A",
+          700: "#F2C766",
+          800: "#FFE7A6",
+          900: "#FFF3D1",
         },
       },
       fontFamily: {

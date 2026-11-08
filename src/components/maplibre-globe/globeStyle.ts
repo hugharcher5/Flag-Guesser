@@ -34,8 +34,8 @@ export const globeStyle: StyleSpecification = {
     },
   ],
   sky: {
-    'sky-color': '#110F2E',
-    'horizon-color': '#110F2E',
-    'fog-color': '#110F2E',
+    'sky-color': '#020A24',
+    'horizon-color': '#020A24',
+    'fog-color': '#020A24',
   },
 };

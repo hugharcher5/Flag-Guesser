@@ -111,7 +111,7 @@ function SilhouetteGrid({ polygons }: { polygons: Map<string, CountryGeometry> }
                     height={TILE_H}
                     aria-label={country.name}
                   >
-                    <path d={path} fill="#E6E4F9" fillRule="evenodd" />
+                    <path d={path} fill="#F6F1E4" fillRule="evenodd" />
                   </svg>
                 )}
               </div>

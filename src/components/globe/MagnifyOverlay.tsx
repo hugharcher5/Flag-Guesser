@@ -37,7 +37,7 @@ export default function MagnifyOverlay({
   countryNames,
 }: Props) {
   const geom = hoveredCode ? polygons.get(hoveredCode) : null;
-  const color = hoveredCode ? (guessColors.get(hoveredCode) ?? '#E6E4F9') : '#E6E4F9';
+  const color = hoveredCode ? (guessColors.get(hoveredCode) ?? '#F6F1E4') : '#F6F1E4';
   const isGuessed = hoveredCode ? guessColors.has(hoveredCode) : false;
   const distKm = hoveredCode ? guessDistances.get(hoveredCode) : undefined;
   const name = hoveredCode ? (countryNames.get(hoveredCode) ?? '') : '';
@@ -112,7 +112,7 @@ export default function MagnifyOverlay({
         {/* Circle background */}
         <div
           className="w-full h-full rounded-full shadow-xl border-2 border-white/80 overflow-hidden"
-          style={{ background: '#1B1846' }}
+          style={{ background: '#0A1F5C' }}
         >
           {svgPath ? (
             <svg
@@ -120,8 +120,8 @@ export default function MagnifyOverlay({
               height={CIRCLE_R * 2}
               viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`}
             >
-              <rect width={SVG_SIZE} height={SVG_SIZE} fill="#1B1846" />
-              <path d={svgPath} fill={isGuessed ? color : '#5A5594'} />
+              <rect width={SVG_SIZE} height={SVG_SIZE} fill="#0A1F5C" />
+              <path d={svgPath} fill={isGuessed ? color : '#3D5A9E'} />
             </svg>
           ) : null}
         </div>
@@ -130,14 +130,14 @@ export default function MagnifyOverlay({
         <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 whitespace-nowrap text-center">
           <span
             className="block text-xs font-medium px-2 py-0.5 rounded-full shadow"
-            style={{ background: 'rgba(17,15,46,0.85)', color: '#fff' }}
+            style={{ background: 'rgba(2,10,36,0.85)', color: '#fff' }}
           >
             {name}
           </span>
           {isGuessed && distKm !== undefined && (
             <span
               className="block text-xs mt-0.5 px-2 py-0.5 rounded-full shadow"
-              style={{ background: 'rgba(17,15,46,0.7)', color: '#e2e8f0' }}
+              style={{ background: 'rgba(2,10,36,0.7)', color: '#DAE2F4' }}
             >
               {distKm === 0 ? '< 1' : distKm.toLocaleString()} km
             </span>

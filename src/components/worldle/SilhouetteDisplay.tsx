@@ -43,7 +43,7 @@ export default function SilhouetteDisplay({
     return geometry ? toSvgPath(geometry, SVG_W, SVG_H, 16, code) : '';
   }, [geometry, code, useImage]);
 
-  const fillColor = revealed ? '#F5D37A' : '#E6E4F9';
+  const fillColor = revealed ? '#F5D37A' : '#F6F1E4';
   const wrapper =
     'w-full rounded-2xl overflow-hidden border border-white/[0.08] bg-surface flex items-center justify-center min-h-48 sm:min-h-56';
 

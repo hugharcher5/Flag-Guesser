@@ -17,12 +17,12 @@ button {
 input,
 select,
 textarea {
-  background-color: #16172f;
-  color: #f4f1ea;
+  background-color: #0A1F5C;
+  color: #F6F1E4;
 }
 
 ::placeholder {
-  color: #8e8fa8;
+  color: #8FA3D1;
 }
 
 /* Every font on the site is Times New Roman. */
@@ -37,7 +37,7 @@ textarea {
     font-variant-numeric: tabular-nums;
   }
   :focus-visible {
-    outline: 2px solid #e2b85a;
+    outline: 2px solid #E9B949;
     outline-offset: 2px;
   }
 }
@@ -47,12 +47,12 @@ textarea {
   font-family: "Times New Roman", Times, serif;
   font-size: 12px;
   line-height: 16px;
-  color: #8e8fa8;
+  color: #8FA3D1;
 }
 .plate-rule {
   height: 1px;
   width: 24px;
-  background: rgba(226, 184, 90, 0.6);
+  background: rgba(233, 185, 73, 0.6);
 }
 
 /* Remove tap highlight flash on iOS/Android */

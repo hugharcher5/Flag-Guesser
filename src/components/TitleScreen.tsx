@@ -79,7 +79,7 @@ export default function TitleScreen({
   );
 
   return (
-    <div className="min-h-[100dvh] bg-[#090C32] text-gray-900">
+    <div className="min-h-[100dvh] bg-[#04123D] text-gray-900">
       {/* Top bar */}
       <div className="mx-auto flex max-w-[1600px] items-center justify-end gap-1 px-4 pt-4 md:hidden">
         <a href="/leaderboard" className={link}>
